@@ -186,6 +186,11 @@ public:
     return CurrentBuildDirectory;
   }
 
+  template <unsigned N>
+  unsigned getCustomDiagID(DiagnosticsEngine::Level lvl, const char (&fmt) [N]) {
+    return DiagEngine->getCustomDiagID(lvl, fmt);
+  }
+
 private:
   // Calls setDiagnosticsEngine() and storeError().
   friend class ClangTidyDiagnosticConsumer;

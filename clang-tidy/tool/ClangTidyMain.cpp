@@ -509,7 +509,13 @@ static int LLVM_ATTRIBUTE_UNUSED PerformanceModuleAnchorDestination =
 
 // This anchor is used to force the linker to link the NagravisionModule.
 extern volatile int NagravisionModuleAnchorSource;
-static int NagravisionModuleAnchorDestination = NagravisionModuleAnchorSource;
+static int LLVM_ATTRIBUTE_UNUSED NagravisionModuleAnchorDestination =
+    NagravisionModuleAnchorSource;
+    
+// This anchor is used to force the linker to link the PagesJaunesModule.
+extern volatile int PagesJaunesModuleAnchorSource;
+static int LLVM_ATTRIBUTE_UNUSED PagesJaunesModuleAnchorDestination =
+    PagesJaunesModuleAnchorSource;
     
 // This anchor is used to force the linker to link the ReadabilityModule.
 extern volatile int ReadabilityModuleAnchorSource;

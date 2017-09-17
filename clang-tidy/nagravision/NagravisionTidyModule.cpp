@@ -29,8 +29,8 @@ namespace clang
       };
 
       // Register the NagravisionModule using this statically initialized variable.
-      static ClangTidyModuleRegistry::Add<NagravisionModule>X("nagravision-module", 
-							      "Adds Nagravision coding rules related checks.");
+      static ClangTidyModuleRegistry::Add<NagravisionModule> X("nagravision-module", 
+							       "Adds Nagravision coding rules related checks.");
       
     } // namespace nagravision
 
