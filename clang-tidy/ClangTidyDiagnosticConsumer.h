@@ -131,6 +131,12 @@ public:
   /// \brief Sets ASTContext for the current translation unit.
   void setASTContext(ASTContext *Context);
 
+  /// \brief Sets ASTContext for the current translation unit.
+  const ASTContext *getASTContext(void) const
+  {
+    return AstContext;
+  };
+
   /// \brief Gets the language options from the AST context.
   const LangOptions &getLangOpts() const { return LangOpts; }
 
@@ -222,6 +228,7 @@ private:
   llvm::DenseMap<unsigned, std::string> CheckNamesByDiagnosticID;
 
   ProfileData *Profile;
+  ASTContext *AstContext;
 };
 
 /// \brief A diagnostic consumer that turns each \c Diagnostic into a
