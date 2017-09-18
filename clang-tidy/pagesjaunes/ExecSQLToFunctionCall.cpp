@@ -25,6 +25,7 @@ namespace clang
       ExecSQLToFunctionCall::ExecSQLToFunctionCall(StringRef Name,
 						   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),
+	  TidyContext(Context),
 	  unexpected_diag_id(Context->
 			     getCustomDiagID(DiagnosticsEngine::Warning,
 					     "Unexpected error occured?!")),

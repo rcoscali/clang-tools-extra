@@ -31,7 +31,20 @@ namespace clang
 
       private:
 
-        void emitDiagAndFix(void);
+	enum CCharToCXXStringErrorKind {
+	  CCHAR_2_CXXSTRING_ERROR_NO_ERROR = 0,
+	};
+		
+        void emitDiagAndFix(const SourceLocation& call_start, const SourceLocation& call_end,
+			    const SourceLocation& def_start, const SourceLocation& def_end);
+	
+	void emitError(DiagnosticsEngine &,
+		       const SourceLocation& err_loc,
+		       enum CCharToCXXStringErrorKind);
+
+	ClangTidyContext *TidyContext;
+	const unsigned unexpected_diag_id;
+	const unsigned no_error_diag_id;
       };
 
     } // namespace pagesjaunes

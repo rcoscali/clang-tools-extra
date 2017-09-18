@@ -50,6 +50,7 @@ namespace clang
 		       const SourceLocation&,
 		       enum ExecSQLToFunctionCallErrorKind);
 
+	ClangTidyContext *TidyContext;
 	const unsigned unexpected_diag_id;
 	const unsigned no_error_diag_id;
 	const unsigned access_char_data_diag_id;

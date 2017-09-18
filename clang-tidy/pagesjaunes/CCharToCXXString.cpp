@@ -12,6 +12,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "llvm/Support/Regex.h"
 
+using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
 
@@ -23,130 +24,184 @@ namespace clang
     {
       CCharToCXXString::CCharToCXXString(StringRef Name,
 					 ClangTidyContext *Context)
-	: ClangTidyCheck(Name, Context)
+	: ClangTidyCheck(Name, Context),
+	  TidyContext(Context),
+	  unexpected_diag_id(Context->
+			     getCustomDiagID(DiagnosticsEngine::Warning,
+					     "Unexpected error occured?!")),
+	  no_error_diag_id(Context->
+			   getCustomDiagID(DiagnosticsEngine::Ignored,
+					   "No error"))
       {}
 
       void 
       CCharToCXXString::registerMatchers(MatchFinder *Finder) 
       {
-	// Bind a variable declaration (ex. local variable)
-	Finder->addMatcher(varDecl(hasParent(declStmt().bind("decl")),
-				   hasType(constantArrayType(hasElementType(builtinType().bind("chartype"),
-									    isAnyCharacter())).bind("arraytype"))
-				   ).bind("var")
-			   , this);
 	// Bind a strcmp call with a constant char array
 	Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcmp"))),
-				    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType().bind("chartype"),
+				    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
 												      isAnyCharacter())).bind("arraytype")),
 							     hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
 				    ).bind("strcmp_call")
 			   , this);
 	// Bind a strcpy call with a constant char array
 	Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcpy"))),
-				    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType().bind("chartype"),
+				    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
 												      isAnyCharacter())).bind("arraytype")),
 							     hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
 				    ).bind("strcpy_call")
 			   , this);
+	// Bind a strlen call with a constant char array
+	Finder->addMatcher(callExpr(callee(functionDecl(hasName("strlen"))),
+				    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+												      isAnyCharacter())).bind("arraytype")),
+							     hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+				    ).bind("strlen_call")
+			   , this);
       }
 
       void
-      CCharToCXXString::emitDiagAndFix()
+      CCharToCXXString::emitDiagAndFix(const SourceLocation& call_start, const SourceLocation& call_end,
+				       const SourceLocation& def_start, const SourceLocation& def_end)
       {
+      }
+
+      void
+      CCharToCXXString::emitError(DiagnosticsEngine &diag_engine,
+				  const SourceLocation& err_loc,
+				  enum CCharToCXXStringErrorKind kind)
+      {
+	switch (kind)
+	  {
+	  default:
+	    diag_engine.Report(err_loc, unexpected_diag_id);
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_NO_ERROR:
+	    diag_engine.Report(err_loc, no_error_diag_id);
+	    break;
+
+	  //case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_:
+	    //break;
+	  }
       }
 
       void
       CCharToCXXString::check(const MatchFinder::MatchResult &Result) 
       {
 	// Get root bounded variables
-	const DeclStmt *decl =  Result.Nodes.getNodeAs<DeclStmt>("decl");
 	const CallExpr *strcmp_call = Result.Nodes.getNodeAs<CallExpr>("strcmp_call");
 	const CallExpr *strcpy_call = Result.Nodes.getNodeAs<CallExpr>("strcpy_call");
+	const CallExpr *strlen_call = Result.Nodes.getNodeAs<CallExpr>("strlen_call");
 
 	// Get the source manager
 	SourceManager &src_mgr = Result.Context->getSourceManager();
 
-	// We got a Decl
-	if (decl)
+	if (strcmp_call)
 	  {
-	    const QualType *chartype = Result.Nodes.getNodeAs<QualType>("chartype");
-	    const ConstantArrayType *arraytype = Result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
-	    const VarDecl *var = Result.Nodes.getNodeAs<VarDecl>("var");
-	    
-	    // Get start/end locations for the statement
-	    SourceLocation stmt_start = decl->getLocStart();
-
-	    // Get file ID in src mgr
-	    FileID start_fid = src_mgr.getFileID(stmt_start);
-	    // Get compound statement start line num
-	    unsigned start_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(stmt_start));
-
-	    outs() << "Found a var decl statement at line #" << start_line_num << "\n";
-
-	    if (chartype)
-	      {
-		outs() << "Element Qualified Type is '" << chartype->getAsString() << "'\n"; 
-	      }
-
-	    if (arraytype)
-	      {
-		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
-		outs() << "   and its size is " << arraytype->getSize() << "\n";
-	      }
-
-	    if (var)
-	      {
-		outs() << "Var is named '" << var->getNameAsString() << "'\n";
-		var->print(llvm::outs(), 4, true);
-	      }
-
-	    decl->dump();
-	    outs() << "\n";
-	  }
-	else if (strcmp_call)
-	  {
-	    const QualType *chartype = Result.Nodes.getNodeAs<QualType>("chartype");
 	    const ConstantArrayType *arraytype = Result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
 	    const CXXRecordDecl *obj_decl = Result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
 	    const MemberExpr *member_expr = Result.Nodes.getNodeAs<MemberExpr>("member_expr");
 
 	    // Get start/end locations for the statement
 	    SourceLocation call_start = strcmp_call->getLocStart();
+	    SourceLocation call_end = strcmp_call->getLocEnd();
 
 	    // Get file ID in src mgr
 	    FileID start_fid = src_mgr.getFileID(call_start);
 	    // Get compound statement start line num
 	    unsigned start_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned start_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned end_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_end));
+	    unsigned end_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_end));
 
-	    outs() << "Found a strcmp call statement at line #" << start_line_num << "\n";
-
-	    if (chartype)
-	      {
-		outs() << "Element Qualified Type is '" << chartype->getAsString() << "'\n"; 
-	      }
+	    outs() << "Found a strcmp call statement from #"
+		   << start_line_num << ":" << start_col_num
+		   << " to "
+		   << end_line_num << ":" << end_col_num << "\n";
 
 	    if (arraytype)
 	      {
+		QualType element_type = arraytype->getElementType();
 		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
+		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
 		outs() << "   and its size is " << arraytype->getSize() << "\n";
+	      }
+
+	    std::string member_name;
+	    SourceLocation member_loc;
+	    DeclarationNameLoc member_decl_name_loc;
+	    if (member_expr)
+	      {
+		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
+		const Expr* base_expr = member_expr->getBase();
+
+		member_name = info.getName().getAsString();
+		member_loc = info.getLoc();
+		member_decl_name_loc = info.getInfo();
+
+		const SourceLocation spelling_member_loc = src_mgr.getImmediateSpellingLoc(member_loc);
+		FileID member_loc_fid = src_mgr.getFileID(spelling_member_loc);
+		unsigned member_loc_line_num = src_mgr.getLineNumber(member_loc_fid, src_mgr.getFileOffset(spelling_member_loc));
+		
+		outs() << "Member name: " << member_name << "\n";
+		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
+		outs() << "    base expr is:\n";
+		//base_expr->dump();
 	      }
 
 	    if (obj_decl)
 	      {
 		if (obj_decl->hasDefinition())
-		  outs() << "Object decl: " << ((Decl *)(obj_decl->getDefinition()))->getDeclKindName() << "\n";
+		  {
+		    std::string obj_decl_kind = ((Decl *)(obj_decl->getDefinition()))->getDeclKindName();
+		    outs() << "Object decl: " << obj_decl_kind << "\n";
+		    if (obj_decl_kind.compare("CXXRecord") == 0)
+		      {
+			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
+			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
+			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
+			// Get compound statement start line num
+			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
+			FileID decl_type_loc_fid = src_mgr.getFileID(spelling_decl_type_loc);
+			unsigned decl_type_loc_line_num = src_mgr.getLineNumber(decl_type_loc_fid, src_mgr.getFileOffset(spelling_decl_type_loc));
+			outs() << "Object decl type defined in "
+			       << src_mgr.getFilename(spelling_decl_type_loc)
+			       << " at line "
+			       << decl_type_loc_line_num
+			       << "\n";
+			for (RecordDecl::field_iterator fit = definition->field_begin();
+			     fit != definition->field_end();
+			     fit++)
+			  {
+			    FieldDecl *field_decl = *fit;
+			    std::string field_name = field_decl->getNameAsString();
+			    if (!member_name.compare(field_name))
+			      {
+				SourceRange field_src_range = field_decl->getSourceRange();
+				SourceLocation field_begin_loc = field_src_range.getBegin();
+				SourceLocation field_end_loc = field_src_range.getEnd();
+				const SourceLocation spelling_field_begin_loc = src_mgr.getImmediateSpellingLoc(field_begin_loc);
+				const SourceLocation spelling_field_end_loc = src_mgr.getImmediateSpellingLoc(field_end_loc);
+				FileID field_loc_fid = src_mgr.getFileID(spelling_field_begin_loc);
+				unsigned field_begin_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_begin_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_end_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				unsigned field_end_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				std::string field_file_name = src_mgr.getFilename(spelling_field_begin_loc);
+				outs() << "    defined in " << field_file_name << " starting at linecol #"
+				       << field_begin_loc_line_num << ":" << field_begin_loc_col_num
+				       << " ending at linecol # "
+				       << field_end_loc_line_num << ":" << field_end_loc_col_num
+				       << "\n";
+			      }
+			  }
+			//decl_type->dump();
+		      }
+		  }
 	      }
 
-	    if (member_expr)
-	      {
-		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
-		const Expr* base_expr = member_expr->getBase();
-		
-		outs() << "Member name: " << info.getName().getAsString() << "\n";
-	      }
-
-	    strcmp_call->dump();
+	    //strcmp_call->dump();
 	    outs() << "\n";
 	  }
 	else if (strcpy_call)
@@ -158,40 +213,213 @@ namespace clang
 
 	    // Get start/end locations for the statement
 	    SourceLocation call_start = strcpy_call->getLocStart();
+	    SourceLocation call_end = strcpy_call->getLocEnd();
 
 	    // Get file ID in src mgr
 	    FileID start_fid = src_mgr.getFileID(call_start);
 	    // Get compound statement start line num
 	    unsigned start_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned start_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned end_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_end));
+	    unsigned end_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_end));
 
-	    outs() << "Found a strcpy call statement at line #" << start_line_num << "\n";
-
-	    if (chartype)
-	      {
-		outs() << "Element Qualified Type is '" << chartype->getAsString() << "'\n"; 
-	      }
+	    outs() << "Found a strcpy call statement from #"
+		   << start_line_num << ":" << start_col_num
+		   << " to "
+		   << end_line_num << ":" << end_col_num << "\n";
 
 	    if (arraytype)
 	      {
+		QualType element_type = arraytype->getElementType();
 		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
+		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
 		outs() << "   and its size is " << arraytype->getSize() << "\n";
+	      }
+
+	    std::string member_name;
+	    SourceLocation member_loc;
+	    DeclarationNameLoc member_decl_name_loc;
+	    if (member_expr)
+	      {
+		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
+		const Expr* base_expr = member_expr->getBase();
+
+		member_name = info.getName().getAsString();
+		member_loc = info.getLoc();
+		member_decl_name_loc = info.getInfo();
+
+		const SourceLocation spelling_member_loc = src_mgr.getImmediateSpellingLoc(member_loc);
+		FileID member_loc_fid = src_mgr.getFileID(spelling_member_loc);
+		unsigned member_loc_line_num = src_mgr.getLineNumber(member_loc_fid, src_mgr.getFileOffset(spelling_member_loc));
+		
+		outs() << "Member name: " << member_name << "\n";
+		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
+		outs() << "    base expr is:\n";
+		//base_expr->dump();
 	      }
 
 	    if (obj_decl)
 	      {
 		if (obj_decl->hasDefinition())
-		  outs() << "Object decl: " << ((Decl *)(obj_decl->getDefinition()))->getDeclKindName() << "\n";
+		  {
+		    DeclContext *decl_ctxt = dynamic_cast<DeclContext*>(obj_decl->getDefinition());
+		    std::string obj_decl_kind = decl_ctxt->getDeclKindName();
+		    outs() << "Object decl: " << obj_decl_kind << "\n";
+		    if (!obj_decl_kind.compare("CXXRecord"))
+		      {
+			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
+			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
+			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
+			// Get compound statement start line num
+			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
+			FileID decl_type_loc_fid = src_mgr.getFileID(spelling_decl_type_loc);
+			unsigned decl_type_loc_line_num = src_mgr.getLineNumber(decl_type_loc_fid, src_mgr.getFileOffset(spelling_decl_type_loc));
+			outs() << "Object decl type defined in "
+			       << src_mgr.getFilename(spelling_decl_type_loc)
+			       << " at line "
+			       << decl_type_loc_line_num
+			       << "\n";
+			for (RecordDecl::field_iterator fit = definition->field_begin();
+			     fit != definition->field_end();
+			     fit++)
+			  {
+			    FieldDecl *field_decl = *fit;
+			    std::string field_name = field_decl->getNameAsString();
+			    if (!member_name.compare(field_name))
+			      {
+				SourceRange field_src_range = field_decl->getSourceRange();
+				SourceLocation field_begin_loc = field_src_range.getBegin();
+				SourceLocation field_end_loc = field_src_range.getEnd();
+				const SourceLocation spelling_field_begin_loc = src_mgr.getImmediateSpellingLoc(field_begin_loc);
+				const SourceLocation spelling_field_end_loc = src_mgr.getImmediateSpellingLoc(field_end_loc);
+				FileID field_loc_fid = src_mgr.getFileID(spelling_field_begin_loc);
+				unsigned field_begin_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_begin_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_end_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				unsigned field_end_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				std::string field_file_name = src_mgr.getFilename(spelling_field_begin_loc);
+				outs() << "    defined in " << field_file_name << " starting at linecol #"
+				       << field_begin_loc_line_num << ":" << field_begin_loc_col_num
+				       << " ending at linecol # "
+				       << field_end_loc_line_num << ":" << field_end_loc_col_num
+				       << "\n";
+			      }
+			  }
+			//decl_type->dump();
+		      }
+		  }
 	      }
 
+	    //strcpy_call->dump();
+	    outs() << "\n";
+	  }
+	else if (strlen_call)
+	  {
+	    const QualType *chartype = Result.Nodes.getNodeAs<QualType>("chartype");
+	    const ConstantArrayType *arraytype = Result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
+	    const CXXRecordDecl *obj_decl = Result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
+	    const MemberExpr *member_expr = Result.Nodes.getNodeAs<MemberExpr>("member_expr");
+
+	    // Get start/end locations for the statement
+	    SourceLocation call_start = strlen_call->getLocStart();
+	    SourceLocation call_end = strcpy_call->getLocEnd();
+
+	    // Get file ID in src mgr
+	    FileID start_fid = src_mgr.getFileID(call_start);
+	    // Get compound statement start line num
+	    unsigned start_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned start_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_start));
+	    unsigned end_line_num = src_mgr.getLineNumber(start_fid, src_mgr.getFileOffset(call_end));
+	    unsigned end_col_num = src_mgr.getColumnNumber(start_fid, src_mgr.getFileOffset(call_end));
+
+	    outs() << "Found a strlen call statement from #"
+		   << start_line_num << ":" << start_col_num
+		   << " to "
+		   << end_line_num << ":" << end_col_num << "\n";
+
+	    if (arraytype)
+	      {
+		QualType element_type = arraytype->getElementType();
+		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
+		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
+		outs() << "   and its size is " << arraytype->getSize() << "\n";
+	      }
+
+	    std::string member_name;
+	    SourceLocation member_loc;
+	    DeclarationNameLoc member_decl_name_loc;
 	    if (member_expr)
 	      {
 		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
 		const Expr* base_expr = member_expr->getBase();
+
+		member_name = info.getName().getAsString();
+		member_loc = info.getLoc();
+		member_decl_name_loc = info.getInfo();
+
+		const SourceLocation spelling_member_loc = src_mgr.getImmediateSpellingLoc(member_loc);
+		FileID member_loc_fid = src_mgr.getFileID(spelling_member_loc);
+		unsigned member_loc_line_num = src_mgr.getLineNumber(member_loc_fid, src_mgr.getFileOffset(spelling_member_loc));
 		
-		outs() << "Member name: " << info.getName().getAsString() << "\n";
+		outs() << "Member name: " << member_name << "\n";
+		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
+		outs() << "    base expr is:\n";
+		//base_expr->dump();
 	      }
 
-	    strcpy_call->dump();
+	    if (obj_decl)
+	      {
+		if (obj_decl->hasDefinition())
+		  {
+		    DeclContext *decl_ctxt = dynamic_cast<DeclContext*>(obj_decl->getDefinition());
+		    std::string obj_decl_kind = decl_ctxt->getDeclKindName();
+		    outs() << "Object decl: " << obj_decl_kind << "\n";
+		    if (!obj_decl_kind.compare("CXXRecord"))
+		      {
+			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
+			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
+			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
+			// Get compound statement start line num
+			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
+			FileID decl_type_loc_fid = src_mgr.getFileID(spelling_decl_type_loc);
+			unsigned decl_type_loc_line_num = src_mgr.getLineNumber(decl_type_loc_fid, src_mgr.getFileOffset(spelling_decl_type_loc));
+			outs() << "Object decl type defined in "
+			       << src_mgr.getFilename(spelling_decl_type_loc)
+			       << " at line "
+			       << decl_type_loc_line_num
+			       << "\n";
+			for (RecordDecl::field_iterator fit = definition->field_begin();
+			     fit != definition->field_end();
+			     fit++)
+			  {
+			    FieldDecl *field_decl = *fit;
+			    std::string field_name = field_decl->getNameAsString();
+			    if (!member_name.compare(field_name))
+			      {
+				SourceRange field_src_range = field_decl->getSourceRange();
+				SourceLocation field_begin_loc = field_src_range.getBegin();
+				SourceLocation field_end_loc = field_src_range.getEnd();
+				const SourceLocation spelling_field_begin_loc = src_mgr.getImmediateSpellingLoc(field_begin_loc);
+				const SourceLocation spelling_field_end_loc = src_mgr.getImmediateSpellingLoc(field_end_loc);
+				FileID field_loc_fid = src_mgr.getFileID(spelling_field_begin_loc);
+				unsigned field_begin_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_begin_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				unsigned field_end_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				unsigned field_end_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				std::string field_file_name = src_mgr.getFilename(spelling_field_begin_loc);
+				outs() << "    defined in " << field_file_name << " starting at linecol #"
+				       << field_begin_loc_line_num << ":" << field_begin_loc_col_num
+				       << " ending at linecol # "
+				       << field_end_loc_line_num << ":" << field_end_loc_col_num
+				       << "\n";
+			      }
+			  }
+			//decl_type->dump();
+		      }
+		  }
+	      }
+
+	    //strlen_call->dump();
 	    outs() << "\n";
 	  }
       }
