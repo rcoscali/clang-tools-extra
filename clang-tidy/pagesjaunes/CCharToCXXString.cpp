@@ -31,7 +31,13 @@ namespace clang
 					     "Unexpected error occured?!")),
 	  no_error_diag_id(Context->
 			   getCustomDiagID(DiagnosticsEngine::Ignored,
-					   "No error"))
+					   "No error")),
+	  member_has_no_def_diag_id(Context->
+				    getCustomDiagID(DiagnosticsEngine::Error,
+						    "Member has no definition !")),
+	  member_not_found_diag_id(Context->
+				   getCustomDiagID(DiagnosticsEngine::Error,
+						   "Could not bind the member expression !"))
       {}
 
       void 
@@ -62,27 +68,63 @@ namespace clang
 
       void
       CCharToCXXString::emitDiagAndFix(const SourceLocation& call_start, const SourceLocation& call_end,
-				       const SourceLocation& def_start, const SourceLocation& def_end)
+				       std::string function_name,
+				       const SourceLocation& def_start, const SourceLocation& def_end,
+				       std::string member_name)
       {
+	SourceRange call_range(call_start, call_end);
+	SourceRange def_range(def_start, def_end);
+
+	DiagnosticBuilder mydiag = diag(call_start,
+					"This string manipulation call shall be replaced with std::string equivalent");
+
+	std::string replt_code;
+	std::string replt_def;
+	replt_code.append("strcmp");
+	replt_def.append("std::string ");
+	mydiag << FixItHint::CreateReplacement(call_range, replt_code);
+	mydiag << FixItHint::CreateReplacement(def_range, replt_def);
       }
 
       void
       CCharToCXXString::emitError(DiagnosticsEngine &diag_engine,
 				  const SourceLocation& err_loc,
-				  enum CCharToCXXStringErrorKind kind)
+				  enum CCharToCXXStringErrorKind kind,
+				  std::string *msg)
       {
 	switch (kind)
 	  {
 	  default:
-	    diag_engine.Report(err_loc, unexpected_diag_id);
+	    {
+	      DiagnosticBuilder diag = diag_engine.Report(err_loc, unexpected_diag_id);
+	      if (!msg->empty())
+		diag.AddString(*msg);
+	    }
 	    break;
 
 	  case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_NO_ERROR:
-	    diag_engine.Report(err_loc, no_error_diag_id);
+	    {
+	      DiagnosticBuilder diag = diag_engine.Report(err_loc, no_error_diag_id);
+	      if (!msg->empty())
+		diag.AddString(*msg);
+	    }
 	    break;
 
-	  //case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_:
-	    //break;
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF:
+	    {
+	      DiagnosticBuilder diag = diag_engine.Report(err_loc, member_has_no_def_diag_id);
+	      if (!msg->empty())
+		diag.AddString(*msg);
+	    }
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND:
+	    {
+	      DiagnosticBuilder diag = diag_engine.Report(err_loc, member_not_found_diag_id);
+	      if (!msg->empty())
+		diag.AddString(*msg);
+	    }
+	    break;
 	  }
       }
 
@@ -96,6 +138,8 @@ namespace clang
 
 	// Get the source manager
 	SourceManager &src_mgr = Result.Context->getSourceManager();
+	// And diagnostics engine
+	DiagnosticsEngine &diagEngine = Result.Context->getDiagnostics();
 
 	if (strcmp_call)
 	  {
@@ -124,31 +168,13 @@ namespace clang
 	      {
 		QualType element_type = arraytype->getElementType();
 		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
-		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
+		outs() << "   ... an array of " << element_type.getAsString() << " elements\n";
 		outs() << "   and its size is " << arraytype->getSize() << "\n";
 	      }
 
 	    std::string member_name;
 	    SourceLocation member_loc;
 	    DeclarationNameLoc member_decl_name_loc;
-	    if (member_expr)
-	      {
-		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
-		const Expr* base_expr = member_expr->getBase();
-
-		member_name = info.getName().getAsString();
-		member_loc = info.getLoc();
-		member_decl_name_loc = info.getInfo();
-
-		const SourceLocation spelling_member_loc = src_mgr.getImmediateSpellingLoc(member_loc);
-		FileID member_loc_fid = src_mgr.getFileID(spelling_member_loc);
-		unsigned member_loc_line_num = src_mgr.getLineNumber(member_loc_fid, src_mgr.getFileOffset(spelling_member_loc));
-		
-		outs() << "Member name: " << member_name << "\n";
-		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
-		outs() << "    base expr is:\n";
-		//base_expr->dump();
-	      }
 
 	    if (obj_decl)
 	      {
@@ -159,7 +185,6 @@ namespace clang
 		    if (obj_decl_kind.compare("CXXRecord") == 0)
 		      {
 			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
-			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
 			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
 			// Get compound statement start line num
 			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
@@ -170,34 +195,76 @@ namespace clang
 			       << " at line "
 			       << decl_type_loc_line_num
 			       << "\n";
-			for (RecordDecl::field_iterator fit = definition->field_begin();
-			     fit != definition->field_end();
-			     fit++)
+
+			if (member_expr)
 			  {
-			    FieldDecl *field_decl = *fit;
-			    std::string field_name = field_decl->getNameAsString();
-			    if (!member_name.compare(field_name))
+			    const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
+			    
+			    member_name = info.getName().getAsString();
+			    member_loc = info.getLoc();
+			    member_decl_name_loc = info.getInfo();
+			    
+			    const SourceLocation spelling_member_loc = src_mgr.getImmediateSpellingLoc(member_loc);
+			    FileID member_loc_fid = src_mgr.getFileID(spelling_member_loc);
+			    unsigned member_loc_line_num = src_mgr.getLineNumber(member_loc_fid, src_mgr.getFileOffset(spelling_member_loc));
+			    
+			    outs() << "Member name: " << member_name << "\n";
+			    outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
+			    outs() << "    base expr is:\n";
+
+			    for (RecordDecl::field_iterator fit = definition->field_begin();
+				 fit != definition->field_end();
+				 fit++)
 			      {
-				SourceRange field_src_range = field_decl->getSourceRange();
-				SourceLocation field_begin_loc = field_src_range.getBegin();
-				SourceLocation field_end_loc = field_src_range.getEnd();
-				const SourceLocation spelling_field_begin_loc = src_mgr.getImmediateSpellingLoc(field_begin_loc);
-				const SourceLocation spelling_field_end_loc = src_mgr.getImmediateSpellingLoc(field_end_loc);
-				FileID field_loc_fid = src_mgr.getFileID(spelling_field_begin_loc);
-				unsigned field_begin_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
-				unsigned field_begin_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
-				unsigned field_end_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
-				unsigned field_end_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
-				std::string field_file_name = src_mgr.getFilename(spelling_field_begin_loc);
-				outs() << "    defined in " << field_file_name << " starting at linecol #"
-				       << field_begin_loc_line_num << ":" << field_begin_loc_col_num
-				       << " ending at linecol # "
-				       << field_end_loc_line_num << ":" << field_end_loc_col_num
-				       << "\n";
+				FieldDecl *field_decl = *fit;
+				std::string field_name = field_decl->getNameAsString();
+				if (!member_name.compare(field_name))
+				  {
+				    SourceRange field_src_range = field_decl->getSourceRange();
+				    SourceLocation field_begin_loc = field_src_range.getBegin();
+				    SourceLocation field_end_loc = field_src_range.getEnd();
+				    const SourceLocation spelling_field_begin_loc = src_mgr.getImmediateSpellingLoc(field_begin_loc);
+				    const SourceLocation spelling_field_end_loc = src_mgr.getImmediateSpellingLoc(field_end_loc);
+				    FileID field_loc_fid = src_mgr.getFileID(spelling_field_begin_loc);
+				    unsigned field_begin_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				    unsigned field_begin_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_begin_loc));
+				    unsigned field_end_loc_line_num = src_mgr.getLineNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				    unsigned field_end_loc_col_num = src_mgr.getColumnNumber(field_loc_fid, src_mgr.getFileOffset(spelling_field_end_loc));
+				    std::string field_file_name = src_mgr.getFilename(spelling_field_begin_loc);
+				    outs() << "    defined in " << field_file_name << " starting at linecol #"
+					   << field_begin_loc_line_num << ":" << field_begin_loc_col_num
+					   << " ending at linecol # "
+					   << field_end_loc_line_num << ":" << field_end_loc_col_num
+					   << "\n";
+				    emitDiagAndFix(call_start, call_end,
+						   std::string("strcmp"),
+						   field_begin_loc, field_end_loc,
+						   member_name);
+				  }
 			      }
 			  }
-			//decl_type->dump();
+			else
+			  {
+			    outs() << "Error: No member could be found !!\n";
+			    emitError(diagEngine,
+				      call_start,
+				      CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND);
+			  }
 		      }
+		    else
+		      {
+			outs() << "Error: Member has no definition !!\n";
+			emitError(diagEngine,
+				  call_start,
+				  CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF);
+		      }
+		  }
+		else
+		  {
+		    outs() << "Error: Member has no definition !!\n";
+		    emitError(diagEngine,
+			      call_start,
+			      CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF);
 		  }
 	      }
 
@@ -206,7 +273,6 @@ namespace clang
 	  }
 	else if (strcpy_call)
 	  {
-	    const QualType *chartype = Result.Nodes.getNodeAs<QualType>("chartype");
 	    const ConstantArrayType *arraytype = Result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
 	    const CXXRecordDecl *obj_decl = Result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
 	    const MemberExpr *member_expr = Result.Nodes.getNodeAs<MemberExpr>("member_expr");
@@ -232,7 +298,7 @@ namespace clang
 	      {
 		QualType element_type = arraytype->getElementType();
 		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
-		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
+		outs() << "   ... an array of " << element_type.getAsString() << " elements\n";
 		outs() << "   and its size is " << arraytype->getSize() << "\n";
 	      }
 
@@ -242,7 +308,6 @@ namespace clang
 	    if (member_expr)
 	      {
 		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
-		const Expr* base_expr = member_expr->getBase();
 
 		member_name = info.getName().getAsString();
 		member_loc = info.getLoc();
@@ -255,7 +320,6 @@ namespace clang
 		outs() << "Member name: " << member_name << "\n";
 		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
 		outs() << "    base expr is:\n";
-		//base_expr->dump();
 	      }
 
 	    if (obj_decl)
@@ -268,7 +332,6 @@ namespace clang
 		    if (!obj_decl_kind.compare("CXXRecord"))
 		      {
 			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
-			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
 			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
 			// Get compound statement start line num
 			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
@@ -303,9 +366,12 @@ namespace clang
 				       << " ending at linecol # "
 				       << field_end_loc_line_num << ":" << field_end_loc_col_num
 				       << "\n";
+				emitDiagAndFix(call_start, call_end,
+					       std::string("strcpy"),
+					       field_begin_loc, field_end_loc,
+					       member_name);
 			      }
 			  }
-			//decl_type->dump();
 		      }
 		  }
 	      }
@@ -315,7 +381,6 @@ namespace clang
 	  }
 	else if (strlen_call)
 	  {
-	    const QualType *chartype = Result.Nodes.getNodeAs<QualType>("chartype");
 	    const ConstantArrayType *arraytype = Result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
 	    const CXXRecordDecl *obj_decl = Result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
 	    const MemberExpr *member_expr = Result.Nodes.getNodeAs<MemberExpr>("member_expr");
@@ -341,7 +406,7 @@ namespace clang
 	      {
 		QualType element_type = arraytype->getElementType();
 		outs() << "Array Type is '" << arraytype->getTypeClassName() << "'\n";
-		outs() << "   ... an array of " << element_type->getAsString() << " elements\n";
+		outs() << "   ... an array of " << element_type.getAsString() << " elements\n";
 		outs() << "   and its size is " << arraytype->getSize() << "\n";
 	      }
 
@@ -351,7 +416,6 @@ namespace clang
 	    if (member_expr)
 	      {
 		const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
-		const Expr* base_expr = member_expr->getBase();
 
 		member_name = info.getName().getAsString();
 		member_loc = info.getLoc();
@@ -364,7 +428,6 @@ namespace clang
 		outs() << "Member name: " << member_name << "\n";
 		outs() << "    declared in " << src_mgr.getFilename(spelling_member_loc) << " at line #" << member_loc_line_num << "\n";
 		outs() << "    base expr is:\n";
-		//base_expr->dump();
 	      }
 
 	    if (obj_decl)
@@ -377,7 +440,6 @@ namespace clang
 		    if (!obj_decl_kind.compare("CXXRecord"))
 		      {
 			RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
-			const Type *decl_type = ((const TypeDecl *)obj_decl)->getTypeForDecl();
 			const SourceLocation decl_type_loc = ((const TypeDecl *)obj_decl)->getLocStart();
 			// Get compound statement start line num
 			const SourceLocation spelling_decl_type_loc = src_mgr.getImmediateSpellingLoc(decl_type_loc);
@@ -412,9 +474,12 @@ namespace clang
 				       << " ending at linecol # "
 				       << field_end_loc_line_num << ":" << field_end_loc_col_num
 				       << "\n";
+				emitDiagAndFix(call_start, call_end,
+					       std::string("strlen"),
+					       field_begin_loc, field_end_loc,
+					       member_name);
 			      }
 			  }
-			//decl_type->dump();
 		      }
 		  }
 	      }

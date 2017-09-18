@@ -33,18 +33,25 @@ namespace clang
 
 	enum CCharToCXXStringErrorKind {
 	  CCHAR_2_CXXSTRING_ERROR_NO_ERROR = 0,
+	  CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF,
+	  CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND
 	};
 		
         void emitDiagAndFix(const SourceLocation& call_start, const SourceLocation& call_end,
-			    const SourceLocation& def_start, const SourceLocation& def_end);
+			    std::string function_name,
+			    const SourceLocation& def_start, const SourceLocation& def_end,
+			    std::string member_name);
 	
 	void emitError(DiagnosticsEngine &,
 		       const SourceLocation& err_loc,
-		       enum CCharToCXXStringErrorKind);
+		       enum CCharToCXXStringErrorKind,
+		       std::string *msg = nullptr);
 
 	ClangTidyContext *TidyContext;
 	const unsigned unexpected_diag_id;
 	const unsigned no_error_diag_id;
+	const unsigned member_has_no_def_diag_id;
+	const unsigned member_not_found_diag_id;
       };
 
     } // namespace pagesjaunes
