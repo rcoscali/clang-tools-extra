@@ -277,8 +277,16 @@ namespace clang
       /**
        * checkStrcmp
        *
-       * @brief check the strcmp call is 
+       * @brief check the strcmp call is ok to be processed
        *
+       * Find the member definition and check if it can be replaced by
+       * a string.
+       *
+       * @param src_mgr		Source manager
+       * @param diag_engine	Diagnostics engine
+       * @param call_name	The name of the called function ("strcmp")
+       * @param strcmp_call	The CallExpr AST node for strcmp call
+       * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrcmp(SourceManager &src_mgr,
@@ -428,8 +436,18 @@ namespace clang
       }
 
       /**
+       * checkStrcpy
        *
+       * @brief check the strcpy call is ok to be processed
        *
+       * Find the member definition and check if it can be replaced by
+       * a string.
+       *
+       * @param src_mgr		Source manager
+       * @param diag_engine	Diagnostics engine
+       * @param call_name	The name of the called function ("strcpy")
+       * @param strcpy_call	The CallExpr AST node for strcpy call
+       * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrcpy(SourceManager &src_mgr,
@@ -572,8 +590,18 @@ namespace clang
       }      
 
       /**
+       * checkStrlen
        *
+       * @brief check the strlen call is ok to be processed
        *
+       * Find the member definition and check if it can be replaced by
+       * a string.
+       *
+       * @param src_mgr		Source manager
+       * @param diag_engine	Diagnostics engine
+       * @param call_name	The name of the called function ("strlen")
+       * @param strlen_call	The CallExpr AST node for strlen call
+       * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrlen(SourceManager &src_mgr,
