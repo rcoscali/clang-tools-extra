@@ -22,6 +22,22 @@ namespace clang
   {
     namespace pagesjaunes
     {
+      /**
+       * ExecSQLToFunctionCall constructor
+       *
+       * @brief Constructor for the ExecSQLToFunctionCall rewriting check
+       *
+       * The rule is created a new check using its \c ClangTidyCheck base class.
+       * Name and context are provided and stored locally.
+       * Some diag ids corresponding to errors handled by rule are created:
+       * - no_error_diag_id: No error
+       * - access_char_data_diag_id: Couldn't access memory buffer for comment (unexpected)
+       * - cant_find_comment_diag_id: Comment not available (unexpected)
+       * - comment_dont_match_diag_id: Invalid comment structure (unexpected)
+       *
+       * @param Name    A StringRef for the new check name
+       * @param Context The ClangTidyContext allowing to access other contexts
+       */
       ExecSQLToFunctionCall::ExecSQLToFunctionCall(StringRef Name,
 						   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),
@@ -43,6 +59,19 @@ namespace clang
 						     "Couldn't match ProC comment for function name creation!"))
       {}
       
+      /**
+       * registerMatchers
+       *
+       * @brief Register the ASTMatcher that will found nodes we are interested in
+       *
+       * This method register 1 matcher for each oracle ProC generated statement
+       * to rewrite. 
+       * The matcher bind elements we will use, for detecting the found statement 
+       * we want to rewrite , and for writing new code.
+       *
+       * @param Finder  the recursive visitor that will use our matcher for sending 
+       *                us AST node.
+       */
       void 
       ExecSQLToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
@@ -54,6 +83,23 @@ namespace clang
 			   , this);
       }
       
+      /*
+       * emitDiagAndFix
+       *
+       * @brief Emit a diagnostic message and possible replacement fix for each
+       *        statement we will be notified with.
+       *
+       * This method is called each time a statement to handle (rewrite) is found.
+       * One replacement will be emited for eachnode found.
+       * It is passed all necessary arguments for:
+       * - creating a comprehensive diagnostic message
+       * - computing the locations of code we will replace
+       * - computing the new code that will replace old one
+       *
+       * @param loc_start       The CompoundStmt start location
+       * @param loc_end         The CompoundStmt end location
+       * @param function_name   The function name that will be called
+       */
       void
       ExecSQLToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
 					    const SourceLocation& loc_end,
@@ -62,12 +108,24 @@ namespace clang
 	SourceRange stmt_range(loc_start, loc_end);
 	DiagnosticBuilder mydiag = diag(loc_end,
 					"ProC Statement Block shall be replaced by a function call named '%0'") << function_name;
-	std::string replt_code("	");
-	replt_code.append(function_name);
-	replt_code.append("();");
+	std::string replt_code = function_name.append("();");
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
       }
+
       
+      /**
+       * emitError
+       *
+       * @brief Manage error conditions by emiting an error
+       *
+       * This method manage any error condition by emitting a specific error message
+       * to the LLVM/Clang DiagnosticsEngine. It uses diag ids that were created 
+       * in constructor.
+       *
+       * @param diag_engine     LLVM/Clang DiagnosticsEngine instance
+       * @param err_loc         Error location
+       * @param kind            Kind of error to report
+       */
       void
       ExecSQLToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
 				       const SourceLocation& err_loc,
@@ -97,6 +155,20 @@ namespace clang
 	  }
       }
       
+      /**
+       * check
+       *
+       * @brief This method is called each time a visited AST node matching our 
+       *        ASTMatcher is found.
+       * 
+       * This method will navigated and inspect the found AST nodes for:
+       * - determining if the found nodes are elligible for rewrite
+       * - extracting all necessary informations for computing rewrite 
+       *   location and code (find ProC generated comment)
+       *
+       * @param Result          The match result provided by the recursive visitor
+       *                        allowing us to access AST nodes bound to variables
+       */
       void
       ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &Result) 
       {
