@@ -24,37 +24,53 @@ namespace clang
     namespace pagesjaunes
     {
 
-      /// \brief Checks that argument name match parameter name rules.
+      // Checks that argument name match parameter name rules.
       class ExecSQLToFunctionCall : public ClangTidyCheck 
       {
       public:
+	// Constructor
 	ExecSQLToFunctionCall(StringRef, ClangTidyContext *);
 
+	// Register matrchers
 	void registerMatchers(ast_matchers::MatchFinder *) override;
+	// Check a matched node
 	void check(const ast_matchers::MatchFinder::MatchResult &) override;
 
       private:
 
-	enum ExecSQLToFunctionCallErrorKind {
-	  EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
-	  EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
-	  EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
-	  EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
-	};
-	
+	enum ExecSQLToFunctionCallErrorKind
+	  {
+	    //
+	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
+	    //
+	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
+	    //
+	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
+	    //
+	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
+	  };
+
+	// Emit diagnostic and eventually fix it
         void emitDiagAndFix(const SourceLocation&,
 			    const SourceLocation&,
 			    const std::string&);
 
+	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
 		       enum ExecSQLToFunctionCallErrorKind);
 
+	// AST Context instance
 	ClangTidyContext *TidyContext;
+	// Diag ids
 	const unsigned unexpected_diag_id;
+	// Diag ids
 	const unsigned no_error_diag_id;
+	// Diag ids
 	const unsigned access_char_data_diag_id;
+	// Diag ids
 	const unsigned cant_find_comment_diag_id;
+	// Diag ids
 	const unsigned comment_dont_match_diag_id;
 
       };

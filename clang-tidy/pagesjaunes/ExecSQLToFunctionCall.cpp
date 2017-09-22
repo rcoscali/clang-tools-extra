@@ -30,6 +30,7 @@ namespace clang
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
        * Some diag ids corresponding to errors handled by rule are created:
+       * - unexpected_diag_id: Unexpected error
        * - no_error_diag_id: No error
        * - access_char_data_diag_id: Couldn't access memory buffer for comment (unexpected)
        * - cant_find_comment_diag_id: Comment not available (unexpected)
@@ -40,20 +41,25 @@ namespace clang
        */
       ExecSQLToFunctionCall::ExecSQLToFunctionCall(StringRef Name,
 						   ClangTidyContext *Context)
-	: ClangTidyCheck(Name, Context),
-	  TidyContext(Context),
+	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
+	  TidyContext(Context),			/** Init our TidyContext instance */
+	  /** Unexpected error occured */
 	  unexpected_diag_id(Context->
 			     getCustomDiagID(DiagnosticsEngine::Warning,
 					     "Unexpected error occured?!")),
+	  /** No error: never thrown */
 	  no_error_diag_id(Context->
 			   getCustomDiagID(DiagnosticsEngine::Ignored,
 					   "No error")),
+	  /** Access char data error occured */
 	  access_char_data_diag_id(Context->
 				   getCustomDiagID(DiagnosticsEngine::Error,
 						   "Couldn't access character data in file cache memory buffers!")),
+	  /** Cannot find comment error */
 	  cant_find_comment_diag_id(Context->
 				    getCustomDiagID(DiagnosticsEngine::Error,
 						    "Couldn't find ProC comment start! This result has been discarded!")),
+	  /** Cannot parse comment as a ProC SQL rqt statement */
 	  comment_dont_match_diag_id(Context->
 				     getCustomDiagID(DiagnosticsEngine::Error,
 						     "Couldn't match ProC comment for function name creation!"))
@@ -75,11 +81,10 @@ namespace clang
       void 
       ExecSQLToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
-        Finder->addMatcher(
-			   varDecl(
-				   hasAncestor(declStmt(hasAncestor(compoundStmt().bind("proCBlock")))),
-				   hasName("sqlstm")
-				   )
+	/* Add a matcher for finding compound statements starting */
+	/* with a sqlstm variable declaration */
+        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt().bind("proCBlock")))),
+				   hasName("sqlstm"))
 			   , this);
       }
       
@@ -105,14 +110,22 @@ namespace clang
 					    const SourceLocation& loc_end,
 					    const std::string& function_name)
       {
+	/* Range of the statement to change */
 	SourceRange stmt_range(loc_start, loc_end);
+
+	/* Diagnostic builder for a found AST node */
+	/* Default is a warning, and it is emitted */
+	/* as soon as the diag builder is destroyed */
 	DiagnosticBuilder mydiag = diag(loc_end,
-					"ProC Statement Block shall be replaced by a function call named '%0'")
+					"ProC Statement Block shall be replaced"
+					" by a function call named '%0'")
 	  << function_name;
-	
+
+	/* Replacement code built */
 	std::string replt_code = function_name;
 	replt_code.append(std::string("();"));
-	
+
+	/* Emit the replacement over the found statement range */
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
       }
 
@@ -135,24 +148,33 @@ namespace clang
 				       const SourceLocation& err_loc,
 				       enum ExecSQLToFunctionCallErrorKind kind)
       {
+	/* 
+	 * According to the kind of error, it is reported through 
+	 * diag engine.
+	 */
 	switch (kind)
 	  {
+	    /** Default unexpected diagnostic id */
 	  default:
 	    diag_engine.Report(err_loc, unexpected_diag_id);
 	    break;
 
+	    /** No error ID: it should never occur */
 	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
 	    diag_engine.Report(err_loc, no_error_diag_id);
 	    break;
 
+	    /** Access char data diag ID */
 	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
 	    diag_engine.Report(err_loc, access_char_data_diag_id);
 	    break;
 
+	    /** Can't find a comment */
 	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
 	    diag_engine.Report(err_loc, cant_find_comment_diag_id);
 	    break;
 
+	    /** Cannot match comment */
 	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
 	    diag_engine.Report(err_loc, comment_dont_match_diag_id);
 	    break;

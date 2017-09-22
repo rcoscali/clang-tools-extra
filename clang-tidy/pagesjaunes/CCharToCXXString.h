@@ -13,6 +13,10 @@
 #include "../ClangTidy.h"
 #include "llvm/Support/Regex.h"
 
+using namespace llvm;
+using namespace clang::ast_matchers;
+using namespace clang;
+
 namespace clang 
 {
   namespace tidy 
@@ -31,15 +35,34 @@ namespace clang
 
       private:
 
-	enum CCharToCXXStringErrorKind {
-	  CCHAR_2_CXXSTRING_ERROR_NO_ERROR = 0,
-	  CCHAR_2_CXXSTRING_ERROR_ARRAY_TYPE_NOT_FOUND,
-	  CCHAR_2_CXXSTRING_ERROR_RECORD_DECL_NOT_FOUND,
-	  CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF,
-	  CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND,
-	  CCHAR_2_CXXSTRING_ERROR_MEMBER2_NOT_FOUND,
-	  CCHAR_2_CXXSTRING_ERROR_UNEXPECTED_AST_NODE_KIND
-	};
+	void checkStrcmp(SourceManager &,
+			 DiagnosticsEngine &,
+			 std::string&,
+			 CallExpr *,
+			 const MatchFinder::MatchResult &);
+	
+	void checkStrcpy(SourceManager &,
+			 DiagnosticsEngine &,
+			 std::string&,
+			 CallExpr *,
+			 const MatchFinder::MatchResult &);
+	
+	void checkStrlen(SourceManager &,
+			 DiagnosticsEngine &,
+			 std::string&,
+			 CallExpr *,
+			 const MatchFinder::MatchResult &);
+	
+	enum CCharToCXXStringErrorKind
+	  {
+	    CCHAR_2_CXXSTRING_ERROR_NO_ERROR = 0,
+	    CCHAR_2_CXXSTRING_ERROR_ARRAY_TYPE_NOT_FOUND,
+	    CCHAR_2_CXXSTRING_ERROR_RECORD_DECL_NOT_FOUND,
+	    CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF,
+	    CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND,
+	    CCHAR_2_CXXSTRING_ERROR_MEMBER2_NOT_FOUND,
+	    CCHAR_2_CXXSTRING_ERROR_UNEXPECTED_AST_NODE_KIND
+	  };
 		
         void emitDiagAndFix(DiagnosticsEngine &,
 			    const SourceLocation&, const SourceLocation&,
