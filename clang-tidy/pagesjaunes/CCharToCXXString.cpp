@@ -391,20 +391,26 @@ namespace clang
 		outs() << "member_expr dump:\n";
 		member_expr->dump();
 
-		if (arg1 == member_expr)
-		  {
-		    outs() << "Not switching args ...\n";
-		    const Expr *tmp = arg2;
-		    arg2 = (const Expr *)member_expr->IgnoreImpCasts();
-		    member_expr = static_cast<const MemberExpr *>(tmp);
-		  }
-		else
-		  {
-		    outs() << "Switching args ...\n";
-		    const Expr *tmp = arg1;
-		    arg1 = (const Expr *)member_expr->IgnoreImpCasts();
-		    member_expr = static_cast<const MemberExpr *>(tmp);
-		  }
+		SourceLocation member_expr_start = member_expr->getLocStart();
+		SourceLocation member_expr_end = member_expr->getLocEnd();
+
+		// if (arg1 == member_expr)
+		//   {
+		//     outs() << "Not switching args ...\n";
+		//     const Expr *tmp = arg2;
+		//     arg2 = (const Expr *)member_expr->IgnoreImpCasts();
+		//     member_expr = static_cast<const MemberExpr *>(tmp);
+		//   }
+		// else
+		//   {
+		//     SourceLocation tmploc = member_expr_start;
+		//     member_expr_start = member_expr_end;
+		//     member_expr_end = tmploc;
+		//     outs() << "Switching args ...\n";
+		//     const Expr *tmp = arg1;
+		//     arg1 = (const Expr *)member_expr->IgnoreImpCasts();
+		//     member_expr = static_cast<const MemberExpr *>(tmp);
+		//   }
 
                 outs() << "Found a strcmp call statement from #"
                        << start_line_num << ":" << start_col_num
@@ -423,9 +429,6 @@ namespace clang
                 std::string member2_name;
                 SourceLocation member2_loc;
                 DeclarationNameLoc member2_decl_name_loc;
-
-		SourceLocation member_expr_start = member_expr->getLocStart();
-
       
 		ExprValueKind member_expr_value_kind = member_expr->getValueKind();
 		
@@ -471,7 +474,6 @@ namespace clang
       
 		  }
 		
-		SourceLocation member_expr_end = member_expr->getLocEnd();
 		Expr *base = member_expr->getBase();
 		QualType base_type = base->getType();
 		std::string object_name = base_type.getAsString();

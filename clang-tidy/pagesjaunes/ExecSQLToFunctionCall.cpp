@@ -107,8 +107,12 @@ namespace clang
       {
 	SourceRange stmt_range(loc_start, loc_end);
 	DiagnosticBuilder mydiag = diag(loc_end,
-					"ProC Statement Block shall be replaced by a function call named '%0'") << function_name;
-	std::string replt_code = function_name.append("();");
+					"ProC Statement Block shall be replaced by a function call named '%0'")
+	  << function_name;
+	
+	std::string replt_code = function_name;
+	replt_code.append(std::string("();"));
+	
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
       }
 
