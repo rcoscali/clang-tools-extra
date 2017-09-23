@@ -23,10 +23,34 @@ namespace clang
       class PagesJaunesModule : public ClangTidyModule 
       {
       public:
-	void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override 
+	/**
+	 * Register all checks of PageJaunes module
+	 */
+	void
+	addCheckFactories(ClangTidyCheckFactories &CheckFactories) override 
 	{
 	  CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
 	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-exec-sql-to-function-call");
+	}
+
+	/**
+	 * Register checks options
+	 */
+	ClangTidyOptions
+	getModuleOptions() override
+	{
+	  ClangTidyOptions Options;
+	  auto &Opts = Options.CheckOptions;
+
+	  /**
+	   * Options are available in order to enable(1)/disable(0) processing
+	   * of each possible string manipulation functions.
+	   */
+	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcpy"] = "1";
+	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
+	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
+
+	  return Options;
 	}
       };
 

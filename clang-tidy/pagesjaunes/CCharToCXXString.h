@@ -24,12 +24,22 @@ namespace clang
     namespace pagesjaunes
     {
 
-      /// \brief Checks that argument name match parameter name rules.
+      /// @brief Checks that argument name match parameter name rules.
+      ///
+      /// These options are supported:
+      ///   * `Handle-strcpy`: actually process or not strcpy
+      ///     default is 1 (process strcpy)
+      ///   * `Handle-strcmp`: actually process or not strcpy
+      ///     default is 1 (process strcmp)
+      ///   * `Handle-strlen`: actually process or not strcpy
+      ///     default is 1 (process strlen)
+      ///
       class CCharToCXXString : public ClangTidyCheck 
       {
       public:
 	CCharToCXXString(StringRef Name, ClangTidyContext *Context);
 
+	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 	void registerMatchers(ast_matchers::MatchFinder *Finder) override;
 	void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
@@ -75,7 +85,9 @@ namespace clang
 		       enum CCharToCXXStringErrorKind,
 		       std::string *msg = nullptr);
 
+	// Context instance
 	ClangTidyContext *TidyContext;
+	// Diag ids
 	const unsigned unexpected_diag_id;
 	const unsigned no_error_diag_id;
 	const unsigned array_type_not_found_diag_id;
@@ -84,6 +96,10 @@ namespace clang
 	const unsigned member_not_found_diag_id;
 	const unsigned member2_not_found_diag_id;
 	const unsigned unexpected_ast_node_kind_diag_id;
+	// Check options
+	const unsigned handle_strcmp;
+	const unsigned handle_strcpy;
+	const unsigned handle_strlen;
       };
 
     } // namespace pagesjaunes

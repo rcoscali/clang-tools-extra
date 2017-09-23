@@ -68,8 +68,22 @@ namespace clang
                                                     "Could not bind the second member expression!")),
           unexpected_ast_node_kind_diag_id(Context->
                                            getCustomDiagID(DiagnosticsEngine::Error,
-                                                           "Could not process member owning record kind!"))
+                                                           "Could not process member owning record kind!")),
+	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
+	  handle_strcpy(Options.get("Handle-strcpy", 1U)),
+	  handle_strlen(Options.get("Handle-strlen", 1U))
       {}
+
+      /**
+       *
+       */
+      void
+      CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      {
+	Options.store(Opts, "Handle-strcpy", handle_strcpy);
+	Options.store(Opts, "Handle-strcmp", handle_strcmp);
+	Options.store(Opts, "Handle-strlen", handle_strlen);
+      }
 
       /**
        * registerMatchers
@@ -784,7 +798,7 @@ namespace clang
         /*
          * Handle strcmp calls
          */
-        if (strcmp_call)
+        if (handle_strcmp && strcmp_call)
           {
             call_name.assign("strcmp");
             checkStrcmp(src_mgr,
@@ -796,7 +810,7 @@ namespace clang
         /*
          * Handle strcpy calls
          */
-        else if (strcpy_call)
+        else if (handle_strcpy && strcpy_call)
           {
             call_name.assign("strcpy");
             checkStrcpy(src_mgr,
@@ -808,7 +822,7 @@ namespace clang
         /*
          * Handle strlen calls
          */
-        else if (strlen_call)
+        else if (handle_strlen && strlen_call)
           {
             call_name.assign("strlen");
             checkStrlen(src_mgr,
