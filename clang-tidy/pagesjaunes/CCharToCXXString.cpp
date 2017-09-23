@@ -11,6 +11,14 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "llvm/Support/Regex.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/DataTypes.h"
+#include "llvm/Support/Format.h"
+#include "llvm/Support/FormatVariadic.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -159,7 +167,7 @@ namespace clang
       void
       CCharToCXXString::emitDiagAndFix(DiagnosticsEngine &diag_engine,
                                        const SourceLocation& call_start, const SourceLocation& call_end,
-                                       std::string& function_name,
+                                       enum CCharToCXXStringCallKind function_kind,
                                        std::string& member_tokens,
                                        std::string& member2_tokens,
                                        const SourceLocation& def_start, const SourceLocation& def_end,
@@ -170,42 +178,42 @@ namespace clang
         SourceRange call_range(call_start, call_end);
         SourceRange def_range(def_start, def_end);
 
-        // Target rewritten code
-        std::string replt_4call;
-        std::string replt_4def;
+	// Name of the function
+	std::string function_name;
+	
+        // Target rewritten code for call
+	std::string replt_4call;
+	switch (function_kind)
+	  {
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP:
+	    // Write new code for strcmp: member_tokens + ".compare(member2)"
+	    replt_4call = formatv("{0}.compare({1})", member_tokens, member2_tokens).str();
+	    function_name.assign("strcmp");
+	    break;
 
-        // Write new code for strcmp: 'member1.compare(member2) == 0'
-        // and for definition: std::string member1
-        // TODO: get operator and literal from CallExpr
-        if (function_name.compare("strcmp") == 0)
-          {
-            replt_4call.append(member_tokens);
-            replt_4call.append(".compare(");
-            replt_4call.append(member2_tokens);
-            replt_4call.append(")");
-            replt_4def.append("std::string ");
-            replt_4def.append(field_name);
-          }
-        // Write new code for strcpy: member1.assign(member2)
-        // and for definition: std::string member1
-        else if (function_name.compare("strcpy") == 0)
-          {
-            replt_4call.append(member_tokens);
-            replt_4call.append(".assign(");
-            replt_4call.append(member2_tokens);
-            replt_4call.append(")");
-            replt_4def.append("std::string ");
-            replt_4def.append(field_name);
-          }
-        // Write new code for strlen: member.length()
-        // and for definition: std::string member1
-        else if (function_name.compare("strlen") == 0)
-          {
-            replt_4call.append(member_tokens);
-            replt_4call.append(".length()");
-            replt_4def.append("std::string ");
-            replt_4def.append(field_name);
-          }
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY:
+	    // Write new code for strcpy: member_tokens + ".assign(member2)"
+	    replt_4call = formatv("{0}.assign({1})", member_tokens, member2_tokens).str();
+	    function_name.assign("strcpy");
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN:
+	    // Write new code for strlen: member_tokens + ".length()"
+            replt_4call = formatv("{0}.length()", member_tokens).str();
+	    function_name.assign("strlen");
+	    break;
+	  }
+
+        // Write new code for definition: std::string + member tokens
+	std::string replt_4def = formatv("std::string {0}", field_name).str();
+
+	/* 
+	 * !!{ ============================================================ }
+	 * !!{ I put the diagnostic builder in its own block because actual }
+	 * !!{ report is launched at destruction. As the destructor is not  }
+	 * !!{ available (= delete), this is the only way to achieve this.  }
+	 * !!{ ============================================================ }
+	 */
 
         {
           // Create diag msg for the call expr rewrite
@@ -215,6 +223,7 @@ namespace clang
           // Emit replacement for call expr
           mydiag << FixItHint::CreateReplacement(call_range, replt_4call);
         }
+
         {
           // Create diag msg for the call expr rewrite
           DiagnosticBuilder mydiag = diag(def_start,
@@ -298,21 +307,18 @@ namespace clang
        *
        * @param src_mgr		Source manager
        * @param diag_engine	Diagnostics engine
-       * @param call_name	The name of the called function ("strcmp")
+       * @param call_kind	The name of the called function ("strcmp")
        * @param strcmp_call	The CallExpr AST node for strcmp call
        * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrcmp(SourceManager &src_mgr,
                                     DiagnosticsEngine &diag_engine,
-                                    std::string& call_name,
                                     CallExpr* strcmp_call,
                                     const MatchFinder::MatchResult &result)
       {
         do
           {
-            std::string call_name("strcmp");
-                
             // Get nodes bound to variables 
             const ConstantArrayType *arraytype = result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
             const CXXRecordDecl *obj_decl = result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
@@ -425,13 +431,15 @@ namespace clang
 			if (!arg1_is_literal)
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 call_name, member_tokens, member2_tokens, 
+					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
+					 member_tokens, member2_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
 			else
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 call_name, member2_tokens, member_tokens, 
+					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
+					 member2_tokens, member_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
                       }
@@ -459,20 +467,18 @@ namespace clang
        *
        * @param src_mgr		Source manager
        * @param diag_engine	Diagnostics engine
-       * @param call_name	The name of the called function ("strcpy")
+       * @param call_kind	The kind of the called function ("strcpy")
        * @param strcpy_call	The CallExpr AST node for strcpy call
        * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrcpy(SourceManager &src_mgr,
                                     DiagnosticsEngine &diag_engine,
-                                    std::string& call_name,
                                     CallExpr* strcpy_call,
                                     const MatchFinder::MatchResult &result)
       {
         do
           {
-            std::string call_name("strcpy");
             const ConstantArrayType *arraytype = result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
             const CXXRecordDecl *obj_decl = result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
             const MemberExpr *member_expr = result.Nodes.getNodeAs<MemberExpr>("member_expr");
@@ -579,13 +585,15 @@ namespace clang
 			if (!arg1_is_literal)
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 call_name, member_tokens, member2_tokens, 
+					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
+					 member_tokens, member2_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
 			else
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 call_name, member2_tokens, member_tokens, 
+					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
+					 member2_tokens, member_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
                       }
@@ -613,22 +621,18 @@ namespace clang
        *
        * @param src_mgr		Source manager
        * @param diag_engine	Diagnostics engine
-       * @param call_name	The name of the called function ("strlen")
+       * @param call_kind	The kind of the called function ("strlen")
        * @param strlen_call	The CallExpr AST node for strlen call
        * @param result		The matched result
        */
       void
       CCharToCXXString::checkStrlen(SourceManager &src_mgr,
                                     DiagnosticsEngine &diag_engine,
-                                    std::string& call_name,
                                     CallExpr* strlen_call,
                                     const MatchFinder::MatchResult &result)
       {
         do
           {
-	    // The call name
-            std::string call_name("strlen");
-
 	    // Get our bounded vars
             const ConstantArrayType *arraytype = result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
             const CXXRecordDecl *obj_decl = result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
@@ -743,7 +747,8 @@ namespace clang
 			// Emit diag and replacement code
                         emitDiagAndFix(diag_engine,
                                        call_start, call_end,
-                                       call_name, member_tokens, member2_tokens, 
+				       CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN,
+                                       member_tokens, member2_tokens, 
                                        field_begin_loc, field_end_loc,
                                        member_name, object_name, field_name, field_tokens);
                       }
@@ -793,44 +798,32 @@ namespace clang
         // And diagnostics engine
         DiagnosticsEngine &diag_engine = result.Context->getDiagnostics();
 
-        std::string call_name;
-        
         /*
          * Handle strcmp calls
          */
         if (handle_strcmp && strcmp_call)
-          {
-            call_name.assign("strcmp");
-            checkStrcmp(src_mgr,
-                        diag_engine,
-                        call_name,
-                        strcmp_call,
-                        result);
-          }
+	  checkStrcmp(src_mgr,
+		      diag_engine,
+		      strcmp_call,
+		      result);
+
         /*
          * Handle strcpy calls
          */
         else if (handle_strcpy && strcpy_call)
-          {
-            call_name.assign("strcpy");
-            checkStrcpy(src_mgr,
-                        diag_engine,
-                        call_name,
-                        strcpy_call,
-                        result);
-          }
+	  checkStrcpy(src_mgr,
+		      diag_engine,
+		      strcpy_call,
+		      result);
+
         /*
          * Handle strlen calls
          */
         else if (handle_strlen && strlen_call)
-          {
-            call_name.assign("strlen");
-            checkStrlen(src_mgr,
-                        diag_engine,
-                        call_name,
-                        strlen_call,
-                        result);
-          }
+	  checkStrlen(src_mgr,
+		      diag_engine,
+		      strlen_call,
+		      result);
       }
     } // namespace pagesjaunes
   } // namespace tidy

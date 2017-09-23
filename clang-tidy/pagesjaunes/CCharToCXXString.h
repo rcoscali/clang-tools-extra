@@ -47,21 +47,32 @@ namespace clang
 
 	void checkStrcmp(SourceManager &,
 			 DiagnosticsEngine &,
-			 std::string&,
 			 CallExpr *,
 			 const MatchFinder::MatchResult &);
 	
 	void checkStrcpy(SourceManager &,
 			 DiagnosticsEngine &,
-			 std::string&,
 			 CallExpr *,
 			 const MatchFinder::MatchResult &);
 	
 	void checkStrlen(SourceManager &,
 			 DiagnosticsEngine &,
-			 std::string&,
 			 CallExpr *,
 			 const MatchFinder::MatchResult &);
+	
+	enum CCharToCXXStringCallKind
+	  {
+	    CCHAR_2_CXXSTRING_CALL_STRCMP = 0,
+	    CCHAR_2_CXXSTRING_CALL_STRCPY,
+	    CCHAR_2_CXXSTRING_CALL_STRLEN,
+	  };
+
+        void emitDiagAndFix(DiagnosticsEngine &,
+			    const SourceLocation&, const SourceLocation&,
+			    enum CCharToCXXStringCallKind,
+			    std::string&, std::string&, 
+			    const SourceLocation&, const SourceLocation&,
+			    std::string&, std::string&, std::string&, std::string&);
 	
 	enum CCharToCXXStringErrorKind
 	  {
@@ -74,12 +85,6 @@ namespace clang
 	    CCHAR_2_CXXSTRING_ERROR_UNEXPECTED_AST_NODE_KIND
 	  };
 		
-        void emitDiagAndFix(DiagnosticsEngine &,
-			    const SourceLocation&, const SourceLocation&,
-			    std::string&, std::string&, std::string&, 
-			    const SourceLocation&, const SourceLocation&,
-			    std::string&, std::string&, std::string&, std::string&);
-	
 	void emitError(DiagnosticsEngine &,
 		       const SourceLocation& err_loc,
 		       enum CCharToCXXStringErrorKind,
