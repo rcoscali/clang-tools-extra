@@ -3,6 +3,7 @@ set(LLVM_LINK_COMPONENTS support)
 add_clang_library(clangTidyPagesJaunesModule
   ExecSQLToFunctionCall.cpp
   CCharToCXXString.cpp
+  DeIncludePreProC.cpp
   PagesJaunesTidyModule.cpp
   
   LINK_LIBS
@@ -16,3 +17,4 @@ add_clang_library(clangTidyPagesJaunesModule
 # Result.Node.getNodeAs returning a const ptr
 set_property(SOURCE CCharToCXXString.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual ")
 set_property(SOURCE ExecSQLToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual ")
+set_property(SOURCE DeIncludePreProC.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual ")

@@ -27,7 +27,7 @@ namespace clang
       /// @brief Checks that argument name match parameter name rules.
       ///
       /// These options are supported:
-      ///   * `Handle-strcpy`: actually process or not strcpy
+      ///   * `Include-Comment-Regex`: The regular expression to use for parsing comment
       ///     default is 1 (process strcpy)
       ///   * `Handle-strcmp`: actually process or not strcpy
       ///     default is 1 (process strcmp)

@@ -31,6 +31,7 @@ namespace clang
 	{
 	  CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
 	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-exec-sql-to-function-call");
+	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-de-include-preproc");
 	}
 
 	/**
