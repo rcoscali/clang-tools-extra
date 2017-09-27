@@ -196,13 +196,13 @@ namespace clang
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &Result) 
+      ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
 	// Get the compound statement AST node as the bounded var 'proCBlock'
-	const CompoundStmt *stmt = Result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
+	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
 	// Get the source manager
-	SourceManager &srcMgr = Result.Context->getSourceManager();
-	DiagnosticsEngine &diagEngine = Result.Context->getDiagnostics();
+	SourceManager &srcMgr = result.Context->getSourceManager();
+	DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
 
 	// Get start/end locations for the statement
 	SourceLocation loc_start = stmt->getLocStart();

@@ -12,6 +12,7 @@
 #include "../ClangTidyModuleRegistry.h"
 #include "CCharToCXXString.h"
 #include "ExecSQLToFunctionCall.h"
+#include "DeIncludePreProC.h"
 
 namespace clang 
 {
@@ -31,7 +32,7 @@ namespace clang
 	{
 	  CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
 	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-exec-sql-to-function-call");
-	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-de-include-preproc");
+	  CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
 	}
 
 	/**

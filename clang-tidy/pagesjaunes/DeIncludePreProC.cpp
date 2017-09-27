@@ -9,7 +9,11 @@
 
 #include "DeIncludePreProC.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/RawCommentList.h"
+#include "clang/Basic/LLVM.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/Tooling/CompilationDatabase.h"
 #include "llvm/Support/Regex.h"
 
 using namespace clang;
@@ -25,16 +29,28 @@ namespace clang
       /**
        * DeIncludePreProC constructor
        *
-       * @brief Constructor for the DeIncludePreProC rewriting check
+       * @brief Constructor for the \c DeIncludePreProC rewriting check
        *
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
        * Some diag ids corresponding to errors handled by rule are created:
-       * - unexpected_diag_id: Unexpected error
-       * - no_error_diag_id: No error
-       * - access_char_data_diag_id: Couldn't access memory buffer for comment (unexpected)
-       * - cant_find_comment_diag_id: Comment not available (unexpected)
-       * - comment_dont_match_diag_id: Invalid comment structure (unexpected)
+       *   - \c unexpected_diag_id: Unexpected error
+       *   - \c no_error_diag_id: No error
+       *   - \c access_char_data_diag_id: Couldn't access memory buffer for comment (unexpected)
+       *   - \c cant_find_comment_diag_id: Comment not available (unexpected)
+       *   - \c comment_dont_match_diag_id: Invalid comment structure (unexpected)
+       * This check allows to customize several values through options. These options
+       * are:
+       *   - \c Comment-regex: Allows to customize the value of the regular expression used
+       *     for finding comments created from the EXEC SQL include statements
+       *   - \c Headers-to-include-in: Allows to customize the headers IN filter. Headers that
+       *     are not in this filter are not included and then not processed. 
+       *   - \c Headers-to-exclude-from: Allows to customize the headers OUT filter. Headers
+       *     that are in this filter are not included and then not processed. 
+       *   - \c Headers-directories: Allows to customize the headers directories that will be
+       *     searched. 
+       *     TODO: Try to find a way to use compilation database to avoid this option.
+       *
        *
        * @param Name    A StringRef for the new check name
        * @param Context The ClangTidyContext allowing to access other contexts
@@ -47,24 +63,66 @@ namespace clang
 	  unexpected_diag_id(Context->
 			     getCustomDiagID(DiagnosticsEngine::Warning,
 					     "Unexpected error occured?!")),
-	  /** No error: never thrown */
+	  /** No error diag id: never thrown */
 	  no_error_diag_id(Context->
 			   getCustomDiagID(DiagnosticsEngine::Ignored,
 					   "No error")),
-	  /** Access char data error occured */
+	  /** Access error diag id: Access char data error occured */
 	  access_char_data_diag_id(Context->
 				   getCustomDiagID(DiagnosticsEngine::Error,
 						   "Couldn't access character data in file cache memory buffers!")),
-	  /** Cannot find comment error */
+	  /** Comment parse diag id: Cannot find comment error */
 	  cant_find_comment_diag_id(Context->
 				    getCustomDiagID(DiagnosticsEngine::Error,
 						    "Couldn't find ProC comment start! This result has been discarded!")),
-	  /** Cannot parse comment as a ProC SQL rqt statement */
+	  /** Diag ID for parse comment error: Cannot parse it as a ProC SQL rqt statement */
 	  comment_dont_match_diag_id(Context->
 				     getCustomDiagID(DiagnosticsEngine::Error,
-						     "Couldn't match ProC comment for function name creation!"))
-      {}
+						     "Couldn't match ProC comment for function name creation!")),
+	  /** Check option for comment regex */
+	  comment_regex(Options.get("Comment-regex", "^.*EXEC SQL[ \t]+include[ \t]+\"?([-0-9A-Za-z._]*)\"?.*$")),
+	  /** Check option for setting a restriction list of headers to process */
+	  headers_to_include_in(Options.get("Headers-to-include-in", "")),
+	  /** Check option for setting a header exclusion list */
+          headers_to_exclude_from(Options.get("Headers-to-exclude-from", "oraca,sqlca")),
+	  /** Check option for setting a list include directories */
+	  headers_directories(Options.get("Headers-directories", ""))
+      {
+	// Init toIncludein value from the tokenization of the
+	// headers_to_include_in option value
+	if (!headers_to_include_in.empty())
+	  toIncludeIn = tokenizeString(headers_to_include_in, ",;:");
+	
+	// Init toExcludeFrom value from the tokenization of the
+	// headers_to_exclude_from option value
+	if (!headers_to_exclude_from.empty())
+	  toExcludeFrom = tokenizeString(headers_to_exclude_from, ",;:");
+
+	// Init headersDirectories value from the tokenization of the
+	// headers_directories option value
+	if (!headers_directories.empty())
+	  headersDirectories = tokenizeString(headers_directories, ",;:");
+      }
       
+      /**
+       * storeOptions
+       *
+       * @brief Store options for this check
+       *
+       * This check support one option for customizing comment regex 
+       * - Comment-regex
+       *
+       * @param Opts	The option map in which to store supported options
+       */
+      void
+      DeIncludePreProC::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      {
+	Options.store(Opts, "Comment-regex", comment_regex);
+	Options.store(Opts, "Headers-to-include-in", headers_to_include_in);
+	Options.store(Opts, "Headers-to-exclude-from", headers_to_exclude_from);
+	Options.store(Opts, "Headers-directories", headers_directories);
+      }
+
       /**
        * registerMatchers
        *
@@ -81,21 +139,22 @@ namespace clang
       void 
       DeIncludePreProC::registerMatchers(MatchFinder *Finder) 
       {
-	/* Add a matcher for finding compound statements starting */
-	/* with a sqlstm variable declaration */
-        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt().bind("proCBlock")))),
-				   hasName("sqlstm"))
+	/* Add a matcher for finding the translation unit */
+	/* This is just a trick to be called once per file */
+	/* The translation unit is also available through ASTContext */
+	/* Rest of processing is based on a custom navigation through comments */
+        Finder->addMatcher(translationUnitDecl().bind("translation_unit")
 			   , this);
       }
       
-      /*
+      /**
        * emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
        *
        * This method is called each time a statement to handle (rewrite) is found.
-       * One replacement will be emited for eachnode found.
+       * One replacement will be emited for each node found.
        * It is passed all necessary arguments for:
        * - creating a comprehensive diagnostic message
        * - computing the locations of code we will replace
@@ -103,12 +162,12 @@ namespace clang
        *
        * @param loc_start       The CompoundStmt start location
        * @param loc_end         The CompoundStmt end location
-       * @param function_name   The function name that will be called
+       * @param hdr_filename    The function name that will be called
        */
       void
       DeIncludePreProC::emitDiagAndFix(const SourceLocation& loc_start,
-					    const SourceLocation& loc_end,
-					    const std::string& function_name)
+				       const SourceLocation& loc_end,
+				       const std::string& hdr_filename)
       {
 	/* Range of the statement to change */
 	SourceRange stmt_range(loc_start, loc_end);
@@ -117,13 +176,14 @@ namespace clang
 	/* Default is a warning, and it is emitted */
 	/* as soon as the diag builder is destroyed */
 	DiagnosticBuilder mydiag = diag(loc_end,
-					"ProC Statement Block shall be replaced"
-					" by a function call named '%0'")
-	  << function_name;
+					"Header file '%0' replaced by a "
+					" standard include")
+	  << hdr_filename;
 
 	/* Replacement code built */
-	std::string replt_code = function_name;
-	replt_code.append(std::string("();"));
+	std::string replt_code = "#include \"";
+	replt_code.append(hdr_filename);
+	replt_code.append("\"");
 
 	/* Emit the replacement over the found statement range */
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
@@ -180,6 +240,51 @@ namespace clang
 	    break;
 	  }
       }
+
+      /**
+       * count_buffer_chars_number
+       *
+       * @brief 		Count characters from char_to_count in the buffer \c buf
+       *
+       * This method allows to count chars in a buffer. It allows to determine, for 
+       * ex., the exact number of lines for computing the exact position of a header
+       * in a source (a header could contain some UTF-8 chars that forbid to calculate
+       * the size of a string from a number of bytes, as a char is variable multibyte)
+       *
+       * @param buf		The buffer in which to count characters in
+       * @param char_to_count	The string containing the characters to be counted
+       *
+       * @return		Number of characters counted from the provided buffer
+       */
+      unsigned int
+      DeIncludePreProC::count_buffer_chars_number (const std::string& buf,
+						   const char* char_to_count)
+      {
+	// Number of found characters
+	std::string::size_type chars = 0;
+	// Position of the found char
+	std::string::size_type pos = -1;
+	// Iterate over the buffer
+	do
+	  {
+	    // Find a character from next position of previous found char
+	    pos = buf.find(char_to_count, pos+1);
+	    // If char was found, ...
+	    if (pos != std::string::npos)
+	      // .. increment the result
+	      chars++;
+	    // or, ...
+	    else
+	      // ... break the loop
+	      break;
+	  }
+	// Iterate until no more char to find. If char is not found
+	// tsd::string returns std::string::npos, that is actually -1
+	while (pos > 0);
+
+	// Return the result
+	return chars;
+      }
       
       /**
        * check
@@ -191,172 +296,151 @@ namespace clang
        * - determining if the found nodes are elligible for rewrite
        * - extracting all necessary informations for computing rewrite 
        *   location and code (find ProC generated comment)
+       * The comment depends on which pre-processoris used. Default value is set
+       * for processing comments created through Oracle ProC.
+       * Customizing the regex is available through \c Comment-regex option.
+       * An example for setting this option is:
+       * {
+       *  key: 
+       *    pagesjaunes-de-include-preproc.Comment-regex, 
+       *  value: 
+       *    '^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$'
+       * }
+       * 
        *
        * @param Result          The match result provided by the recursive visitor
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      DeIncludePreProC::check(const MatchFinder::MatchResult &Result) 
+      DeIncludePreProC::check(const MatchFinder::MatchResult &result) 
       {
-	// Get the compound statement AST node as the bounded var 'proCBlock'
-	const CompoundStmt *stmt = Result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
-	// Get the source manager
-	SourceManager &srcMgr = Result.Context->getSourceManager();
-	DiagnosticsEngine &diagEngine = Result.Context->getDiagnostics();
+	// Comment regular expression for a processed header
+	Regex comment_re(comment_regex);
+	// Translation unit found by matcher
+	const TranslationUnitDecl *translation_unit =
+	  result.Nodes.getNodeAs<TranslationUnitDecl>("translation_unit");
 
-	// Get start/end locations for the statement
-	SourceLocation loc_start = stmt->getLocStart();
-	SourceLocation loc_end = stmt->getLocEnd();
-
-	// Get file ID in src mgr
-	FileID startFid = srcMgr.getFileID(loc_start);
-	// Get compound statement start line num
-	unsigned startLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(loc_start));
-
-	//outs() << "found one result at line " << startLineNum << "\n";
-
-	/*
-	 * iteration from line -2 to line -5 until finding the whole EXEC SQL comment
-	 * comments are MAX_NUMBER_OF_LINE_TO_SEARCH lines max
-	 */
-	// Current line number
-	size_t lineNum = startLineNum-2;
-	// Get end comment loc
-	SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
-	SourceLocation comment_loc_start;
-	// Does error occured while doing getCharacterData 
-	bool errOccured = false;
-	// Get comment C string from the file memory buffer
-	const char *commentCStr = srcMgr.getCharacterData(comment_loc_end, &errOccured);
-	// The line data & comment
-	std::string lineData;
-
-	// Finding loop
-	do
+	// Found a translation unit 
+	if (translation_unit)
 	  {
-	    // All was ok ?
-	    if (!errOccured)
+	    // AST context
+	    ASTContext &ast_ctxt = translation_unit->getASTContext();
+	    // Raw comments list
+	    RawCommentList &raw_comments = ast_ctxt.getRawCommentList();
+	    // Get an array of the comments
+	    ArrayRef<RawComment *> raw_comments_array = raw_comments.getComments();
+
+	    // Filter comments for finding all includes
+	    for (auto cit = raw_comments_array.begin();
+		 cit != raw_comments_array.end();
+		 ++cit)
 	      {
-		// Assign comment C string to line data var
-		lineData.assign(commentCStr);
-		// And remove all remaining chars after end of line
-		lineData.erase (lineData.find("\n", 1), std::string::npos);
-		
-		// Try to get comment start in current line 
-		size_t commentStart = lineData.find("/*");
-		
-		// If found, break the loop
-		if (commentStart != std::string::npos)
-		  break;
-	      }
-	    else
-	      // Error occured at getting char data ! break comment start find loop
-	      break;
+		// Matches result
+		SmallVector<StringRef, 8> matches;
+		// Raw text for the comment
+		std::string raw_text = (*cit)->getRawText(ast_ctxt.getSourceManager()).str();
+		// Raw comment
+		RawComment *raw_comment = (*cit);
+		// Location of the comment start
+		SourceLocation comment_start_loc = raw_comment->getLocStart();
 
-	    // try previous line
-	    lineNum--;
-	    // Get Location for the new current line
-	    comment_loc_start = srcMgr.translateLineCol(startFid, lineNum, 1);
-	    // And get char data again
-	    commentCStr = srcMgr.getCharacterData(comment_loc_start, &errOccured);
-	  }
-	// Try again
-	while (true);
-
-	std::string comment;
-	std::string function_name;
-
-	// If found comment start & no error occured
-	if (!errOccured)
-	  {
-	    // Assign comment char data in the comnt string
-	    comment = std::string(commentCStr);
-
-	    /*
-	     * Erase from end of comment to end of data
-	     */
-
-	    // Find end of comment
-	    size_t endCommentPos = comment.find("*/", 1);
-	    // Erase until end of character data
-	    comment.erase (endCommentPos +2, std::string::npos);
-
-	    /*
-	     * Remove all \n
-	     */
-	    
-	    // Find CR from start in comment
-	    size_t crpos = comment.find("\n", 0);
-	    // Iterate
-	    do
-	      {
-		// If one has been found
-		if (crpos != std::string::npos)
+		// If comment matches
+		if (comment_re.match(raw_text, &matches))
 		  {
-		    // Erase CR
-		    comment.erase(crpos, 1);
+		    // Header file name
+		    std::string header_name = matches[1].str();
+
+		    if ((toIncludeIn.empty() ||
+			 contain(toIncludeIn, header_name)) &&
+			(toExcludeFrom.empty() ||
+			 !contain(toExcludeFrom, header_name)))
+		      {
+			std::string raw_txt = raw_comment->getRawText(ast_ctxt.getSourceManager()).str();
+			raw_text.erase(raw_text.find("*/")+2,std::string::npos);
+			unsigned raw_text_len = raw_text.length();
+
+			SourceManager &src_mgr = ast_ctxt.getSourceManager();
+			FileManager &file_mgr = src_mgr.getFileManager();
+			FileID fid = src_mgr.getMainFileID();
+
+			const FileEntry *hdr_fentry = nullptr;
+			for (auto it = headersDirectories.begin();
+			     it != headersDirectories.end();
+			     ++it)
+			  {
+			    std::string hdr_dir = (*it).append("/");
+			    hdr_fentry = file_mgr.getFile(hdr_dir.append(header_name), true);
+			    if (hdr_fentry)
+			      break;
+			  }
+			// Found hdr file included here
+			if (hdr_fentry)
+			  {
+			    auto buf = src_mgr.getMemoryBufferForFile(hdr_fentry);
+			    const char *pbuf = buf->getBufferStart();
+			    std::string pbufstr = std::string(pbuf);
+
+			    unsigned int hdr_lines = count_buffer_chars_number(pbufstr, "\n");
+			    // Get location of start of included hdr file
+			    unsigned comment_start_file_offset = src_mgr.getFileOffset(comment_start_loc);
+			    unsigned comment_end_file_offset = comment_start_file_offset + raw_text_len -1;
+			    unsigned comment_end_line_number = src_mgr.getLineNumber(fid, comment_end_file_offset+1);
+			    unsigned hdr_start_line_number = comment_end_line_number +1;
+			    unsigned hdr_end_line_number = hdr_start_line_number + hdr_lines -1;
+			    // outs() << "Hdr start line number = " << hdr_start_line_number << "\n";
+			    // outs() << "Hdr end line number = " << hdr_end_line_number << "\n";
+			    SourceLocation hdr_start = src_mgr.translateLineCol(fid, hdr_start_line_number, 1);
+			    SourceLocation hdr_end = src_mgr.translateLineCol(fid, hdr_end_line_number, 1);
+
+			    emitDiagAndFix(hdr_start, hdr_end,
+					   header_name);
+			  }
+		      }
 		  }
-		// Find again CR
-		crpos = comment.find("\n", 0);
+		    
 	      }
-	    // Until no more is found
-	    while (crpos != std::string::npos);
-
-	    //outs() << "comment for block at line #" << startLineNum << ": " << comment << "\n";
-	    
-	    /*
-	     * Create function call for the request
-	     */
-
-	    // Regex for processing comment
-	    Regex reqRe("^.*EXEC SQL[ \t]+([A-Za-z]+)[ \t]+([A-Za-z]+).*;.*$");
-	    // Returned matches
-	    SmallVector<StringRef, 8> matches;
-
-	    // If comment match
-	    if (reqRe.match(comment, &matches))
-	      {
-		// Start at first match ($0 is the whole match)
-		auto it = matches.begin();
-		// Skip it
-		it++;
-		//outs() << "match #1  = '" << (*it).str() << "'\n";
-		// Append first match (action) to function name
-		function_name.append((*it).lower());
-		// Get next match
-		it++;
-		//outs() << "match #2  = '" << (*it).str() << "'\n";
-		// Get match in rest string
-		std::string rest((*it).str());
-		// Capitalize it
-		rest[0] &= ~0x20;
-		// And append to function name
-		function_name.append(rest);
-
-		// Got it, emit changes
-		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
-
-		// Emit errors, warnings and fixes
-		emitDiagAndFix(loc_start, loc_end, function_name);
-	      }
-	    else
-	      emitError(diagEngine,
-			comment_loc_start,
-			DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_COMMENT_DONT_MATCH);
-	  }
-	else
-	  {
-	    if (errOccured)
-	      emitError(diagEngine,
-			loc_start,
-			DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_ACCESS_CHAR_DATA);
-
-	    else
-	      emitError(diagEngine,
-			comment_loc_end,
-			DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_CANT_FIND_COMMENT_START);
 	  }
       }
+
+      /**
+       * 
+       */
+      bool
+      DeIncludePreProC::contain(std::vector<std::string>& set,
+				std::string& str)
+      {
+	for (auto it = set.begin();
+	     it != set.end();
+	     ++it)
+	  {
+	    if (str.compare((*it)) == 0)
+	      return true;
+	  }
+	return false;
+      }
+
+      /**
+       *
+       */
+      std::vector<std::string>
+      DeIncludePreProC::tokenizeString(const std::string& str,
+				       const std::string& delims)
+	{
+	  std::vector<std::string> tokens;
+
+	  std::string::size_type lastPos = str.find_first_not_of(delims, 0);
+	  std::string::size_type pos = str.find_first_of(delims, lastPos);
+
+	  while (pos != std::string::npos ||
+		 lastPos != std::string::npos)
+	    {
+	      tokens.push_back(str.substr(lastPos, pos - lastPos));
+	      lastPos = str.find_first_not_of(delims, pos);
+	      pos = str.find_first_of(delims, lastPos);
+	    }
+	  return tokens;
+	}
+      
     } // namespace pagesjaunes
   } // namespace tidy
 } // namespace clang

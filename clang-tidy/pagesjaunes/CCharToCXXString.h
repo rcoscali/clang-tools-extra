@@ -39,8 +39,11 @@ namespace clang
       public:
 	CCharToCXXString(StringRef Name, ClangTidyContext *Context);
 
+	// Store check options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+	// Register the AST matchers used for finding nodes
 	void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+	// Callback calkled with each found node
 	void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
       private:

@@ -83,7 +83,17 @@ namespace clang
       {}
 
       /**
+       * storeOptions
        *
+       * @brief Store options for this check
+       *
+       * This check support three options for enabling/disabling each
+       * call processing:
+       * - Handle-strcpy: allowsto enable/disable processing of strcpy
+       * - Handle-strcmp: allowsto enable/disable processing of strcmp
+       * - Handle-strlen: allowsto enable/disable processing of strlen
+       *
+       * @param Opts	The option map in which to store supported options
        */
       void
       CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts)
