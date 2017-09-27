@@ -386,7 +386,7 @@ namespace clang
 			    unsigned comment_end_file_offset = comment_start_file_offset + raw_text_len -1;
 			    unsigned comment_end_line_number = src_mgr.getLineNumber(fid, comment_end_file_offset+1);
 			    unsigned hdr_start_line_number = comment_end_line_number +1;
-			    unsigned hdr_end_line_number = hdr_start_line_number + hdr_lines -1;
+			    unsigned hdr_end_line_number = hdr_start_line_number + hdr_lines;
 			    // outs() << "Hdr start line number = " << hdr_start_line_number << "\n";
 			    // outs() << "Hdr end line number = " << hdr_end_line_number << "\n";
 			    SourceLocation hdr_start = src_mgr.translateLineCol(fid, hdr_start_line_number, 1);
