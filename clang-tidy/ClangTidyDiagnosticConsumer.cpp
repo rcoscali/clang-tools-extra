@@ -218,6 +218,16 @@ void ClangTidyContext::setASTContext(ASTContext *Context) {
   LangOpts = Context->getLangOpts();
 }
 
+void ClangTidyContext::setToolPtr(ClangTool *tool)
+{
+  m_tool = tool;
+}
+
+ClangTool *ClangTidyContext::getToolPtr(void)
+{
+  return m_tool;
+}
+
 const ClangTidyGlobalOptions &ClangTidyContext::getGlobalOptions() const {
   return OptionsProvider->getGlobalOptions();
 }

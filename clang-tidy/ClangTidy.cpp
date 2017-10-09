@@ -478,6 +478,8 @@ void runClangTidy(clang::tidy::ClangTidyContext &Context,
                   ArrayRef<std::string> InputFiles, ProfileData *Profile) {
   ClangTool Tool(Compilations, InputFiles);
 
+  Context.setToolPtr(&Tool);
+
   // Add extra arguments passed by the clang-tidy command-line.
   ArgumentsAdjuster PerFileExtraArgumentsInserter =
       [&Context](const CommandLineArguments &Args, StringRef Filename) {
