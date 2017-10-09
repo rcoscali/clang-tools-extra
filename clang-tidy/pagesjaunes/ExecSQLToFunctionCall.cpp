@@ -7,6 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <iostream>
+#include <fstream>
+
 #include "ExecSQLToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
@@ -62,8 +65,39 @@ namespace clang
 	  /** Cannot parse comment as a ProC SQL rqt statement */
 	  comment_dont_match_diag_id(Context->
 				     getCustomDiagID(DiagnosticsEngine::Error,
-						     "Couldn't match ProC comment for function name creation!"))
+						     "Couldn't match ProC comment for function name creation!")),
+	  generate_req_headers(Options.get("Generate-requests-headers", false)),
+	  generate_req_sources(Options.get("Generate-requests-sources", false)),
+	  generation_directory(Options.get("Generation-directory", "./")),
+	  generation_header_template(Options.get("Generation-header-template", "./pagesjaunes.h.tmpl")),
+	  generation_source_template(Options.get("Generation-source-template", "./pagesjaunes.pc.tmpl"))
+	  generation_prepare_header_template(Options.get("Generation-prepare-header-template", "./pagesjaunes_prepare.h.tmpl")),
+	  generation_prepare_source_template(Options.get("Generation-prepare-source-template", "./pagesjaunes_prepare.pc.tmpl"))
       {}
+      
+      /**
+       * storeOptions
+       *
+       * @brief Store options for this check
+       *
+       * This check support one option for customizing comment regex 
+       * - Generate-requests-headers
+       * - Generate-requests-sources
+       * - Generation-directory
+       * - Generation-header-template
+       * - Generation-source-template
+       *
+       * @param Opts	The option map in which to store supported options
+       */
+      void
+      ExecSQLToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      {
+	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
+	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
+	Options.store(Opts, "Generation-directory", generation_directory);
+	Options.store(Opts, "Generation-header-template", generation_header_template);
+	Options.store(Opts, "Generation-source-template", generation_source_template);
+      }
       
       /**
        * registerMatchers
@@ -83,7 +117,7 @@ namespace clang
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
-        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt().bind("proCBlock")))),
+        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl()/*.bind("function")*/)).bind("proCBlock")))),
 				   hasName("sqlstm"))
 			   , this);
       }
@@ -128,6 +162,102 @@ namespace clang
 	/* Emit the replacement over the found statement range */
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
       }
+
+      /**
+       *
+       * Generate source file for request
+       */
+      void
+      ExecSQLToFunctionCall::doRequestSourceGeneration(std::map<std::string, std::string> values_map)
+      {
+	std::filebuf fbi, fbo;
+	std::string fileName = values_map["@RequestFunctionName@"];
+	fileName.append(".cpp");
+	fileName.insert(0, "/");
+	fileName.insert(0, generation_directory);
+	if (fbi.open(generation_source_template, std::ios::in))
+	  {
+	    if (fbo.open(fileName, std::ios::out))
+	      {
+		std::istream is(&fbi);
+		std::ostream os(&fbo);
+
+		while (is)
+		  {
+		    char buf[255];
+		    is.getline(buf, 255);
+		    std::string aline = buf;
+		    for (auto it = values_map.begin();
+			 it != values_map.end();
+			 ++it)
+		      {
+			size_t pos = 0;
+			do
+			  {
+			    if ((pos = aline.find(it->first, pos)) != std::string::npos)
+			      {
+				aline.erase(pos, it->first.length());
+				aline.insert(pos, it->second);
+			      }
+			  }
+			while (pos != std::string::npos);
+		      }
+		    
+		    os << aline << std::endl;
+		  }
+		fbo.close();
+	      }
+	    fbi.close();
+	  }
+      }
+      
+      /**
+       *
+       * Generate header file for request
+       */
+      void ExecSQLToFunctionCall::doRequestHeaderGeneration(std::map<std::string, std::string> values_map)
+      {	
+	std::filebuf fbi, fbo;
+	std::string fileName = values_map["@RequestFunctionName@"];
+	fileName.append(".h");
+	fileName.insert(0, "/");
+	fileName.insert(0, generation_directory);
+	if (fbi.open(generation_header_template, std::ios::in))
+	  {
+	    if (fbo.open(fileName, std::ios::out))
+	      {
+		std::istream is(&fbi);
+		std::ostream os(&fbo);
+
+		while (is)
+		  {
+		    char buf[255];
+		    is.getline(buf, 255);
+		    std::string aline = buf;
+		    for (auto it = values_map.begin();
+			 it != values_map.end();
+			 ++it)
+		      {
+			size_t pos = 0;
+			do
+			  {
+			    if ((pos = aline.find(it->first, pos)) != std::string::npos)
+			      {
+				aline.erase(pos, it->first.length());
+				aline.insert(pos, it->second);
+			      }
+			  }
+			while (pos != std::string::npos);
+
+		      }
+		    os << aline << std::endl;			 
+		  }
+		fbo.close();
+	      }
+	    fbi.close();
+	  }
+      }
+	
 
       
       /**
@@ -198,11 +328,19 @@ namespace clang
       void
       ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
-	// Get the compound statement AST node as the bounded var 'proCBlock'
-	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
 	// Get the source manager
 	SourceManager &srcMgr = result.Context->getSourceManager();
 	DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
+	ClangTool *tool = TidyContext->getToolPtr();
+
+	/*
+	 * Init check context
+	 * ------------------
+	 */
+	
+	// Get the compound statement AST node as the bounded var 'proCBlock'
+	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
+	//const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
 
 	// Get start/end locations for the statement
 	SourceLocation loc_start = stmt->getLocStart();
@@ -213,25 +351,41 @@ namespace clang
 	// Get compound statement start line num
 	unsigned startLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(loc_start));
 
-	//outs() << "found one result at line " << startLineNum << "\n";
+	outs() << "Found one result at line " << startLineNum << "\n";
+	outs() << "Generate_req_headers: " << (generate_req_headers ? "true" : "false") << "\n";
+	outs() << "Generate_req_sources: " << (generate_req_sources ? "true" : "false") << "\n";
+	outs() << "Generation_directory: '" << generation_directory << "'\n";
+	outs() << "Generation_header_template: '" << generation_header_template << "'\n";
+	outs() << "Generation_source_template: '" << generation_source_template << "'\n";
 
 	/*
-	 * iteration from line -2 to line -5 until finding the whole EXEC SQL comment
+	 * Find the comment for the EXEC SQL statement
+	 * -------------------------------------------
+	 *
+	 * Iterate from line -2 to line -5 until finding the whole EXEC SQL comment
 	 * comments are MAX_NUMBER_OF_LINE_TO_SEARCH lines max
 	 */
+	
 	// Current line number
 	size_t lineNum = startLineNum-2;
+	
 	// Get end comment loc
 	SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
 	SourceLocation comment_loc_start;
+	
 	// Does error occured while doing getCharacterData 
 	bool errOccured = false;
+	
 	// Get comment C string from the file memory buffer
 	const char *commentCStr = srcMgr.getCharacterData(comment_loc_end, &errOccured);
+	
 	// The line data & comment
 	std::string lineData;
 
-	// Finding loop
+	/*
+	 * Finding loop
+	 * ------------
+	 */
 	do
 	  {
 	    // All was ok ?
@@ -249,6 +403,7 @@ namespace clang
 		if (commentStart != std::string::npos)
 		  break;
 	      }
+	    
 	    else
 	      // Error occured at getting char data ! break comment start find loop
 	      break;
@@ -263,6 +418,9 @@ namespace clang
 	// Try again
 	while (true);
 
+	/*
+	 * Comment found
+	 */
 	std::string comment;
 	std::string function_name;
 
@@ -278,15 +436,17 @@ namespace clang
 
 	    // Find end of comment
 	    size_t endCommentPos = comment.find("*/", 1);
+	    
 	    // Erase until end of character data
 	    comment.erase (endCommentPos +2, std::string::npos);
 
 	    /*
-	     * Remove all \n
+	     * Remove all \n from comment
 	     */
 	    
 	    // Find CR from start in comment
 	    size_t crpos = comment.find("\n", 0);
+
 	    // Iterate
 	    do
 	      {
@@ -302,19 +462,104 @@ namespace clang
 	    // Until no more is found
 	    while (crpos != std::string::npos);
 
-	    //outs() << "comment for block at line #" << startLineNum << ": " << comment << "\n";
-	    
+	    outs() << "comment for block at line #" << startLineNum << ": '" << comment << "'\n";
+
 	    /*
 	     * Create function call for the request
 	     */
 
-	    // Regex for processing comment
-	    Regex reqRe("^.*EXEC SQL[ \t]+([A-Za-z]+)[ \t]+([A-Za-z]+).*;.*$");
+	    // Regex for processing comment for all remaining requests
+	    Regex reqRe("^.*EXEC SQL[ \t]+([A-Za-z]+)[ \t]+([A-Za-z0-9]+).*;.*$");
+	    
+	    // Regex for processing PREPARE comment
+	    Regex reqRePrep("^.*EXEC SQL[ \t]+(prepare|PREPARE)[ \t]+([A-Za-z0-9]+)[ \t]+from[ \t]+:([A-Za-z]+);.*$");
+	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
 
 	    // If comment match
-	    if (reqRe.match(comment, &matches))
+	    if (reqRePrep.match(comment, &matches))
+	      {
+		outs() << "!!!*** Prep comment match: from request name is '" << matches[3] << "' and request name is '"<< matches[2] << "'\n";
+
+		/*
+		 * Find the request literal
+		 */
+		
+		// The request name used in ProC (syntax :reqName)
+		std::string fromReqName = matches[3];
+		std::string reqName = matches[2];
+		
+		// Statement matcher for the request string literal	
+		StatementMatcher m_matcher = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
+						      hasArgument(0,
+								  declRefExpr(hasDeclaration(namedDecl(hasName(fromReqName.c_str()))))),
+						      hasArgument(1,
+								  stringLiteral().bind("reqLiteral"))).bind("callExpr");
+		
+
+		CopyRequestMatcher crMatcher(this);
+		MatchFinder finder;
+		finder.addMatcher(m_matcher, &crMatcher);
+		m_req_copy_collector.clear();
+		tool->run(newFrontendActionFactory(&finder).get());
+		struct StringLiteralRecord *lastRecord = (struct StringLiteralRecord *)NULL;
+		for (auto it = m_req_copy_collector.begin();
+		     it != m_req_copy_collector.end();
+		     ++it)
+		  {
+		    struct StringLiteralRecord *record = (*it);
+		    if (record->call_linenum > startLineNum)
+		      break;
+		    lastRecord = record;
+		  }
+
+		std::string requestDefineValue;
+		
+		if (lastRecord)
+		  {
+		    outs() << "Found literal at line #" << lastRecord->linenum << ": '" << lastRecord->literal->getString() << "'\n";
+		    outs() << "     for a call at line #" << lastRecord->call_linenum << "'\n";
+		    requestDefineValue.assign(lastRecord->literal->getString());
+		  }
+
+		function_name.append("prepare");
+		// Get match in rest string
+		std::string rest(reqName);
+		// Capitalize it
+		rest[0] &= ~0x20;
+		// And append to function name
+		function_name.append(rest);
+
+		std::string requestExecSql = "prepare ";
+		requestExecSql.append(reqName);
+		requestExecSql.append(" from :");
+		requestExecSql.append(fromReqName);
+
+		if (generate_req_headers)
+		  {
+		    std::map<std::string, std::string> values_map;
+		    values_map["@RequestFunctionName@"] = function_name;
+		    doRequestHeaderGeneration(values_map);
+		  }
+
+		if (generate_req_sources)
+		  {
+		    std::map<std::string, std::string> values_map;
+		    values_map["@FromRequestName@"] = fromReqName;
+		    values_map["@RequestDefineName@"] = reqName;
+		    values_map["@RequestDefineValue@"] = requestDefineValue;
+		    values_map["@RequestFunctionName@"] = function_name;
+		    values_map["@RequestExecSql@"] = requestExecSql;
+		    doRequestSourceGeneration(values_map);
+		  }
+
+		// Emit errors, warnings and fixes
+		emitDiagAndFix(loc_start, loc_end, function_name);
+	      }
+	    
+	    // If comment match
+	    else if (reqRe.match(comment, &matches))
 	      {
 		// Start at first match ($0 is the whole match)
 		auto it = matches.begin();
@@ -335,6 +580,20 @@ namespace clang
 
 		// Got it, emit changes
 		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
+
+		if (generate_req_headers)
+		  {
+		    std::map<std::string, std::string> values_map;
+		    values_map["@RequestFunctionName@"] = function_name;
+		    doRequestHeaderGeneration(values_map);
+		  }
+
+		if (generate_req_sources)
+		  {
+		    std::map<std::string, std::string> values_map;
+		    values_map["@RequestFunctionName@"] = function_name;
+		    doRequestSourceGeneration(values_map);
+		  }
 
 		// Emit errors, warnings and fixes
 		emitDiagAndFix(loc_start, loc_end, function_name);
