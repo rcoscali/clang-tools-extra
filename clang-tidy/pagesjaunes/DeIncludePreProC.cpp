@@ -111,6 +111,9 @@ namespace clang
        *
        * This check support one option for customizing comment regex 
        * - Comment-regex
+       * - Headers-to-include-in
+       * - Headers-to-exclude-from
+       * - Headers-directories
        *
        * @param Opts	The option map in which to store supported options
        */
