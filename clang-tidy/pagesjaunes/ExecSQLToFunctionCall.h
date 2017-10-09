@@ -17,6 +17,7 @@
 
 using namespace clang;
 using namespace clang::ast_matchers;
+using string2_map = std::map<std::string, std::string>;
 
 namespace clang 
 {
@@ -92,13 +93,13 @@ namespace clang
 
 	enum ExecSQLToFunctionCallErrorKind
 	  {
-	    //
+	    // Error kind for no error
 	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
-	    //
+	    // Error kind for 
 	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
-	    //
+	    // Error kind for 
 	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
-	    //
+	    // Error kind for 
 	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
 	  };
 
@@ -108,10 +109,10 @@ namespace clang
 			    const std::string&);
 
 	// Generate source file for request
-	void doRequestSourceGeneration(std::map<std::string, std::string>);
+	void doRequestSourceGeneration(const std::string&, string2_map&);
 
 	// Generate header file for request
-	void doRequestHeaderGeneration(std::map<std::string, std::string>);
+	void doRequestHeaderGeneration(const std::string&, string2_map&);
 	
 	// Emit error
 	void emitError(DiagnosticsEngine&,
@@ -120,15 +121,15 @@ namespace clang
 
 	// AST Context instance
 	ClangTidyContext *TidyContext;
-	// Diag ids
+	// Diag id for unexpected error
 	const unsigned unexpected_diag_id;
-	// Diag ids
+	// Diag id for no error
 	const unsigned no_error_diag_id;
-	// Diag ids
+	// Diag id for access char data error
 	const unsigned access_char_data_diag_id;
-	// Diag ids
+	// Diag id for cannot find comment error
 	const unsigned cant_find_comment_diag_id;
-	// Diag ids
+	// Diag id for comment do not match error
 	const unsigned comment_dont_match_diag_id;
 
 	/*
@@ -144,6 +145,10 @@ namespace clang
 	const std::string generation_header_template;
 	// Request source template (default: "./pagesjaunes.pc.tmpl")
 	const std::string generation_source_template;
+	// Request header template for prepare requests (default: "./pagesjaunes_prepare.h.tmpl")
+	const std::string generation_prepare_header_template;
+	// Request source template for prepare requests (default: "./pagesjaunes_prepare.pc.tmpl")
+	const std::string generation_prepare_source_template;
       };
 
     } // namespace pagesjaunes

@@ -66,13 +66,30 @@ namespace clang
 	  comment_dont_match_diag_id(Context->
 				     getCustomDiagID(DiagnosticsEngine::Error,
 						     "Couldn't match ProC comment for function name creation!")),
-	  generate_req_headers(Options.get("Generate-requests-headers", false)),
-	  generate_req_sources(Options.get("Generate-requests-sources", false)),
-	  generation_directory(Options.get("Generation-directory", "./")),
-	  generation_header_template(Options.get("Generation-header-template", "./pagesjaunes.h.tmpl")),
-	  generation_source_template(Options.get("Generation-source-template", "./pagesjaunes.pc.tmpl"))
-	  generation_prepare_header_template(Options.get("Generation-prepare-header-template", "./pagesjaunes_prepare.h.tmpl")),
-	  generation_prepare_source_template(Options.get("Generation-prepare-source-template", "./pagesjaunes_prepare.pc.tmpl"))
+	  /*
+	   * Options
+	   */
+	  /// Generate requests header files (bool)
+	  generate_req_headers(Options.get("Generate-requests-headers",
+					   false)),
+	  /// Generate requests source files (bool)
+	  generate_req_sources(Options.get("Generate-requests-sources",
+					   false)),
+	  /// Generation directory (string)
+	  generation_directory(Options.get("Generation-directory",
+					   "./")),
+	  /// Generation header default template (string)
+	  generation_header_template(Options.get("Generation-header-template",
+						 "./pagesjaunes.h.tmpl")),
+	  /// Generation source default template (string)
+	  generation_source_template(Options.get("Generation-source-template",
+						 "./pagesjaunes.pc.tmpl")),
+	  /// Generation header template for prepare requests (string)
+	  generation_prepare_header_template(Options.get("Generation-prepare-header-template",
+							 "./pagesjaunes_prepare.h.tmpl")),
+	  /// Generation source template for prepare requests (string)
+	  generation_prepare_source_template(Options.get("Generation-prepare-source-template",
+							 "./pagesjaunes_prepare.pc.tmpl"))
       {}
       
       /**
@@ -86,6 +103,8 @@ namespace clang
        * - Generation-directory
        * - Generation-header-template
        * - Generation-source-template
+       * - Generation-prepare-header-template
+       * - Generation-prepare-source-template
        *
        * @param Opts	The option map in which to store supported options
        */
@@ -97,6 +116,8 @@ namespace clang
 	Options.store(Opts, "Generation-directory", generation_directory);
 	Options.store(Opts, "Generation-header-template", generation_header_template);
 	Options.store(Opts, "Generation-source-template", generation_source_template);
+	Options.store(Opts, "Generation-prepare-header-template", generation_prepare_header_template);
+	Options.store(Opts, "Generation-prepare-source-template", generation_prepare_source_template);
       }
       
       /**
@@ -117,7 +138,7 @@ namespace clang
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
-        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl()/*.bind("function")*/)).bind("proCBlock")))),
+        Finder->addMatcher(varDecl(hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl().bind("function"))).bind("proCBlock")))),
 				   hasName("sqlstm"))
 			   , this);
       }
@@ -164,18 +185,24 @@ namespace clang
       }
 
       /**
+       * ExecSQLToFunctionCall::doRequestSourceGeneration
        *
-       * Generate source file for request
+       * @brief Generate source file for request from template
+       *
+       * @param[in] tmpl         Template file pathname
+       * @param[in] values_map   Map containing values for replacement strings
+       *
        */
       void
-      ExecSQLToFunctionCall::doRequestSourceGeneration(std::map<std::string, std::string> values_map)
+      ExecSQLToFunctionCall::doRequestSourceGeneration(const std::string& tmpl,
+						       string2_map& values_map)
       {
 	std::filebuf fbi, fbo;
 	std::string fileName = values_map["@RequestFunctionName@"];
 	fileName.append(".cpp");
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
-	if (fbi.open(generation_source_template, std::ios::in))
+	if (fbi.open(tmpl, std::ios::in))
 	  {
 	    if (fbo.open(fileName, std::ios::out))
 	      {
@@ -215,14 +242,15 @@ namespace clang
        *
        * Generate header file for request
        */
-      void ExecSQLToFunctionCall::doRequestHeaderGeneration(std::map<std::string, std::string> values_map)
+      void ExecSQLToFunctionCall::doRequestHeaderGeneration(const std::string& tmpl,
+							    string2_map& values_map)
       {	
 	std::filebuf fbi, fbo;
 	std::string fileName = values_map["@RequestFunctionName@"];
 	fileName.append(".h");
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
-	if (fbi.open(generation_header_template, std::ios::in))
+	if (fbi.open(tmpl, std::ios::in))
 	  {
 	    if (fbo.open(fileName, std::ios::out))
 	      {
@@ -340,7 +368,7 @@ namespace clang
 	
 	// Get the compound statement AST node as the bounded var 'proCBlock'
 	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
-	//const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
+	const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
 
 	// Get start/end locations for the statement
 	SourceLocation loc_start = stmt->getLocStart();
@@ -490,32 +518,42 @@ namespace clang
 		std::string fromReqName = matches[3];
 		std::string reqName = matches[2];
 		
-		// Statement matcher for the request string literal	
-		StatementMatcher m_matcher = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
-						      hasArgument(0,
-								  declRefExpr(hasDeclaration(namedDecl(hasName(fromReqName.c_str()))))),
-						      hasArgument(1,
-								  stringLiteral().bind("reqLiteral"))).bind("callExpr");
-		
+		// Statement matcher for the request string literal
+                DeclarationMatcher m_matcher
+		  = functionDecl(hasDescendant(
+                        callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
+                            hasArgument(0,
+                                declRefExpr(hasDeclaration(namedDecl(hasName(fromReqName.c_str()))))),
+                            hasArgument(1,
+                                stringLiteral().bind("reqLiteral"))).bind("callExpr")),
+                        hasName(curFunc->getNameAsString()));
 
+		// Prepare matcher finder for our customized matcher
 		CopyRequestMatcher crMatcher(this);
 		MatchFinder finder;
 		finder.addMatcher(m_matcher, &crMatcher);
+		// Clear collector vector
 		m_req_copy_collector.clear();
+		// Run the visitor pattern for collecting matches
 		tool->run(newFrontendActionFactory(&finder).get());
+		// The collected records
 		struct StringLiteralRecord *lastRecord = (struct StringLiteralRecord *)NULL;
+		// Let's iterate over all collected matches
 		for (auto it = m_req_copy_collector.begin();
 		     it != m_req_copy_collector.end();
 		     ++it)
 		  {
+		    // And find the one just before the ProC statement
 		    struct StringLiteralRecord *record = (*it);
 		    if (record->call_linenum > startLineNum)
 		      break;
+		    // Didn't find yet
 		    lastRecord = record;
 		  }
 
 		std::string requestDefineValue;
-		
+
+		// Last record collected just before the ProC statement
 		if (lastRecord)
 		  {
 		    outs() << "Found literal at line #" << lastRecord->linenum << ": '" << lastRecord->literal->getString() << "'\n";
@@ -523,7 +561,8 @@ namespace clang
 		    requestDefineValue.assign(lastRecord->literal->getString());
 		  }
 
-		function_name.append("prepare");
+		// Compute function name
+		function_name.assign("prepare");
 		// Get match in rest string
 		std::string rest(reqName);
 		// Capitalize it
@@ -531,6 +570,7 @@ namespace clang
 		// And append to function name
 		function_name.append(rest);
 
+		// 'EXEC SQL' statement
 		std::string requestExecSql = "prepare ";
 		requestExecSql.append(reqName);
 		requestExecSql.append(" from :");
@@ -538,20 +578,22 @@ namespace clang
 
 		if (generate_req_headers)
 		  {
-		    std::map<std::string, std::string> values_map;
+		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = function_name;
-		    doRequestHeaderGeneration(values_map);
+		    doRequestHeaderGeneration(generation_prepare_header_template,
+					      values_map);
 		  }
 
 		if (generate_req_sources)
 		  {
-		    std::map<std::string, std::string> values_map;
+		    string2_map values_map;
 		    values_map["@FromRequestName@"] = fromReqName;
 		    values_map["@RequestDefineName@"] = reqName;
 		    values_map["@RequestDefineValue@"] = requestDefineValue;
 		    values_map["@RequestFunctionName@"] = function_name;
 		    values_map["@RequestExecSql@"] = requestExecSql;
-		    doRequestSourceGeneration(values_map);
+		    doRequestSourceGeneration(generation_prepare_source_template,
+					      values_map);
 		  }
 
 		// Emit errors, warnings and fixes
@@ -583,16 +625,18 @@ namespace clang
 
 		if (generate_req_headers)
 		  {
-		    std::map<std::string, std::string> values_map;
+		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = function_name;
-		    doRequestHeaderGeneration(values_map);
+		    doRequestHeaderGeneration(generation_header_template,
+					      values_map);
 		  }
 
 		if (generate_req_sources)
 		  {
-		    std::map<std::string, std::string> values_map;
+		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = function_name;
-		    doRequestSourceGeneration(values_map);
+		    doRequestSourceGeneration(generation_source_template,
+					      values_map);
 		  }
 
 		// Emit errors, warnings and fixes
