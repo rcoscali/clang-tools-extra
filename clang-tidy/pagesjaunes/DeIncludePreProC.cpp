@@ -60,23 +60,23 @@ namespace clang
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
 	  /** Unexpected error occured */
-	  unexpected_diag_id(Context->
+	  unexpected_diag_id(Context->getASTContext()->getDiagnostics().
 			     getCustomDiagID(DiagnosticsEngine::Warning,
 					     "Unexpected error occured?!")),
 	  /** No error diag id: never thrown */
-	  no_error_diag_id(Context->
+	  no_error_diag_id(Context->getASTContext()->getDiagnostics().
 			   getCustomDiagID(DiagnosticsEngine::Ignored,
 					   "No error")),
 	  /** Access error diag id: Access char data error occured */
-	  access_char_data_diag_id(Context->
+	  access_char_data_diag_id(Context->getASTContext()->getDiagnostics().
 				   getCustomDiagID(DiagnosticsEngine::Error,
 						   "Couldn't access character data in file cache memory buffers!")),
 	  /** Comment parse diag id: Cannot find comment error */
-	  cant_find_comment_diag_id(Context->
+	  cant_find_comment_diag_id(Context->getASTContext()->getDiagnostics().
 				    getCustomDiagID(DiagnosticsEngine::Error,
 						    "Couldn't find ProC comment start! This result has been discarded!")),
 	  /** Diag ID for parse comment error: Cannot parse it as a ProC SQL rqt statement */
-	  comment_dont_match_diag_id(Context->
+	  comment_dont_match_diag_id(Context->getASTContext()->getDiagnostics().
 				     getCustomDiagID(DiagnosticsEngine::Error,
 						     "Couldn't match ProC comment for function name creation!")),
 	  /** Check option for comment regex */
