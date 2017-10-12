@@ -53,28 +53,28 @@ namespace clang
                                          ClangTidyContext *Context)
         : ClangTidyCheck(Name, Context),
           TidyContext(Context),
-          unexpected_diag_id(Context->
+          unexpected_diag_id(Context->getASTContext()->getDiagnostics().
                              getCustomDiagID(DiagnosticsEngine::Warning,
                                              "Unexpected error occured?!")),
-          no_error_diag_id(Context->
+          no_error_diag_id(Context->getASTContext()->getDiagnostics().
                            getCustomDiagID(DiagnosticsEngine::Ignored,
                                            "No error")),
-          array_type_not_found_diag_id(Context->
+          array_type_not_found_diag_id(Context->getASTContext()->getDiagnostics().
                                        getCustomDiagID(DiagnosticsEngine::Error,
                                                        "Constant Array type was not found!")),
-          record_decl_not_found_diag_id(Context->
+          record_decl_not_found_diag_id(Context->getASTContext()->getDiagnostics().
                                         getCustomDiagID(DiagnosticsEngine::Error,
                                                         "Could not bind the Structure Access expression!")),
-          member_has_no_def_diag_id(Context->
+          member_has_no_def_diag_id(Context->getASTContext()->getDiagnostics().
                                     getCustomDiagID(DiagnosticsEngine::Error,
                                                     "Member has no definition!")),
-          member_not_found_diag_id(Context->
+          member_not_found_diag_id(Context->getASTContext()->getDiagnostics().
                                    getCustomDiagID(DiagnosticsEngine::Error,
                                                    "Could not bind the member expression!")),
-          member2_not_found_diag_id(Context->
+          member2_not_found_diag_id(Context->getASTContext()->getDiagnostics().
                                     getCustomDiagID(DiagnosticsEngine::Error,
                                                     "Could not bind the second member expression!")),
-          unexpected_ast_node_kind_diag_id(Context->
+          unexpected_ast_node_kind_diag_id(Context->getASTContext()->getDiagnostics().
                                            getCustomDiagID(DiagnosticsEngine::Error,
                                                            "Could not process member owning record kind!")),
 	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
