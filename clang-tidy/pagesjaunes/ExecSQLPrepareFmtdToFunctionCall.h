@@ -1,4 +1,4 @@
-//===--- ExecSQLToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ExecSQLPrepareFmtdToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H
 
 #include "../ClangTidy.h"
 #include "llvm/ADT/StringRef.h"
@@ -29,7 +29,7 @@ namespace clang
     {
 
       // Checks that argument name match parameter name rules.
-      class ExecSQLToFunctionCall : public ClangTidyCheck 
+      class ExecSQLPrepareFmtdToFunctionCall : public ClangTidyCheck 
       {
       public:
 	// AST Context instance
@@ -39,28 +39,34 @@ namespace clang
 	{
 	public:
 	  SourceRangeForStringLiterals() {};
-	  SourceRangeForStringLiterals(SourceRange range, StringRef name, StringRef literal)
-	    : m_macro_range(range),
+	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name, StringRef literal)
+	    : m_usage_range(urange),
+	      m_macro_range(mrange),
 	      m_macro_name(name),
 	      m_macro_literal(literal) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
-	  : m_macro_range(to_copy.m_macro_range),
+	  : m_usage_range(to_copy.m_usage_range),
+	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name),
 	    m_macro_literal(to_copy.m_macro_literal) {};	  
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
-	  : m_macro_range(to_copy.m_macro_range),
+	  : m_usage_range(to_copy.m_usage_range),
+	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name),
 	    m_macro_literal(to_copy.m_macro_literal) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
-	  : m_macro_range(to_copy->m_macro_range),
+	  : m_usage_range(to_copy->m_usage_range),
+	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name),
 	    m_macro_literal(to_copy->m_macro_literal) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
-	  : m_macro_range(to_copy->m_macro_range),
+	  : m_usage_range(to_copy->m_usage_range),
+	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name),
 	    m_macro_literal(to_copy->m_macro_literal) {};
 	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
 	  {
+	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
 	    m_macro_literal = to_copy.m_macro_literal;
@@ -68,12 +74,14 @@ namespace clang
 	  }
 	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
 	  {
+	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
 	    m_macro_literal = to_copy.m_macro_literal;
 	    return *this;
 	  }
 	  
+	  SourceRange m_usage_range;
 	  SourceRange m_macro_range;
 	  StringRef m_macro_name;
 	  StringRef m_macro_literal;
@@ -89,10 +97,10 @@ namespace clang
 	    return (l.m_macro_range.getBegin() < r.m_macro_range.getBegin());
 	  }
 	};
-	using source_range_set_t = std::set<SourceRangeForStringLiterals, SourceRangeBefore>;
+	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
 	// Constructor
-	ExecSQLToFunctionCall(StringRef, ClangTidyContext *);
+	ExecSQLPrepareFmtdToFunctionCall(StringRef, ClangTidyContext *);
 
 	// Store check Options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
@@ -102,64 +110,6 @@ namespace clang
 	void registerPPCallbacks(CompilerInstance &Compiler) override;
 	// Check a matched node
 	void check(const ast_matchers::MatchFinder::MatchResult &) override;
-
-      protected:
-	/*
-	 * sprintf finder collector in case of a prepare request
-	 * Literal must be directly copied in the :reqName var
-	 */
-	struct StringLiteralRecord
-	{
-	  const CallExpr *callExpr;
-	  unsigned call_linenum;
-	  const StringLiteral *literal;
-	  unsigned linenum;
-	  const VarDecl *varDecl;
-	  unsigned vardecl_linenum;
-	};
-
-	// Collector for possible sprintf calls
-	std::vector<struct StringLiteralRecord *> m_req_copy_collector;
-	
-      private:
-
-	/**
-	 * CopyRequestMatcher
-	 *
-	 */
-	class CopyRequestMatcher : public MatchFinder::MatchCallback
-	{
-	public:
-	  /// Explicit constructor taking the parent instance as param
-	  explicit CopyRequestMatcher(ExecSQLToFunctionCall *parent)
-	    : m_parent(parent)
-	  {}
-
-	  /// The run method adding all calls in the collection vector
-	  virtual void
-	  run(const MatchFinder::MatchResult &result)
-	  {
-	    struct StringLiteralRecord *record = new(struct StringLiteralRecord);
-	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
-	    record->call_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
-	    record->literal = result.Nodes.getNodeAs<StringLiteral>("reqLiteral");
-	    record->linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->literal->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
-	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("vardecl");
-	    record->vardecl_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
-	  }
-
-	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
-	};
 
       protected:
 	/*
@@ -188,7 +138,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindAssignMatcher(ExecSQLToFunctionCall *parent)
+	  explicit FindAssignMatcher(ExecSQLPrepareFmtdToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -207,8 +157,8 @@ namespace clang
 	  }
 
 	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
+	  // Parent ExecSQLPrepareFmtdToFunctionCall instance
+	  ExecSQLPrepareFmtdToFunctionCall *m_parent;
 	};
 
       protected:
@@ -229,8 +179,6 @@ namespace clang
 	
       private:
 
-	source_range_set_t m_macrosStringLiterals;
-	
 	/**
 	 * FindReqFmtMatcher
 	 *
@@ -239,7 +187,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindReqFmtMatcher(ExecSQLToFunctionCall *parent)
+	  explicit FindReqFmtMatcher(ExecSQLPrepareFmtdToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -257,11 +205,15 @@ namespace clang
 	  }
 
 	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
+	  // Parent ExecSQLPrepareFmtdToFunctionCall instance
+	  ExecSQLPrepareFmtdToFunctionCall *m_parent;
 	};
 
-	enum ExecSQLToFunctionCallErrorKind
+      private:
+
+	source_range_set_t m_macrosStringLiterals;
+	
+	enum ExecSQLPrepareFmtdToFunctionCallErrorKind
 	  {
 	    // Error kind for no error
 	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
@@ -300,8 +252,14 @@ namespace clang
 	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
-		       enum ExecSQLToFunctionCallErrorKind,
+		       enum ExecSQLPrepareFmtdToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
+
+	// Find macro string literal at a line
+	bool findMacroStringLiteralAtLine(SourceManager&,
+					  unsigned,
+					  std::string&, std::string&,
+					  SourceRangeForStringLiterals**);
 
 	// Diag id for unexpected error
 	const unsigned unexpected_diag_id;
@@ -333,18 +291,10 @@ namespace clang
 	const bool generate_req_sources;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
-	// Request header template (default: "./pagesjaunes.h.tmpl")
+	// Request header template (default: "./pagesjaunes_prepare_fmt.h.tmpl")
 	const std::string generation_header_template;
-	// Request source template (default: "./pagesjaunes.pc.tmpl")
+	// Request source template (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
 	const std::string generation_source_template;
-	// Request header template for prepare requests (default: "./pagesjaunes_prepare.h.tmpl")
-	const std::string generation_prepare_header_template;
-	// Request source template for prepare requests (default: "./pagesjaunes_prepare.pc.tmpl")
-	const std::string generation_prepare_source_template;
-	// Request header template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.h.tmpl")
-	const std::string generation_prepare_fmt_header_template;
-	// Request source template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
-	const std::string generation_prepare_fmt_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
       };
@@ -353,4 +303,4 @@ namespace clang
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H

@@ -1,4 +1,4 @@
-//===--- ExecSQLToFunctionCall.cpp - clang-tidy ----------------------------===//
+//===--- ExecSQLPrepareToFunctionCall.cpp - clang-tidy ----------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <string>
 
-#include "ExecSQLToFunctionCall.h"
+#include "ExecSQLPrepareToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Sema/Sema.h"
@@ -39,8 +39,8 @@ namespace clang
 	// original define (for keeping indentation)
 	class GetStringLiteralsDefines : public PPCallbacks {
 	public:
-	  explicit GetStringLiteralsDefines(ExecSQLToFunctionCall *parent,
-					    ExecSQLToFunctionCall::source_range_set_t *srset)
+	  explicit GetStringLiteralsDefines(ExecSQLPrepareToFunctionCall *parent,
+					    ExecSQLPrepareToFunctionCall::source_range_set_t *srset)
 	    : m_parent(parent),
 	      m_src_mgr(m_parent->TidyContext->getASTContext()->getSourceManager()),
 	      m_macrosStringLiteralsPtr(srset)
@@ -86,8 +86,8 @@ namespace clang
 		  {
 		    StringRef extrait(macroLiteral.c_str(), (25 < macroLiteral.length() ? 25 : macroLiteral.length()));
 		    outs() << "Adding macro '" << macroName << "' from " << range.getBegin().printToString(m_src_mgr) << ": '" << extrait << "...'\n";
-		    ExecSQLToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLToFunctionCall::SourceRangeForStringLiterals(range, macroName, StringRef(macroLiteral.c_str()));
+		    ExecSQLPrepareToFunctionCall::SourceRangeForStringLiterals *ent
+		      = new ExecSQLPrepareToFunctionCall::SourceRangeForStringLiterals(range, macroName, StringRef(macroLiteral.c_str()));
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -100,16 +100,16 @@ namespace clang
 	  }
 	  
 	private:
-	  ExecSQLToFunctionCall *m_parent;
+	  ExecSQLPrepareToFunctionCall *m_parent;
 	  const SourceManager &m_src_mgr; 
-	  ExecSQLToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
+	  ExecSQLPrepareToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
 	};
       } // namespace
       
       /**
-       * ExecSQLToFunctionCall constructor
+       * ExecSQLPrepareToFunctionCall constructor
        *
-       * @brief Constructor for the ExecSQLToFunctionCall rewriting check
+       * @brief Constructor for the ExecSQLPrepareToFunctionCall rewriting check
        *
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
@@ -125,7 +125,7 @@ namespace clang
        * @param Name    A StringRef for the new check name
        * @param Context The ClangTidyContext allowing to access other contexts
        */
-      ExecSQLToFunctionCall::ExecSQLToFunctionCall(StringRef Name,
+      ExecSQLPrepareToFunctionCall::ExecSQLPrepareToFunctionCall(StringRef Name,
 						   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
@@ -171,10 +171,10 @@ namespace clang
 					   "./")),
 	  /// Generation header default template (string)
 	  generation_header_template(Options.get("Generation-header-template",
-						 "./pagesjaunes.h.tmpl")),
+						 "./pagesjaunes_prepare.h.tmpl")),
 	  /// Generation source default template (string)
 	  generation_source_template(Options.get("Generation-source-template",
-						 "./pagesjaunes.pc.tmpl")),
+						 "./pagesjaunes_prepare.pc.tmpl")),
 	  /// Request grouping option: Filename containing a json map for
 	  /// a group name indexing a vector of requests name
 	  generation_request_groups(Options.get("Generation-request-groups",
@@ -227,7 +227,7 @@ namespace clang
        * @param Opts	The option map in which to store supported options
        */
       void
-      ExecSQLToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      ExecSQLPrepareToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
@@ -251,7 +251,7 @@ namespace clang
        *                us AST node.
        */
       void 
-      ExecSQLToFunctionCall::registerMatchers(MatchFinder *Finder) 
+      ExecSQLPrepareToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
@@ -261,7 +261,7 @@ namespace clang
 			   , this);
       }
 
-      void ExecSQLToFunctionCall::registerPPCallbacks(CompilerInstance &Compiler) {
+      void ExecSQLPrepareToFunctionCall::registerPPCallbacks(CompilerInstance &Compiler) {
 	Compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -287,7 +287,7 @@ namespace clang
        * @param function_name   The function name that will be called
        */
       void
-      ExecSQLToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
+      ExecSQLPrepareToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
 					    const SourceLocation& loc_end,
 					    const std::string& function_name)
       {
@@ -311,7 +311,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLToFunctionCall::processTemplate
+       * ExecSQLPrepareToFunctionCall::processTemplate
        *
        * @brief Process a template file with values from the 
        *        provided map
@@ -324,7 +324,7 @@ namespace clang
        * @retval false 	if something wrong occurs
        */
       bool
-      ExecSQLToFunctionCall::processTemplate(const std::string& tmpl,
+      ExecSQLPrepareToFunctionCall::processTemplate(const std::string& tmpl,
 					     const std::string& fname,
 					     string2_map& values_map)
       {
@@ -398,7 +398,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLToFunctionCall::doRequestSourceGeneration
+       * ExecSQLPrepareToFunctionCall::doRequestSourceGeneration
        *
        * @brief Generate source file for request from template
        *
@@ -411,7 +411,7 @@ namespace clang
        *
        */
       void
-      ExecSQLToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLPrepareToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {
@@ -425,12 +425,12 @@ namespace clang
 	if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
 		    &fileName);
       }
       
       /**
-       * ExecSQLToFunctionCall::doRequestHeaderGeneration
+       * ExecSQLPrepareToFunctionCall::doRequestHeaderGeneration
        *
        * @brief Generate header file for request from template
        *
@@ -443,7 +443,7 @@ namespace clang
        *
        */
       void
-      ExecSQLToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLPrepareToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {	
@@ -457,7 +457,7 @@ namespace clang
 	if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+		    ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
 		    &fileName);
       }
 	
@@ -477,9 +477,9 @@ namespace clang
        * @param kind            Kind of error to report
        */
       void
-      ExecSQLToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
+      ExecSQLPrepareToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
 				       const SourceLocation& err_loc,
-				       enum ExecSQLToFunctionCallErrorKind kind,
+				       enum ExecSQLPrepareToFunctionCallErrorKind kind,
 				       const std::string* msgptr)
       {
 	std::string msg;
@@ -498,32 +498,32 @@ namespace clang
 	    break;
 
 	    /** No error ID: it should never occur */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
 	    diag_engine.Report(err_loc, no_error_diag_id);
 	    break;
 
 	    /** Access char data diag ID */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
 	    diag_engine.Report(err_loc, access_char_data_diag_id);
 	    break;
 
 	    /** Can't find a comment */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
 	    diag_engine.Report(err_loc, cant_find_comment_diag_id);
 	    break;
 
 	    /** Cannot match comment */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
 	    diag_engine.Report(err_loc, comment_dont_match_diag_id);
 	    break;
 
 	    /** Cannot generate request source file (no location) */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
 	    diag_engine.Report(source_generation_failure_diag_id).AddString(msg);
 	    break;
 
 	    /** Cannot generate request header file (no location) */
-	  case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
 	    diag_engine.Report(header_generation_failure_diag_id).AddString(msg);
 	    break;
 	  }
@@ -544,7 +544,7 @@ namespace clang
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &result) 
+      ExecSQLPrepareToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
 	// Get the source manager
 	SourceManager &srcMgr = result.Context->getSourceManager();
@@ -689,70 +689,162 @@ namespace clang
 	     * Create function call for the request
 	     */
 
-	    // Regex for processing comment for all remaining requests
-	    Regex reqRe("^.*EXEC SQL[ \t]+([A-Za-z]+)[ \t]+([A-Za-z0-9]+).*;.*$");
+	    // Regex for processing PREPARE comment
+	    Regex reqRePrep("^.*EXEC SQL[ \t]+(prepare|PREPARE)[ \t]+([A-Za-z0-9]+)[ \t]+(from|FROM)[ \t]+:([A-Za-z]+);.*$");
 	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
 
 	    /*
-	     * Now we match against a more permissive regex for all other (simpler) requests
-	     * =============================================================================
+	     * First let's try to match comment against a regex designed for prepape requests
+	     * ==============================================================================
 	     */
-	    if (reqRe.match(comment, &matches))
+	    if (reqRePrep.match(comment, &matches))
 	      {
-		// Start at first match ($0 is the whole match)
-		auto it = matches.begin();
-		// Skip it
-		it++;
-		//outs() << "match #1  = '" << (*it).str() << "'\n";
-		// Append first match (action) to function name
-		function_name.append((*it).lower());
-		// Get next match
-		it++;
-		//outs() << "match #2  = '" << (*it).str() << "'\n";
-		// Get match in rest string
-		std::string rest((*it).str());
-		// Capitalize it
-		rest[0] &= ~0x20;
-		// And append to function name
-		function_name.append(rest);
+		/*
+		 * Find the request literal
+		 */
+		
+		// The request name used in ProC (syntax :reqName)
+		std::string fromReqName = matches[4];
+		std::string reqName = matches[2];
+		
+		outs() << "!!!*** Prepare request comment match: from request name is '" << fromReqName
+		       << "' and request name is '"<< reqName << "'\n";
 
-		// Got it, emit changes
-		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
+		/*
+		 * First let's try to find a request that is initialized from a 
+		 * string literal (constant string) with sprintf
+		 * The next statement matcher find such requests
+		 */
+                StatementMatcher m_matcher
+		  // find a sprintf call expr
+		  = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
+			 // with arg 0 being the symbol specified in the ProC request (target decl bound to vardecl)
+                         hasArgument(0,
+			     declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(fromReqName.c_str()))).bind("vardecl")))),
+			 // and with arg1 being the searched literal (literal bound to reqLiteral)
+                         hasArgument(1,
+                             stringLiteral().bind("reqLiteral")),
+                         // and this call is in the current function (call bound to callExpr))
+			     hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
 
-		// If headers generation was requested
-		if (generate_req_headers)
+		// Prepare matcher finder for our customized matcher
+		CopyRequestMatcher crMatcher(this);
+		// The matcher implementing visitor pattern
+		MatchFinder finder;
+		// Add our matcher to our processing class
+		finder.addMatcher(m_matcher, &crMatcher);
+		// Clear collector vector (the result filled with found patterns)
+		m_req_copy_collector.clear();
+		// Run the visitor pattern for collecting matches
+		tool->run(newFrontendActionFactory(&finder).get());
+
+		// Display number of matches
+		outs() << "Found " << m_req_copy_collector.size() << " sprintf calls\n";
+		
+		// The collected records
+		struct StringLiteralRecord *lastRecord = (struct StringLiteralRecord *)nullptr;
+
+		// Some result that will be passed to the templating engine
+		std::string requestDefineValue;
+		std::string fromReqNameLength;
+
+		// If result is not an empty set
+		// We found a request of type:
+		// #define GIVreq "select ...."
+		//     char reqBuf[1234];
+		//     sprintf(reqBuf, GIVreq);
+		//     EXEC SQL prepare aRequest from :reqBuf;
+		if (!m_req_copy_collector.empty())
 		  {
-		    // Build the map for templating engine
-		    string2_map values_map;
-		    values_map["@RequestFunctionName@"] = function_name;
-		    // And call it
-		    doRequestHeaderGeneration(diagEngine,
-					      generation_header_template,
-					      values_map);
+		    // Let's iterate over all collected matches
+		    for (auto it = m_req_copy_collector.begin();
+			 it != m_req_copy_collector.end();
+			 ++it)
+		      {
+			// And find the one just before the ProC statement
+			struct StringLiteralRecord *record = (*it);
+			if (record->call_linenum > startLineNum)
+			  break;
+			// Didn't find yet, so keep current as the last one
+			lastRecord = record;
+		      }
+		    
+		    // Found the last record collected just before the ProC statement
+		    if (lastRecord != nullptr)
+		      {
+			// Get the qualified type for the sprintf target variable
+			QualType fromType = lastRecord->varDecl->getType().withConst();
+			// We need the size of the char table
+			CharUnits cu = TidyContext->getASTContext()->getTypeSizeInChars(fromType);
+			size_t fromReqNameLengthSize = (size_t)cu.getQuantity();
+
+			// Let's format this size in a string for templating engine
+			std::stringbuf buffer;      // empty stringbuf
+			std::ostream bos (&buffer);  // associate stream buffer to stream
+			bos << fromReqNameLengthSize;
+			fromReqNameLength = buffer.str();
+
+			// Display for debug
+			outs() << "Found literal at line #" << lastRecord->linenum
+			       << ": '" << lastRecord->literal->getString() << "'\n";
+			outs() << "     for a call at line #" << lastRecord->call_linenum << "'\n";
+			outs() << "     and declared at line #" << lastRecord->vardecl_linenum
+			       << ": '" << fromType.getAsString() << " " << fromReqNameLength << "'\n";
+
+			// Get the string literal value for templating engine (used in a #define)
+			requestDefineValue.assign(lastRecord->literal->getString());
+		      }
+		    
+		    // Compute function name
+		    function_name.assign("prepare");
+		    // Get match in rest string
+		    std::string rest(reqName);
+		    // Capitalize it
+		    rest[0] &= ~0x20;
+		    // And append to function name
+		    function_name.append(rest);
+		    
+		    // 'EXEC SQL' statement
+		    std::string requestExecSql = "prepare ";
+		    requestExecSql.append(reqName);
+		    requestExecSql.append(" from :");
+		    requestExecSql.append(fromReqName);
+		    
+		    if (generate_req_headers)
+		      {
+			string2_map values_map;
+			values_map["@RequestFunctionName@"] = function_name;
+			doRequestHeaderGeneration(diagEngine,
+						  generation_header_template,
+						  values_map);
+		      }
+		    
+		    if (generate_req_sources)
+		      {
+			string2_map values_map;
+			values_map["@FromRequestName@"] = fromReqName;
+			values_map["@FromRequestNameLength@"] = fromReqNameLength;
+			values_map["@RequestDefineName@"] = reqName;
+			values_map["@RequestDefineValue@"] = requestDefineValue;
+			values_map["@RequestFunctionName@"] = function_name;
+			values_map["@RequestExecSql@"] = requestExecSql;
+			doRequestSourceGeneration(diagEngine,
+						  generation_source_template,
+						  values_map);
+		      }
 		  }
 
-		// If source generation was requested
-		if (generate_req_sources)
-		  {
-		    // Build the map for templating engine
-		    string2_map values_map;
-		    values_map["@RequestFunctionName@"] = function_name;
-		    // And call it
-		    doRequestSourceGeneration(diagEngine,
-					      generation_source_template,
-					      values_map);
-		  }
-
-		// Emit errors, warnings and fixes
+		// Now, emit errors, warnings and fixes
 		emitDiagAndFix(loc_start, loc_end, function_name);
 	      }
+	    
 	    else
 	      // Didn't match comment at all!
 	      emitError(diagEngine,
 			comment_loc_start,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
 	  }
 	else
 	  {
@@ -760,13 +852,13 @@ namespace clang
 	      // An error occured while accessing memory buffer for sources
 	      emitError(diagEngine,
 			loc_start,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
+			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
 
 	    else
 	      // We didn't found the comment start ???
 	      emitError(diagEngine,
 			comment_loc_end,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
+			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
 	  }
       }
     } // namespace pagesjaunes

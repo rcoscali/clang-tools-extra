@@ -12,6 +12,8 @@
 #include "../ClangTidyModuleRegistry.h"
 #include "CCharToCXXString.h"
 #include "ExecSQLToFunctionCall.h"
+#include "ExecSQLPrepareToFunctionCall.h"
+#include "ExecSQLPrepareFmtdToFunctionCall.h"
 #include "DeIncludePreProC.h"
 
 namespace clang 
@@ -32,6 +34,8 @@ namespace clang
 	{
 	  CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
 	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-exec-sql-to-function-call");
+	  CheckFactories.registerCheck<ExecSQLPrepareToFunctionCall> ("pagesjaunes-exec-sql-prepare-to-function-call");
+	  CheckFactories.registerCheck<ExecSQLPrepareFmtdToFunctionCall> ("pagesjaunes-exec-sql-prepare-fmtd-to-function-call");
 	  CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
 	}
 
@@ -51,6 +55,45 @@ namespace clang
 	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcpy"] = "1";
 	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
 	  Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
+
+	  /*
+	   * Options are available in order to select processed headers
+	   * and indicated their location.
+	   */
+	  Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$";
+	  Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
+	  Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
+	  Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
+
+	  /*
+	   * 
+	   */
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generate-requests-headers"] = "1";
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generate-requests-sources"] = "1";
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generation-directory"] = "./REQSQL/src";
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generation-header-template"] = "./pagesjaunes.h.tmpl";
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generation-source-template"] = "./pagesjaunes.pc.tmpl";
+	  Opts["pagesjaunes-exec-sql-to-function-call.Generation-request-groups"] = "request_groups.json";
+
+	  /*
+	   * 
+	   */
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generate-requests-headers"] = "1";
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generate-requests-sources"] = "1";
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-directory"] = "./REQSQL/src";
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-header-template"] = "./pagesjaunes_prepare.h.tmpl";
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-source-template"] = "./pagesjaunes_prepare.pc.tmpl";
+	  Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-request-groups"] = "request_groups.json";
+
+	  /*
+	   * 
+	   */
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generate-requests-headers"] = "1";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generate-requests-sources"] = "1";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-directory"] = "./REQSQL/src";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-header-template"] = "./pagesjaunes_prepare_fmt.h.tmpl";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-source-template"] = "./pagesjaunes_prepare_fmt.pc.tmpl";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-request-groups"] = "request_groups.json";
 
 	  return Options;
 	}

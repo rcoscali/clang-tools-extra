@@ -1,4 +1,4 @@
-//===--- ExecSQLToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ExecSQLPrepareToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
 
 #include "../ClangTidy.h"
 #include "llvm/ADT/StringRef.h"
@@ -29,7 +29,7 @@ namespace clang
     {
 
       // Checks that argument name match parameter name rules.
-      class ExecSQLToFunctionCall : public ClangTidyCheck 
+      class ExecSQLPrepareToFunctionCall : public ClangTidyCheck 
       {
       public:
 	// AST Context instance
@@ -92,7 +92,7 @@ namespace clang
 	using source_range_set_t = std::set<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
 	// Constructor
-	ExecSQLToFunctionCall(StringRef, ClangTidyContext *);
+	ExecSQLPrepareToFunctionCall(StringRef, ClangTidyContext *);
 
 	// Store check Options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
@@ -131,7 +131,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit CopyRequestMatcher(ExecSQLToFunctionCall *parent)
+	  explicit CopyRequestMatcher(ExecSQLPrepareToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -157,8 +157,8 @@ namespace clang
 	  }
 
 	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
+	  // Parent ExecSQLPrepareToFunctionCall instance
+	  ExecSQLPrepareToFunctionCall *m_parent;
 	};
 
       protected:
@@ -180,88 +180,9 @@ namespace clang
 	
       private:
 
-	/**
-	 * FindAssignMatcher
-	 *
-	 */
-	class FindAssignMatcher : public MatchFinder::MatchCallback
-	{
-	public:
-	  /// Explicit constructor taking the parent instance as param
-	  explicit FindAssignMatcher(ExecSQLToFunctionCall *parent)
-	    : m_parent(parent)
-	  {}
-
-	  /// The run method adding all calls in the collection vector
-	  virtual void
-	  run(const MatchFinder::MatchResult &result)
-	  {
-	    struct AssignmentRecord *record = new(struct AssignmentRecord);
-	    record->lhs = result.Nodes.getNodeAs<DeclRefExpr>("lhs");
-	    record->rhs = result.Nodes.getNodeAs<DeclRefExpr>("rhs");
-	    record->binop = result.Nodes.getNodeAs<BinaryOperator>("binop");
-	    record->binop_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->binop->getLocStart()));
-	    m_parent->m_req_assign_collector.push_back(record);
-	  }
-
-	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
-	};
-
-      protected:
-	/*
-	 * assignment finder collector in case of a prepare request
-	 * Literal is created from params and formatted with sprint 
-	 * then assigned to the from :reqName.
-	 */
-	struct ReqFmtRecord
-	{
-	  const CallExpr *callExpr;
-	  const DeclRefExpr *arg0;
-	  unsigned callexpr_linenum;
-	};
-
-	// Collector for possible assignments
-	std::vector<struct ReqFmtRecord *> m_req_fmt_collector;
-	
-      private:
-
 	source_range_set_t m_macrosStringLiterals;
 	
-	/**
-	 * FindReqFmtMatcher
-	 *
-	 */
-	class FindReqFmtMatcher : public MatchFinder::MatchCallback
-	{
-	public:
-	  /// Explicit constructor taking the parent instance as param
-	  explicit FindReqFmtMatcher(ExecSQLToFunctionCall *parent)
-	    : m_parent(parent)
-	  {}
-
-	  /// The run method adding all calls in the collection vector
-	  virtual void
-	  run(const MatchFinder::MatchResult &result)
-	  {
-	    struct ReqFmtRecord *record = new(struct ReqFmtRecord);
-	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
-	    record->arg0 = result.Nodes.getNodeAs<DeclRefExpr>("arg0");
-	    record->callexpr_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
-	    m_parent->m_req_fmt_collector.push_back(record);
-	  }
-
-	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
-	};
-
-	enum ExecSQLToFunctionCallErrorKind
+	enum ExecSQLPrepareToFunctionCallErrorKind
 	  {
 	    // Error kind for no error
 	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
@@ -300,7 +221,7 @@ namespace clang
 	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
-		       enum ExecSQLToFunctionCallErrorKind,
+		       enum ExecSQLPrepareToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
 	// Diag id for unexpected error
@@ -333,18 +254,10 @@ namespace clang
 	const bool generate_req_sources;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
-	// Request header template (default: "./pagesjaunes.h.tmpl")
+	// Request header template (default: "./pagesjaunes_prepare.h.tmpl")
 	const std::string generation_header_template;
-	// Request source template (default: "./pagesjaunes.pc.tmpl")
+	// Request source template (default: "./pagesjaunes_prepare.pc.tmpl")
 	const std::string generation_source_template;
-	// Request header template for prepare requests (default: "./pagesjaunes_prepare.h.tmpl")
-	const std::string generation_prepare_header_template;
-	// Request source template for prepare requests (default: "./pagesjaunes_prepare.pc.tmpl")
-	const std::string generation_prepare_source_template;
-	// Request header template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.h.tmpl")
-	const std::string generation_prepare_fmt_header_template;
-	// Request source template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
-	const std::string generation_prepare_fmt_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
       };
@@ -353,4 +266,4 @@ namespace clang
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
