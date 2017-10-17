@@ -1,4 +1,4 @@
-//===--- ExecSQLPrepareToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ExecSQLOpenToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLOPENTOFUNCTIONCALL_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLOPENTOFUNCTIONCALL_H
 
 #include "../ClangTidy.h"
 #include "llvm/ADT/StringRef.h"
@@ -29,11 +29,11 @@ namespace clang
     {
 
       // Checks that argument name match parameter name rules.
-      class ExecSQLPrepareToFunctionCall : public ClangTidyCheck 
+      class ExecSQLOpenToFunctionCall : public ClangTidyCheck 
       {
       public:
 
-	enum ExecSQLPrepareToFunctionCallErrorKind
+	enum ExecSQLOpenToFunctionCallErrorKind
 	  {
 	    // Error kind for no error
 	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
@@ -139,7 +139,7 @@ namespace clang
 	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
 	// Constructor
-	ExecSQLPrepareToFunctionCall(StringRef, ClangTidyContext *);
+	ExecSQLOpenToFunctionCall(StringRef, ClangTidyContext *);
 
 	// Store check Options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
@@ -158,7 +158,7 @@ namespace clang
 	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
-		       enum ExecSQLPrepareToFunctionCallErrorKind,
+		       enum ExecSQLOpenToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
       protected:
@@ -166,30 +166,28 @@ namespace clang
 	 * sprintf finder collector in case of a prepare request
 	 * Literal must be directly copied in the :reqName var
 	 */
-	struct StringLiteralRecord
+	struct VarDeclMatchRecord
 	{
-	  const CallExpr *callExpr;
-	  unsigned call_linenum;
-	  const StringLiteral *literal;
-	  unsigned linenum;
 	  const VarDecl *varDecl;
-	  unsigned vardecl_linenum;
+	  unsigned linenum;
+	  char dummy1[16];
+	  char dummy2[16];
 	};
 
 	// Collector for possible sprintf calls
-	std::vector<struct StringLiteralRecord *> m_req_copy_collector;
+	std::vector<struct VarDeclMatchRecord *> m_req_var_decl_collector;
 	
       private:
 
 	/**
-	 * CopyRequestMatcher
+	 * VarDeclMatcher
 	 *
 	 */
-	class CopyRequestMatcher : public MatchFinder::MatchCallback
+	class VarDeclMatcher : public MatchFinder::MatchCallback
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit CopyRequestMatcher(ExecSQLPrepareToFunctionCall *parent)
+	  explicit VarDeclMatcher(ExecSQLOpenToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -197,44 +195,18 @@ namespace clang
 	  virtual void
 	  run(const MatchFinder::MatchResult &result)
 	  {
-	    struct StringLiteralRecord *record = new(struct StringLiteralRecord);
-	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
-	    record->call_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
-	    record->literal = result.Nodes.getNodeAs<StringLiteral>("reqLiteral");
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
 	    record->linenum =
 	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->literal->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
-	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("vardecl");
-	    record->vardecl_linenum =
-	      result.Context->getSourceManager()
 	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
+	    m_parent->m_req_var_decl_collector.push_back(record);
 	  }
 
 	private:
-	  // Parent ExecSQLPrepareToFunctionCall instance
-	  ExecSQLPrepareToFunctionCall *m_parent;
+	  // Parent ExecSQLOpenToFunctionCall instance
+	  ExecSQLOpenToFunctionCall *m_parent;
 	};
-
-      protected:
-	/*
-	 * assignment finder collector in case of a prepare request
-	 * Literal is created from params and formatted with sprint 
-	 * then assigned to the from :reqName.
-	 */
-	struct AssignmentRecord
-	{
-	  const BinaryOperator *binop;
-	  const DeclRefExpr *lhs;
-	  const DeclRefExpr *rhs;
-	  unsigned binop_linenum;
-	};
-
-	// Collector for possible assignments
-	std::vector<struct AssignmentRecord *> m_req_assign_collector;
 	
       private:
 
@@ -261,6 +233,10 @@ namespace clang
 					     std::string&, std::string&,
 					     SourceRangeForStringLiterals **);
 	
+	const VarDecl *findSymbolInFunction(ClangTool *,
+					    std::string&,
+					    const FunctionDecl *);
+	  
 	// Diag id for unexpected error
 	const unsigned unexpected_diag_id;
 	// Diag id for no error
@@ -293,16 +269,18 @@ namespace clang
 	const bool generate_req_sources;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
-	// Request header template (default: "./pagesjaunes_prepare.h.tmpl")
+	// Request header template (default: "./pagesjaunes_open.h.tmpl")
 	const std::string generation_header_template;
-	// Request source template (default: "./pagesjaunes_prepare.pc.tmpl")
+	// Request source template (default: "./pagesjaunes_open.pc.tmpl")
 	const std::string generation_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
+	// Simplify request args list simplification
+	const bool generation_simplify_function_args;
       };
 
     } // namespace pagesjaunes
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPARETOFUNCTIONCALL_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLOPENTOFUNCTIONCALL_H

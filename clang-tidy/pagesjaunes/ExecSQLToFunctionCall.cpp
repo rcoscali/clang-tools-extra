@@ -18,7 +18,7 @@
 #include "ExecSQLToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Sema/Sema.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
 
 using namespace clang;
@@ -60,16 +60,15 @@ namespace clang
 
 	    if (name_fid == main_fid)
 	      {
+		SourceRange sr;
 		bool have_literal = false;
 		for (const auto& t : md.getMacroInfo()->tokens())
 		  {
 		    if (t.is(tok::string_literal))
 		      {
-			unsigned tokenLength = t.getLength();
-			StringRef litdata(t.getLiteralData(), tokenLength);
-			outs() << "Token Length: '" << tokenLength  << "'\n";
-			outs() << "    value: '" << litdata << "'\n";
-			macroLiteral = litdata.str();
+			SourceLocation sloc = t.getLocation();
+			SourceLocation eloc = t.getEndLoc();
+			sr = SourceRange(sloc, eloc);
 			have_literal = true;
 		      }
 		    else if (t.is(tok::wide_string_literal) ||
@@ -78,16 +77,15 @@ namespace clang
 			     t.is(tok::utf16_string_literal) ||
 			     t.is(tok::utf32_string_literal))
 		      {
-			outs() << "*** Token for weird string (wide, utf etc) found\n";
+			errs() << "*** Token for weird string (wide, utf etc) found\n";
 		      }
 		  }
 		
 		if (have_literal)
 		  {
-		    StringRef extrait(macroLiteral.c_str(), (25 < macroLiteral.length() ? 25 : macroLiteral.length()));
-		    outs() << "Adding macro '" << macroName << "' from " << range.getBegin().printToString(m_src_mgr) << ": '" << extrait << "...'\n";
+		    //outs() << "Adding macro '" << macroName << "' expansion at " << range.getBegin().printToString(m_src_mgr) << "...'\n";
 		    ExecSQLToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLToFunctionCall::SourceRangeForStringLiterals(range, macroName, StringRef(macroLiteral.c_str()));
+		      = new ExecSQLToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -96,7 +94,7 @@ namespace clang
 	  void
 	  EndOfMainFile() override
 	  {
-	    outs() << "!!!***> END OF MAIN FILE !\n";
+	    //outs() << "!!!***> END OF MAIN FILE !\n";
 	  }
 	  
 	private:
@@ -194,15 +192,12 @@ namespace clang
 		 it != reqgroups.end();
 		 ++it)
 	      {
-		//outs() << "Request group: " << it->first << "\n";
 		std::vector<std::string> agroup = it->second.get<std::vector<std::string>>();
-		req_groups.emplace(it->first, agroup);
-		// for (auto it2 = agroup.begin();
-		//      it2 != agroup.end();
-		//      ++it2)
-		//   {
-		//     outs() << "    " << (*it2) << "\n";
-		//   }
+		auto status = req_groups.emplace(it->first, agroup);
+		if (!status.second)
+		  errs() << "ERROR!! Couldn't add group '" << it->first
+			 << "': a group with same name already exists  in file '"
+			 << generation_request_groups << "' !!\n";
 	      }
 	  }
 	else
@@ -261,8 +256,19 @@ namespace clang
 			   , this);
       }
 
-      void ExecSQLToFunctionCall::registerPPCallbacks(CompilerInstance &Compiler) {
-	Compiler
+      /**
+       * ExecSQLToFunctionCall::registerPPCallbacks
+       *
+       * @brief Register callback for intercepting all pre-processor actions
+       *
+       * Allows to register a callback for executing our actions at every C/C++ 
+       * pre-processor processing. Thanks to this callback we will collect all string
+       * literal macro expansions.
+       *
+       * @param[in] compiler	the compiler instance we will intercept
+       */
+      void ExecSQLToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
 								      &m_macrosStringLiterals));
@@ -270,7 +276,7 @@ namespace clang
       
       
       /*
-       * emitDiagAndFix
+       * ExecSQLToFunctionCall::emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
@@ -549,7 +555,6 @@ namespace clang
 	// Get the source manager
 	SourceManager &srcMgr = result.Context->getSourceManager();
 	DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
-	ClangTool *tool = TidyContext->getToolPtr();
 
 	/*
 	 * Init check context
@@ -558,7 +563,6 @@ namespace clang
 	
 	// Get the compound statement AST node as the bounded var 'proCBlock'
 	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
-	const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
 
 	// Get start/end locations for the statement
 	SourceLocation loc_start = stmt->getLocStart();

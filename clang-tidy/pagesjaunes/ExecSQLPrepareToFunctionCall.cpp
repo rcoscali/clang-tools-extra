@@ -18,7 +18,7 @@
 #include "ExecSQLPrepareToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Sema/Sema.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
 
 using namespace clang;
@@ -33,16 +33,19 @@ namespace clang
     namespace pagesjaunes
     {
 
-      namespace {
+      namespace
+      {
 	// Keep track of macro expansions that defines a StringLiteral
 	// then keep the associated source_range_set_t to be able to get the
 	// original define (for keeping indentation)
-	class GetStringLiteralsDefines : public PPCallbacks {
+	class GetStringLiteralsDefines : public PPCallbacks
+	{
 	public:
 	  explicit GetStringLiteralsDefines(ExecSQLPrepareToFunctionCall *parent,
 					    ExecSQLPrepareToFunctionCall::source_range_set_t *srset)
 	    : m_parent(parent),
 	      m_src_mgr(m_parent->TidyContext->getASTContext()->getSourceManager()),
+	      m_diag_engine(m_parent->TidyContext->getASTContext()->getDiagnostics()),
 	      m_macrosStringLiteralsPtr(srset)
 	  {
 	  }
@@ -60,16 +63,15 @@ namespace clang
 
 	    if (name_fid == main_fid)
 	      {
+		SourceRange sr;
 		bool have_literal = false;
 		for (const auto& t : md.getMacroInfo()->tokens())
 		  {
 		    if (t.is(tok::string_literal))
 		      {
-			unsigned tokenLength = t.getLength();
-			StringRef litdata(t.getLiteralData(), tokenLength);
-			outs() << "Token Length: '" << tokenLength  << "'\n";
-			outs() << "    value: '" << litdata << "'\n";
-			macroLiteral = litdata.str();
+			SourceLocation sloc = t.getLocation();
+			SourceLocation eloc = t.getEndLoc();
+			sr = SourceRange(sloc, eloc);
 			have_literal = true;
 		      }
 		    else if (t.is(tok::wide_string_literal) ||
@@ -78,16 +80,32 @@ namespace clang
 			     t.is(tok::utf16_string_literal) ||
 			     t.is(tok::utf32_string_literal))
 		      {
-			outs() << "*** Token for weird string (wide, utf etc) found\n";
+			// TODO: handle that kind of string charsets
+			std::string slKind;
+			if (t.is(tok::wide_string_literal))
+			  slKind = "Wide String";
+			else if (t.is(tok::angle_string_literal))
+			  slKind = "Angle String";
+			else if (t.is(tok::utf8_string_literal))
+			  slKind = "UTF8 String";
+			else if (t.is(tok::utf16_string_literal))
+			  slKind = "UTF16 String";
+			else if (t.is(tok::utf32_string_literal))
+			  slKind = "UTF32 String";
+
+			//errs() << "*** Token for weird string (" << slKind << ") found\n";
+			m_parent->emitError(m_diag_engine,
+					    t.getLocation(),
+					    ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+					    &slKind);
 		      }
 		  }
 		
 		if (have_literal)
 		  {
-		    StringRef extrait(macroLiteral.c_str(), (25 < macroLiteral.length() ? 25 : macroLiteral.length()));
-		    outs() << "Adding macro '" << macroName << "' from " << range.getBegin().printToString(m_src_mgr) << ": '" << extrait << "...'\n";
+		    //outs() << "Adding macro '" << macroName << "' expansion at " << range.getBegin().printToString(m_src_mgr) << "...'\n";
 		    ExecSQLPrepareToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLPrepareToFunctionCall::SourceRangeForStringLiterals(range, macroName, StringRef(macroLiteral.c_str()));
+		      = new ExecSQLPrepareToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -96,12 +114,13 @@ namespace clang
 	  void
 	  EndOfMainFile() override
 	  {
-	    outs() << "!!!***> END OF MAIN FILE !\n";
+	    //outs() << "!!!***> END OF MAIN FILE !\n";
 	  }
 	  
 	private:
 	  ExecSQLPrepareToFunctionCall *m_parent;
 	  const SourceManager &m_src_mgr; 
+	  DiagnosticsEngine &m_diag_engine;
 	  ExecSQLPrepareToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
 	};
       } // namespace
@@ -126,16 +145,21 @@ namespace clang
        * @param Context The ClangTidyContext allowing to access other contexts
        */
       ExecSQLPrepareToFunctionCall::ExecSQLPrepareToFunctionCall(StringRef Name,
-						   ClangTidyContext *Context)
+								 ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
+
+	  /*
+	   * Custom Diagnostics IDs
+	   */
+	  
 	  /** Unexpected error occured */
 	  unexpected_diag_id(Context->getASTContext()->getDiagnostics().
 			     getCustomDiagID(DiagnosticsEngine::Warning,
 					     "Unexpected error occured?!")),
 	  /** No error: never thrown */
 	  no_error_diag_id(Context->getASTContext()->getDiagnostics().
-			   getCustomDiagID(DiagnosticsEngine::Ignored,
+			   getCustomDiagID(DiagnosticsEngine::Remark,
 					   "No error")),
 	  /** Access char data error occured */
 	  access_char_data_diag_id(Context->getASTContext()->getDiagnostics().
@@ -147,7 +171,7 @@ namespace clang
 						    "Couldn't find ProC comment start! This result has been discarded!")),
 	  /** Cannot parse comment as a ProC SQL rqt statement */
 	  comment_dont_match_diag_id(Context->getASTContext()->getDiagnostics().
-				     getCustomDiagID(DiagnosticsEngine::Error,
+				     getCustomDiagID(DiagnosticsEngine::Warning,
 						     "Couldn't match ProC comment for function name creation!")),
 	  /** Cannot generate one request source file */
 	  source_generation_failure_diag_id(Context->getASTContext()->getDiagnostics().
@@ -157,6 +181,10 @@ namespace clang
 	  header_generation_failure_diag_id(Context->getASTContext()->getDiagnostics().
 					    getCustomDiagID(DiagnosticsEngine::Error,
 							    "Couldn't generate request header file %0!")),
+	  /** Cannot generate one request header file */
+	  unsupported_string_literal_charset_diag_id(Context->getASTContext()->getDiagnostics().
+						     getCustomDiagID(DiagnosticsEngine::Error,
+								     "Token for weird charset string (%0) found!")),
 	  /*
 	   * Options
 	   */
@@ -180,8 +208,6 @@ namespace clang
 	  generation_request_groups(Options.get("Generation-request-groups",
 						"./request_groups.json"))
       {
-	//outs() << "Opening request group file: '" << generation_request_groups << "'\n";
-
 	req_groups.clear();
 	std::filebuf fb;
 	if (fb.open(generation_request_groups, std::ios::in))
@@ -194,9 +220,12 @@ namespace clang
 		 it != reqgroups.end();
 		 ++it)
 	      {
-		//outs() << "Request group: " << it->first << "\n";
 		std::vector<std::string> agroup = it->second.get<std::vector<std::string>>();
-		req_groups.emplace(it->first, agroup);
+		auto status = req_groups.emplace(it->first, agroup);
+		if (!status.second)
+		  errs() << "ERROR!! Couldn't add group '" << it->first
+			 << "': a group with same name already exists  in file '"
+			 << generation_request_groups << "' !!\n";
 		// for (auto it2 = agroup.begin();
 		//      it2 != agroup.end();
 		//      ++it2)
@@ -208,6 +237,10 @@ namespace clang
 	else
 	  {
 	    errs() << "Cannot load groups file: '" << generation_request_groups << "'\n";
+	    emitError(Context->getASTContext()->getDiagnostics(),
+		      SourceLocation(),
+		      ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+		      &generation_request_groups);
 	  }
       }
       
@@ -261,8 +294,21 @@ namespace clang
 			   , this);
       }
 
-      void ExecSQLPrepareToFunctionCall::registerPPCallbacks(CompilerInstance &Compiler) {
-	Compiler
+      /**
+       * ExecSQLPrepareToFunctionCall::registerPPCallbacks
+       *
+       * @brief Register callback for intercepting all pre-processor actions
+       *
+       * Allows to register a callback for executing our actions at every C/C++ 
+       * pre-processor processing. Thanks to this callback we will collect all string
+       * literal macro expansions.
+       *
+       * @param[in] compiler	the compiler instance we will intercept
+       */
+      void
+      ExecSQLPrepareToFunctionCall::registerPPCallbacks(CompilerInstance &compiler)
+      {
+	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
 								      &m_macrosStringLiterals));
@@ -270,7 +316,7 @@ namespace clang
       
       
       /*
-       * emitDiagAndFix
+       * ExecSQLPrepareToFunctionCall::emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
@@ -288,8 +334,8 @@ namespace clang
        */
       void
       ExecSQLPrepareToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
-					    const SourceLocation& loc_end,
-					    const std::string& function_name)
+						   const SourceLocation& loc_end,
+						   const std::string& function_name)
       {
 	/* Range of the statement to change */
 	SourceRange stmt_range(loc_start, loc_end);
@@ -325,8 +371,8 @@ namespace clang
        */
       bool
       ExecSQLPrepareToFunctionCall::processTemplate(const std::string& tmpl,
-					     const std::string& fname,
-					     string2_map& values_map)
+						    const std::string& fname,
+						    string2_map& values_map)
       {
 	// Return value
 	bool ret = false;
@@ -444,8 +490,8 @@ namespace clang
        */
       void
       ExecSQLPrepareToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+							      const std::string& tmpl,
+							      string2_map& values_map)
       {	
 	SourceLocation dummy;
 	// Compute output file pathname
@@ -526,9 +572,75 @@ namespace clang
 	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
 	    diag_engine.Report(header_generation_failure_diag_id).AddString(msg);
 	    break;
+
+	    /** Unsupported String Literal charset */
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+	    diag_engine.Report(unsupported_string_literal_charset_diag_id).AddString(msg);
+	    break;
+
+	    /** Invalid groups file error */
+	  case ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+	    diag_engine.Report(unsupported_string_literal_charset_diag_id).AddString(msg);
+	    break;
+	    
 	  }
       }
       
+      /**
+       * ExecSQLPrepareToFunctionCall::findMacroStringLiteralDefAtLine
+       *
+       * @brief find a macro expansion for a string literal used for a request
+       *
+       * Search the set of macro expansion collected from Pre Processor work.
+       * This set contains string literals and macro names used for request formatting.
+       * String literals values preserve the original source indentation.
+       *
+       * @param[in]    src_mgr	the source manager for translating locations 
+       *                        in line nums
+       * @param[in]    ln	the origin location line number for which we 
+       *                        want string literal
+       * @param[inout] name	the name of the macro
+       * @param[inout] val	the value of the string literal
+       * @param[out]   record	the pointer to the found record is one was found.
+       *                        if no record were found a null is returned
+       *
+       */
+      bool
+      ExecSQLPrepareToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
+								    unsigned ln,
+								    std::string& name, std::string& val,
+								    SourceRangeForStringLiterals **record = nullptr)
+      {
+	bool ret = false;
+	if (record)
+	  *record = nullptr;
+	for (auto it = m_macrosStringLiterals.begin();
+	     it != m_macrosStringLiterals.end();
+	     ++it)
+	  {
+	    auto sr = (*it);
+	    SourceLocation sl = sr.m_macro_range.getBegin();
+	    unsigned sln = src_mgr.getSpellingLineNumber(sl);
+	    //outs() << "Macro def at line#" << sln << " versus searching line#" << ln << " or line #" << ln+1 << "\n";
+	    if (sln == ln || sln + 1 == ln)
+	      {
+		name = sr.m_macro_name.str();
+		if (record)
+		  *record = new SourceRangeForStringLiterals(sr);
+		unsigned ldl =
+		  src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getEnd()))
+		  - src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getBegin()));
+		StringRef lstr(src_mgr.getCharacterData(src_mgr.getFileLoc(sr.m_macro_range.getBegin())),
+			       ldl);
+		val = lstr.str();
+		ret = true;
+		break;
+	      }
+	  }
+
+	return ret;
+      }
+
       /**
        * check
        *
@@ -570,11 +682,6 @@ namespace clang
 	unsigned startLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(loc_start));
 
 	// outs() << "Found one result at line " << startLineNum << "\n";
-	// outs() << "Generate_req_headers: " << (generate_req_headers ? "true" : "false") << "\n";
-	// outs() << "Generate_req_sources: " << (generate_req_sources ? "true" : "false") << "\n";
-	// outs() << "Generation_directory: '" << generation_directory << "'\n";
-	// outs() << "Generation_header_template: '" << generation_header_template << "'\n";
-	// outs() << "Generation_source_template: '" << generation_source_template << "'\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
@@ -683,7 +790,7 @@ namespace clang
 	    // Until no more is found
 	    while (crpos != std::string::npos);
 
-	    outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
+	    //outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
 	    /*
 	     * Create function call for the request
@@ -709,8 +816,8 @@ namespace clang
 		std::string fromReqName = matches[4];
 		std::string reqName = matches[2];
 		
-		outs() << "!!!*** Prepare request comment match: from request name is '" << fromReqName
-		       << "' and request name is '"<< reqName << "'\n";
+		//outs() << "!!!*** Prepare request comment match: from request name is '" << fromReqName
+		//       << "' and request name is '"<< reqName << "'\n";
 
 		/*
 		 * First let's try to find a request that is initialized from a 
@@ -741,13 +848,14 @@ namespace clang
 		tool->run(newFrontendActionFactory(&finder).get());
 
 		// Display number of matches
-		outs() << "Found " << m_req_copy_collector.size() << " sprintf calls\n";
+		//outs() << "Found " << m_req_copy_collector.size() << " sprintf calls\n";
 		
 		// The collected records
 		struct StringLiteralRecord *lastRecord = (struct StringLiteralRecord *)nullptr;
 
 		// Some result that will be passed to the templating engine
 		std::string requestDefineValue;
+		std::string requestDefineName;
 		std::string fromReqNameLength;
 
 		// If result is not an empty set
@@ -786,58 +894,69 @@ namespace clang
 			bos << fromReqNameLengthSize;
 			fromReqNameLength = buffer.str();
 
-			// Display for debug
-			outs() << "Found literal at line #" << lastRecord->linenum
-			       << ": '" << lastRecord->literal->getString() << "'\n";
-			outs() << "     for a call at line #" << lastRecord->call_linenum << "'\n";
-			outs() << "     and declared at line #" << lastRecord->vardecl_linenum
-			       << ": '" << fromType.getAsString() << " " << fromReqNameLength << "'\n";
+			SourceRangeForStringLiterals *sr;
+			
+			if (findMacroStringLiteralDefAtLine(srcMgr,
+							    lastRecord->linenum,
+							    requestDefineName, requestDefineValue,
+							    &sr))
+			  {
+			    //unsigned literalStartLineNumber = srcMgr.getSpellingLineNumber(sr->m_macro_range.getBegin());
+			    //unsigned literalEndLineNumber = srcMgr.getSpellingLineNumber(sr->m_macro_range.getEnd());
+			    // outs() << "*>*>*> Request Literal '" << requestDefineName << "'from line #"
+			    // 	   << literalStartLineNumber << " to line #" << literalEndLineNumber << "\n";
+			    // outs() << "\"" << requestDefineValue <<"\"\n";
 
-			// Get the string literal value for templating engine (used in a #define)
-			requestDefineValue.assign(lastRecord->literal->getString());
-		      }
-		    
-		    // Compute function name
-		    function_name.assign("prepare");
-		    // Get match in rest string
-		    std::string rest(reqName);
-		    // Capitalize it
-		    rest[0] &= ~0x20;
-		    // And append to function name
-		    function_name.append(rest);
-		    
-		    // 'EXEC SQL' statement
-		    std::string requestExecSql = "prepare ";
-		    requestExecSql.append(reqName);
-		    requestExecSql.append(" from :");
-		    requestExecSql.append(fromReqName);
-		    
-		    if (generate_req_headers)
-		      {
-			string2_map values_map;
-			values_map["@RequestFunctionName@"] = function_name;
-			doRequestHeaderGeneration(diagEngine,
-						  generation_header_template,
-						  values_map);
-		      }
-		    
-		    if (generate_req_sources)
-		      {
-			string2_map values_map;
-			values_map["@FromRequestName@"] = fromReqName;
-			values_map["@FromRequestNameLength@"] = fromReqNameLength;
-			values_map["@RequestDefineName@"] = reqName;
-			values_map["@RequestDefineValue@"] = requestDefineValue;
-			values_map["@RequestFunctionName@"] = function_name;
-			values_map["@RequestExecSql@"] = requestExecSql;
-			doRequestSourceGeneration(diagEngine,
-						  generation_source_template,
-						  values_map);
+			    
+			  }
+			
+			else
+			  errs() << "ERROR !! Didn't found back macro expansion for "
+				 << "the string literal used at line number " << lastRecord->vardecl_linenum << "\n";
+	    
+			// Compute function name
+			function_name.assign("prepare");
+			// Get match in rest string
+			std::string rest(reqName);
+			// Capitalize it
+			rest[0] &= ~0x20;
+			// And append to function name
+			function_name.append(rest);
+			
+			// 'EXEC SQL' statement
+			std::string requestExecSql = "prepare ";
+			requestExecSql.append(reqName);
+			requestExecSql.append(" from :");
+			requestExecSql.append(fromReqName);
+			
+			if (generate_req_headers)
+			  {
+			    string2_map values_map;
+			    values_map["@RequestFunctionName@"] = function_name;
+			    doRequestHeaderGeneration(diagEngine,
+						      generation_header_template,
+						      values_map);
+			  }
+			
+			if (generate_req_sources)
+			  {
+			    string2_map values_map;
+			    values_map["@FromRequestName@"] = fromReqName;
+			    values_map["@FromRequestNameLength@"] = fromReqNameLength;
+			    values_map["@RequestDefineName@"] = requestDefineName;
+			    values_map["@RequestDefineValue@"] = requestDefineValue;
+			    values_map["@RequestFunctionName@"] = function_name;
+			    values_map["@RequestExecSql@"] = requestExecSql;
+			    doRequestSourceGeneration(diagEngine,
+						      generation_source_template,
+						      values_map);
+			    
+			  }
+			
+			// Now, emit errors, warnings and fixes
+			emitDiagAndFix(loc_start, loc_end, function_name);			
 		      }
 		  }
-
-		// Now, emit errors, warnings and fixes
-		emitDiagAndFix(loc_start, loc_end, function_name);
 	      }
 	    
 	    else

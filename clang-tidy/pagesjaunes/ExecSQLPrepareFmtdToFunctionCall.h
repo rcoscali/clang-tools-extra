@@ -32,60 +32,99 @@ namespace clang
       class ExecSQLPrepareFmtdToFunctionCall : public ClangTidyCheck 
       {
       public:
+
+	enum ExecSQLPrepareFmtdToFunctionCallErrorKind
+	  {
+	    // Error kind for no error
+	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
+	    // Error kind for access char data
+	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
+	    // Error kind for cannot find comment start
+	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
+	    // Error kind for comment do not match
+	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
+	    // Error kind for source generation failure
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+	    // Error kind for header generation failure
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+	    // Error kind for unsupported string literal charset
+	    EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+	    // Error kind for invalid group file
+	    EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+	    // Error kind for assignment not found
+	    EXEC_SQL_2_FUNC_ERROR_ASSIGNMENT_NOT_FOUND,
+	  };
+
 	// AST Context instance
 	ClangTidyContext *TidyContext;
 
+	/**
+	 * SourceRangeForStringLiterals
+	 *
+	 * @brief Collect data about macro expansion for string literals
+	 *
+	 * Instances of this class are created for each occurence of string literal 
+	 * expansions in macro. Each occurence allows to keep two source ranges:
+	 *  - one for the macro usage in source code (expansion usage location)
+	 *  - one for the macro definition used for expansion (macro definition location)
+	 * This class also keep the original macro identifier (identifier token for the 
+	 * name of the macro).
+	 */
 	class SourceRangeForStringLiterals
 	{
 	public:
+	  /* Default constructor */ 
 	  SourceRangeForStringLiterals() {};
-	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name, StringRef literal)
+	  /* Explicit constructor */ 
+	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
 	    : m_usage_range(urange),
 	      m_macro_range(mrange),
-	      m_macro_name(name),
-	      m_macro_literal(literal) {};
+	      m_macro_name(name) {};
+	  /* Instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
-	    m_macro_name(to_copy.m_macro_name),
-	    m_macro_literal(to_copy.m_macro_literal) {};	  
+	    m_macro_name(to_copy.m_macro_name) {};	  
+	  /* Const instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
-	    m_macro_name(to_copy.m_macro_name),
-	    m_macro_literal(to_copy.m_macro_literal) {};
+	    m_macro_name(to_copy.m_macro_name) {};
+	  /* Instance pointer constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
-	    m_macro_name(to_copy->m_macro_name),
-	    m_macro_literal(to_copy->m_macro_literal) {};
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
+	    m_macro_name(to_copy->m_macro_name) {};
+	  /* Const instance pointer constructor */ 
+	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
-	    m_macro_name(to_copy->m_macro_name),
-	    m_macro_literal(to_copy->m_macro_literal) {};
+	    m_macro_name(to_copy->m_macro_name) {};
+	  /* Const instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
-	    m_macro_literal = to_copy.m_macro_literal;
 	    return *this;
 	  }
+	  /* Instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
-	    m_macro_literal = to_copy.m_macro_literal;
 	    return *this;
 	  }
 	  
 	  SourceRange m_usage_range;
 	  SourceRange m_macro_range;
 	  StringRef m_macro_name;
-	  StringRef m_macro_literal;
 	};
+
+	/**
+	 * SourceRangeBefore
+	 */
 	class SourceRangeBefore
 	{
 	public:
@@ -110,6 +149,18 @@ namespace clang
 	void registerPPCallbacks(CompilerInstance &Compiler) override;
 	// Check a matched node
 	void check(const ast_matchers::MatchFinder::MatchResult &) override;
+
+	// Emit diagnostic and eventually fix it
+        void emitDiagAndFix(const SourceLocation&,
+			    const SourceLocation&,
+			    const std::string&,
+			    const std::string&);
+
+	// Emit error
+	void emitError(DiagnosticsEngine&,
+		       const SourceLocation&,
+		       enum ExecSQLPrepareFmtdToFunctionCallErrorKind,
+		       const std::string* msgptr = nullptr);
 
       protected:
 	/*
@@ -213,27 +264,6 @@ namespace clang
 
 	source_range_set_t m_macrosStringLiterals;
 	
-	enum ExecSQLPrepareFmtdToFunctionCallErrorKind
-	  {
-	    // Error kind for no error
-	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
-	    // Error kind for access char data
-	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
-	    // Error kind for cannot find comment start
-	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
-	    // Error kind for comment do not match
-	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
-	    // Error kind for source generation failure
-	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
-	    // Error kind for header generation failure
-	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
-	  };
-
-	// Emit diagnostic and eventually fix it
-        void emitDiagAndFix(const SourceLocation&,
-			    const SourceLocation&,
-			    const std::string&);
-
 	// Process a template file with values in map
 	bool processTemplate(const std::string&,
 			     const std::string&,
@@ -249,12 +279,6 @@ namespace clang
 				       const std::string&,
 				       string2_map&);
 	
-	// Emit error
-	void emitError(DiagnosticsEngine&,
-		       const SourceLocation&,
-		       enum ExecSQLPrepareFmtdToFunctionCallErrorKind,
-		       const std::string* msgptr = nullptr);
-
 	// Find macro string literal at a line
 	bool findMacroStringLiteralAtLine(SourceManager&,
 					  unsigned,
@@ -275,6 +299,10 @@ namespace clang
 	const unsigned source_generation_failure_diag_id;
 	// Diag id for header generation failure
 	const unsigned header_generation_failure_diag_id;
+	// Diag id for unsupported string literal charset
+	const unsigned unsupported_string_literal_charset_diag_id;
+	// Diag id for assignment not found
+	const unsigned assignment_not_found_diag_id;
 
 	// Json for request grouping
 	nlohmann::json request_groups;
@@ -297,6 +325,8 @@ namespace clang
 	const std::string generation_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
+	// Simplify request args list simplification
+	const bool generation_simplify_function_args;
       };
 
     } // namespace pagesjaunes

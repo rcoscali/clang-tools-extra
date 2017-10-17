@@ -39,44 +39,44 @@ namespace clang
 	{
 	public:
 	  SourceRangeForStringLiterals() {};
-	  SourceRangeForStringLiterals(SourceRange range, StringRef name, StringRef literal)
-	    : m_macro_range(range),
-	      m_macro_name(name),
-	      m_macro_literal(literal) {};
+	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
+	    : m_usage_range(urange),
+	      m_macro_range(mrange),
+	      m_macro_name(name) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
-	  : m_macro_range(to_copy.m_macro_range),
-	    m_macro_name(to_copy.m_macro_name),
-	    m_macro_literal(to_copy.m_macro_literal) {};	  
+	  : m_usage_range(to_copy.m_usage_range),
+	    m_macro_range(to_copy.m_macro_range),
+	    m_macro_name(to_copy.m_macro_name) {};	  
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
-	  : m_macro_range(to_copy.m_macro_range),
-	    m_macro_name(to_copy.m_macro_name),
-	    m_macro_literal(to_copy.m_macro_literal) {};
+	  : m_usage_range(to_copy.m_usage_range),
+	    m_macro_range(to_copy.m_macro_range),
+	    m_macro_name(to_copy.m_macro_name) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
-	  : m_macro_range(to_copy->m_macro_range),
-	    m_macro_name(to_copy->m_macro_name),
-	    m_macro_literal(to_copy->m_macro_literal) {};
+	  : m_usage_range(to_copy->m_usage_range),
+	    m_macro_range(to_copy->m_macro_range),
+	    m_macro_name(to_copy->m_macro_name) {};
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
-	  : m_macro_range(to_copy->m_macro_range),
-	    m_macro_name(to_copy->m_macro_name),
-	    m_macro_literal(to_copy->m_macro_literal) {};
+	  : m_usage_range(to_copy->m_usage_range),
+	    m_macro_range(to_copy->m_macro_range),
+	    m_macro_name(to_copy->m_macro_name) {};
 	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
 	  {
+	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
-	    m_macro_literal = to_copy.m_macro_literal;
 	    return *this;
 	  }
 	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
 	  {
+	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
-	    m_macro_literal = to_copy.m_macro_literal;
 	    return *this;
 	  }
 	  
+	  SourceRange m_usage_range;
 	  SourceRange m_macro_range;
 	  StringRef m_macro_name;
-	  StringRef m_macro_literal;
 	};
 	class SourceRangeBefore
 	{
@@ -89,7 +89,7 @@ namespace clang
 	    return (l.m_macro_range.getBegin() < r.m_macro_range.getBegin());
 	  }
 	};
-	using source_range_set_t = std::set<SourceRangeForStringLiterals, SourceRangeBefore>;
+	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
 	// Constructor
 	ExecSQLToFunctionCall(StringRef, ClangTidyContext *);

@@ -12,6 +12,7 @@
 #include "../ClangTidyModuleRegistry.h"
 #include "CCharToCXXString.h"
 #include "ExecSQLToFunctionCall.h"
+#include "ExecSQLOpenToFunctionCall.h"
 #include "ExecSQLPrepareToFunctionCall.h"
 #include "ExecSQLPrepareFmtdToFunctionCall.h"
 #include "DeIncludePreProC.h"
@@ -34,6 +35,7 @@ namespace clang
 	{
 	  CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
 	  CheckFactories.registerCheck<ExecSQLToFunctionCall> ("pagesjaunes-exec-sql-to-function-call");
+	  CheckFactories.registerCheck<ExecSQLOpenToFunctionCall> ("pagesjaunes-exec-sql-open-to-function-call");
 	  CheckFactories.registerCheck<ExecSQLPrepareToFunctionCall> ("pagesjaunes-exec-sql-prepare-to-function-call");
 	  CheckFactories.registerCheck<ExecSQLPrepareFmtdToFunctionCall> ("pagesjaunes-exec-sql-prepare-fmtd-to-function-call");
 	  CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
@@ -94,6 +96,18 @@ namespace clang
 	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-header-template"] = "./pagesjaunes_prepare_fmt.h.tmpl";
 	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-source-template"] = "./pagesjaunes_prepare_fmt.pc.tmpl";
 	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-request-groups"] = "request_groups.json";
+	  Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-simplify-function-args"] = "0";
+
+	  /*
+	   * 
+	   */
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generate-requests-headers"] = "1";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generate-requests-sources"] = "1";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-directory"] = "./REQSQL/src";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-header-template"] = "./pagesjaunes_open.h.tmpl";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-source-template"] = "./pagesjaunes_open.pc.tmpl";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-request-groups"] = "request_groups.json";
+	  Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-simplify-function-args"] = "0";
 
 	  return Options;
 	}
