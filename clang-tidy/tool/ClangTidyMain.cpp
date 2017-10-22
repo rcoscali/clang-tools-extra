@@ -199,6 +199,22 @@ code with clang-apply-replacements.
                                         cl::value_desc("filename"),
                                         cl::cat(ClangTidyCategory));
 
+static cl::opt<std::string> ExportPatch("export-patch", cl::desc(R"(
+A File to store suggested patch in. The
+stored patch can be applied to the input source
+code with clang-apply-replacements.
+)"),
+                                        cl::value_desc("filename"),
+                                        cl::cat(ClangTidyCategory));
+
+static cl::opt<std::string> ExportPatchSource("export-patch-source", cl::desc(R"(
+The file used as an original source used for generating
+patch file numbers. For success it should be the processed file
+with only some include removed.
+)"),
+                                        cl::value_desc("filename"),
+                                        cl::cat(ClangTidyCategory));
+
 static cl::opt<bool> Quiet("quiet", cl::desc(R"(
 Run clang-tidy in quiet mode. This suppresses
 printing statistics about ignored warnings and
@@ -294,6 +310,7 @@ static std::unique_ptr<ClangTidyOptionsProvider> createOptionsProvider() {
   DefaultOptions.AnalyzeTemporaryDtors = AnalyzeTemporaryDtors;
   DefaultOptions.FormatStyle = FormatStyle;
   DefaultOptions.User = llvm::sys::Process::GetEnv("USER");
+  DefaultOptions.ExportPatchSource = "";
   // USERNAME is used on Windows.
   if (!DefaultOptions.User)
     DefaultOptions.User = llvm::sys::Process::GetEnv("USERNAME");
@@ -311,6 +328,8 @@ static std::unique_ptr<ClangTidyOptionsProvider> createOptionsProvider() {
     OverrideOptions.AnalyzeTemporaryDtors = AnalyzeTemporaryDtors;
   if (FormatStyle.getNumOccurrences() > 0)
     OverrideOptions.FormatStyle = FormatStyle;
+  if (ExportPatchSource.getNumOccurrences() > 0)
+    OverrideOptions.ExportPatchSource = ExportPatchSource;
 
   if (!Config.empty()) {
     if (llvm::ErrorOr<ClangTidyOptions> ParsedConfig =
@@ -351,6 +370,9 @@ static int clangTidyMain(int argc, const char **argv) {
   }
   ClangTidyOptions EffectiveOptions = OptionsProvider->getOptions(FilePath);
   std::vector<std::string> EnabledChecks = getCheckNames(EffectiveOptions);
+
+  SmallString<256> ExportPatchSource("");
+
 
   if (ExplainConfig) {
     // FIXME: Show other ClangTidyOptions' fields, like ExtraArg.
@@ -423,10 +445,20 @@ static int clangTidyMain(int argc, const char **argv) {
     std::error_code EC;
     llvm::raw_fd_ostream OS(ExportFixes, EC, llvm::sys::fs::F_None);
     if (EC) {
-      llvm::errs() << "Error opening output file: " << EC.message() << '\n';
+      llvm::errs() << "Error opening fixes output file: " << EC.message() << '\n';
       return 1;
     }
     exportReplacements(FilePath.str(), Errors, OS);
+  }
+
+  if (!ExportPatch.empty() && !Errors.empty()) {
+    std::error_code EC;
+    llvm::raw_fd_ostream OS(ExportPatch, EC, llvm::sys::fs::F_None);
+    if (EC) {
+      llvm::errs() << "Error opening patch output file: " << EC.message() << '\n';
+      return 1;
+    }
+    exportReplacementsAsPatch(FilePath.str(), ExportPatchSource, Errors, OS);
   }
 
   if (!Quiet) {

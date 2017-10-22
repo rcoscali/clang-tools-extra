@@ -1,4 +1,4 @@
-//===--- ExecSQLPrepareFmtdToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ExecSQLLOBFreeToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBFREETOFUNCTIONCALL_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBFREETOFUNCTIONCALL_H
 
 #include "../ClangTidy.h"
 #include "llvm/ADT/StringRef.h"
@@ -32,78 +32,36 @@ namespace clang
     {
 
       // Checks that argument name match parameter name rules.
-      class ExecSQLPrepareFmtdToFunctionCall : public ClangTidyCheck 
+      class ExecSQLLOBFreeToFunctionCall : public ClangTidyCheck 
       {
       public:
-
-	enum ExecSQLPrepareFmtdToFunctionCallErrorKind
-	  {
-	    // Error kind for no error
-	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
-	    // Error kind for access char data
-	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
-	    // Error kind for cannot find comment start
-	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
-	    // Error kind for comment do not match
-	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
-	    // Error kind for source generation failure
-	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
-	    // Error kind for header generation failure
-	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
-	    // Error kind for unsupported string literal charset
-	    EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
-	    // Error kind for invalid group file
-	    EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
-	    // Error kind for assignment not found
-	    EXEC_SQL_2_FUNC_ERROR_ASSIGNMENT_NOT_FOUND,
-	  };
-
 	// AST Context instance
 	ClangTidyContext *TidyContext;
 
-	/**
-	 * SourceRangeForStringLiterals
-	 *
-	 * @brief Collect data about macro expansion for string literals
-	 *
-	 * Instances of this class are created for each occurence of string literal 
-	 * expansions in macro. Each occurence allows to keep two source ranges:
-	 *  - one for the macro usage in source code (expansion usage location)
-	 *  - one for the macro definition used for expansion (macro definition location)
-	 * This class also keep the original macro identifier (identifier token for the 
-	 * name of the macro).
-	 */
 	class SourceRangeForStringLiterals
 	{
 	public:
-	  /* Default constructor */ 
 	  SourceRangeForStringLiterals() {};
-	  /* Explicit constructor */ 
 	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
 	    : m_usage_range(urange),
 	      m_macro_range(mrange),
 	      m_macro_name(name) {};
-	  /* Instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};	  
-	  /* Const instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};
-	  /* Instance pointer constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
-	  /* Const instance pointer constructor */ 
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const *to_copy)
+	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
-	  /* Const instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
@@ -111,7 +69,6 @@ namespace clang
 	    m_macro_name= to_copy.m_macro_name;
 	    return *this;
 	  }
-	  /* Instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
@@ -124,10 +81,6 @@ namespace clang
 	  SourceRange m_macro_range;
 	  StringRef m_macro_name;
 	};
-
-	/**
-	 * SourceRangeBefore
-	 */
 	class SourceRangeBefore
 	{
 	public:
@@ -142,7 +95,7 @@ namespace clang
 	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
 	// Constructor
-	ExecSQLPrepareFmtdToFunctionCall(StringRef, ClangTidyContext *);
+	ExecSQLLOBFreeToFunctionCall(StringRef, ClangTidyContext *);
 
 	// Store check Options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
@@ -153,17 +106,63 @@ namespace clang
 	// Check a matched node
 	void check(const ast_matchers::MatchFinder::MatchResult &) override;
 
-	// Emit diagnostic and eventually fix it
-        void emitDiagAndFix(const SourceLocation&,
-			    const SourceLocation&,
-			    const std::string&,
-			    const std::string&);
+      protected:
+	/*
+	 * sprintf finder collector in case of a prepare request
+	 * Literal must be directly copied in the :reqName var
+	 */
+	struct StringLiteralRecord
+	{
+	  const CallExpr *callExpr;
+	  unsigned call_linenum;
+	  const StringLiteral *literal;
+	  unsigned linenum;
+	  const VarDecl *varDecl;
+	  unsigned vardecl_linenum;
+	};
 
-	// Emit error
-	void emitError(DiagnosticsEngine&,
-		       const SourceLocation&,
-		       enum ExecSQLPrepareFmtdToFunctionCallErrorKind,
-		       const std::string* msgptr = nullptr);
+	// Collector for possible sprintf calls
+	std::vector<struct StringLiteralRecord *> m_req_copy_collector;
+	
+      private:
+
+	/**
+	 * CopyRequestMatcher
+	 *
+	 */
+	class CopyRequestMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit CopyRequestMatcher(ExecSQLLOBFreeToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct StringLiteralRecord *record = new(struct StringLiteralRecord);
+	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
+	    record->call_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
+	    record->literal = result.Nodes.getNodeAs<StringLiteral>("reqLiteral");
+	    record->linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->literal->getLocStart()));
+	    m_parent->m_req_copy_collector.push_back(record);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("vardecl");
+	    record->vardecl_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_copy_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLLOBFreeToFunctionCall instance
+	  ExecSQLLOBFreeToFunctionCall *m_parent;
+	};
 
       protected:
 	/*
@@ -192,7 +191,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindAssignMatcher(ExecSQLPrepareFmtdToFunctionCall *parent)
+	  explicit FindAssignMatcher(ExecSQLLOBFreeToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -211,8 +210,8 @@ namespace clang
 	  }
 
 	private:
-	  // Parent ExecSQLPrepareFmtdToFunctionCall instance
-	  ExecSQLPrepareFmtdToFunctionCall *m_parent;
+	  // Parent ExecSQLLOBFreeToFunctionCall instance
+	  ExecSQLLOBFreeToFunctionCall *m_parent;
 	};
 
       protected:
@@ -233,6 +232,8 @@ namespace clang
 	
       private:
 
+	source_range_set_t m_macrosStringLiterals;
+	
 	/**
 	 * FindReqFmtMatcher
 	 *
@@ -241,7 +242,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindReqFmtMatcher(ExecSQLPrepareFmtdToFunctionCall *parent)
+	  explicit FindReqFmtMatcher(ExecSQLLOBFreeToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -259,14 +260,31 @@ namespace clang
 	  }
 
 	private:
-	  // Parent ExecSQLPrepareFmtdToFunctionCall instance
-	  ExecSQLPrepareFmtdToFunctionCall *m_parent;
+	  // Parent ExecSQLLOBFreeToFunctionCall instance
+	  ExecSQLLOBFreeToFunctionCall *m_parent;
 	};
 
-      private:
+	enum ExecSQLLOBFreeToFunctionCallErrorKind
+	  {
+	    // Error kind for no error
+	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
+	    // Error kind for access char data
+	    EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA,
+	    // Error kind for cannot find comment start
+	    EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START,
+	    // Error kind for comment do not match
+	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
+	    // Error kind for source generation failure
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+	    // Error kind for header generation failure
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+	  };
 
-	source_range_set_t m_macrosStringLiterals;
-	
+	// Emit diagnostic and eventually fix it
+        void emitDiagAndFix(const SourceLocation&,
+			    const SourceLocation&,
+			    const std::string&);
+
 	// Process a template file with values in map
 	bool processTemplate(const std::string&,
 			     const std::string&,
@@ -282,11 +300,11 @@ namespace clang
 				       const std::string&,
 				       string2_map&);
 	
-	// Find macro string literal at a line
-	bool findMacroStringLiteralAtLine(SourceManager&,
-					  unsigned,
-					  std::string&, std::string&,
-					  SourceRangeForStringLiterals**);
+	// Emit error
+	void emitError(DiagnosticsEngine&,
+		       const SourceLocation&,
+		       enum ExecSQLLOBFreeToFunctionCallErrorKind,
+		       const std::string* msgptr = nullptr);
 
 	// Diag id for unexpected error
 	const unsigned unexpected_diag_id;
@@ -302,10 +320,6 @@ namespace clang
 	const unsigned source_generation_failure_diag_id;
 	// Diag id for header generation failure
 	const unsigned header_generation_failure_diag_id;
-	// Diag id for unsupported string literal charset
-	const unsigned unsupported_string_literal_charset_diag_id;
-	// Diag id for assignment not found
-	const unsigned assignment_not_found_diag_id;
 
 	// Json for request grouping
 	nlohmann::json request_groups;
@@ -322,18 +336,24 @@ namespace clang
 	const bool generate_req_sources;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
-	// Request header template (default: "./pagesjaunes_prepare_fmt.h.tmpl")
+	// Request header template (default: "./pagesjaunes.h.tmpl")
 	const std::string generation_header_template;
-	// Request source template (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
+	// Request source template (default: "./pagesjaunes.pc.tmpl")
 	const std::string generation_source_template;
+	// Request header template for prepare requests (default: "./pagesjaunes_prepare.h.tmpl")
+	const std::string generation_prepare_header_template;
+	// Request source template for prepare requests (default: "./pagesjaunes_prepare.pc.tmpl")
+	const std::string generation_prepare_source_template;
+	// Request header template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.h.tmpl")
+	const std::string generation_prepare_fmt_header_template;
+	// Request source template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
+	const std::string generation_prepare_fmt_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
-	// Simplify request args list simplification
-	const bool generation_simplify_function_args;
       };
 
     } // namespace pagesjaunes
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLPREPAREFMTDTOFUNCTIONCALL_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBFREETOFUNCTIONCALL_H

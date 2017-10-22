@@ -587,5 +587,21 @@ void exportReplacements(const llvm::StringRef MainFilePath,
   YAML << TUD;
 }
 
+  void exportReplacementsAsPatch(const llvm::StringRef MainFilePath,
+				 const llvm::StringRef ExportPatchSource,
+				 const std::vector<ClangTidyError> &Errors,
+				 raw_ostream &OS)
+  {
+    TranslationUnitDiagnostics TUD;
+    TUD.MainSourceFile = MainFilePath;
+    for (const auto &Error : Errors) {
+      tooling::Diagnostic Diag = Error;
+      TUD.Diagnostics.insert(TUD.Diagnostics.end(), Diag);
+    }
+    
+    //yaml::Output YAML(OS);
+    //YAML << TUD;
+  }
+
 } // namespace tidy
 } // namespace clang

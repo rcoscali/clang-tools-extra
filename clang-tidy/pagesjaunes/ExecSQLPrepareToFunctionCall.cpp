@@ -464,7 +464,7 @@ namespace clang
 	SourceLocation dummy;
 	// Compute output file pathname
 	std::string fileName = values_map["@RequestFunctionName@"];
-	fileName.append(".cpp");
+	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
 	// Process template for creating source file
@@ -496,7 +496,7 @@ namespace clang
 	SourceLocation dummy;
 	// Compute output file pathname
 	std::string fileName = values_map["@RequestFunctionName@"];
-	fileName.append(".h");
+	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
 	// Process template for creating header file
@@ -680,8 +680,12 @@ namespace clang
 	FileID startFid = srcMgr.getFileID(loc_start);
 	// Get compound statement start line num
 	unsigned startLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(loc_start));
+	std::stringbuf slnbuffer;
+	std::ostream slnos (&slnbuffer);
+	slnos << startLineNum;
+	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
 
-	// outs() << "Found one result at line " << startLineNum << "\n";
+	outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
@@ -933,6 +937,7 @@ namespace clang
 			  {
 			    string2_map values_map;
 			    values_map["@RequestFunctionName@"] = function_name;
+			    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 			    doRequestHeaderGeneration(diagEngine,
 						      generation_header_template,
 						      values_map);
@@ -942,6 +947,7 @@ namespace clang
 			  {
 			    string2_map values_map;
 			    values_map["@FromRequestName@"] = fromReqName;
+			    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 			    values_map["@FromRequestNameLength@"] = fromReqNameLength;
 			    values_map["@RequestDefineName@"] = requestDefineName;
 			    values_map["@RequestDefineValue@"] = requestDefineValue;

@@ -1,4 +1,4 @@
-//===--- ExecSQLToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ExecSQLLOBReadToFunctionCall.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBREADTOFUNCTIONCALL_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBREADTOFUNCTIONCALL_H
 
 #include "../ClangTidy.h"
 #include "llvm/ADT/StringRef.h"
@@ -32,44 +32,44 @@ namespace clang
     {
 
       // Checks that argument name match parameter name rules.
-      class ExecSQLToFunctionCall : public ClangTidyCheck 
+      class ExecSQLLOBReadToFunctionCall : public ClangTidyCheck 
       {
       public:
 	// AST Context instance
 	ClangTidyContext *TidyContext;
 
-	class SourceRangeForStringLiterals
+	class SourceRangeForIntegerNStringLiterals
 	{
 	public:
-	  SourceRangeForStringLiterals() {};
-	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
+	  SourceRangeForIntegerNStringLiterals() {};
+	  SourceRangeForIntegerNStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
 	    : m_usage_range(urange),
 	      m_macro_range(mrange),
 	      m_macro_name(name) {};
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
+	  SourceRangeForIntegerNStringLiterals(SourceRangeForIntegerNStringLiterals& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};	  
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
+	  SourceRangeForIntegerNStringLiterals(SourceRangeForIntegerNStringLiterals const& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
+	  SourceRangeForIntegerNStringLiterals(SourceRangeForIntegerNStringLiterals *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
+	  SourceRangeForIntegerNStringLiterals(SourceRangeForIntegerNStringLiterals const*to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
-	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
+	  SourceRangeForIntegerNStringLiterals& operator =(const SourceRangeForIntegerNStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
 	    m_macro_name= to_copy.m_macro_name;
 	    return *this;
 	  }
-	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
+	  SourceRangeForIntegerNStringLiterals& operator =(SourceRangeForIntegerNStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
 	    m_macro_range = to_copy.m_macro_range;
@@ -84,7 +84,7 @@ namespace clang
 	class SourceRangeBefore
 	{
 	public:
-	  bool operator()(const SourceRangeForStringLiterals &l, const SourceRangeForStringLiterals &r) const
+	  bool operator()(const SourceRangeForIntegerNStringLiterals &l, const SourceRangeForIntegerNStringLiterals &r) const
 	  {
 	    if (l.m_macro_range.getBegin() == r.m_macro_range.getBegin())
 	      return (l.m_macro_range.getEnd() < r.m_macro_range.getEnd());
@@ -92,10 +92,10 @@ namespace clang
 	    return (l.m_macro_range.getBegin() < r.m_macro_range.getBegin());
 	  }
 	};
-	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
-	
+	using source_range_set_t = std::multiset<SourceRangeForIntegerNStringLiterals, SourceRangeBefore>;
+		
 	// Constructor
-	ExecSQLToFunctionCall(StringRef, ClangTidyContext *);
+	ExecSQLLOBReadToFunctionCall(StringRef, ClangTidyContext *);
 
 	// Store check Options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
@@ -105,114 +105,6 @@ namespace clang
 	void registerPPCallbacks(CompilerInstance &Compiler) override;
 	// Check a matched node
 	void check(const ast_matchers::MatchFinder::MatchResult &) override;
-
-      protected:
-	/*
-	 * sprintf finder collector in case of a prepare request
-	 * Literal must be directly copied in the :reqName var
-	 */
-	struct StringLiteralRecord
-	{
-	  const CallExpr *callExpr;
-	  unsigned call_linenum;
-	  const StringLiteral *literal;
-	  unsigned linenum;
-	  const VarDecl *varDecl;
-	  unsigned vardecl_linenum;
-	};
-
-	// Collector for possible sprintf calls
-	std::vector<struct StringLiteralRecord *> m_req_copy_collector;
-	
-      private:
-
-	/**
-	 * CopyRequestMatcher
-	 *
-	 */
-	class CopyRequestMatcher : public MatchFinder::MatchCallback
-	{
-	public:
-	  /// Explicit constructor taking the parent instance as param
-	  explicit CopyRequestMatcher(ExecSQLToFunctionCall *parent)
-	    : m_parent(parent)
-	  {}
-
-	  /// The run method adding all calls in the collection vector
-	  virtual void
-	  run(const MatchFinder::MatchResult &result)
-	  {
-	    struct StringLiteralRecord *record = new(struct StringLiteralRecord);
-	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
-	    record->call_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
-	    record->literal = result.Nodes.getNodeAs<StringLiteral>("reqLiteral");
-	    record->linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->literal->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
-	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("vardecl");
-	    record->vardecl_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
-	    m_parent->m_req_copy_collector.push_back(record);
-	  }
-
-	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
-	};
-
-      protected:
-	/*
-	 * assignment finder collector in case of a prepare request
-	 * Literal is created from params and formatted with sprint 
-	 * then assigned to the from :reqName.
-	 */
-	struct AssignmentRecord
-	{
-	  const BinaryOperator *binop;
-	  const DeclRefExpr *lhs;
-	  const DeclRefExpr *rhs;
-	  unsigned binop_linenum;
-	};
-
-	// Collector for possible assignments
-	std::vector<struct AssignmentRecord *> m_req_assign_collector;
-	
-      private:
-
-	/**
-	 * FindAssignMatcher
-	 *
-	 */
-	class FindAssignMatcher : public MatchFinder::MatchCallback
-	{
-	public:
-	  /// Explicit constructor taking the parent instance as param
-	  explicit FindAssignMatcher(ExecSQLToFunctionCall *parent)
-	    : m_parent(parent)
-	  {}
-
-	  /// The run method adding all calls in the collection vector
-	  virtual void
-	  run(const MatchFinder::MatchResult &result)
-	  {
-	    struct AssignmentRecord *record = new(struct AssignmentRecord);
-	    record->lhs = result.Nodes.getNodeAs<DeclRefExpr>("lhs");
-	    record->rhs = result.Nodes.getNodeAs<DeclRefExpr>("rhs");
-	    record->binop = result.Nodes.getNodeAs<BinaryOperator>("binop");
-	    record->binop_linenum =
-	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->binop->getLocStart()));
-	    m_parent->m_req_assign_collector.push_back(record);
-	  }
-
-	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
-	};
 
       protected:
 	/*
@@ -230,19 +122,35 @@ namespace clang
 	// Collector for possible assignments
 	std::vector<struct ReqFmtRecord *> m_req_fmt_collector;
 	
+	/*
+	 * sprintf finder collector in case of a prepare request
+	 * Literal must be directly copied in the :reqName var
+	 */
+	struct VarDeclMatchRecord
+	{
+	  const VarDecl *varDecl;
+	  unsigned linenum;
+	  char dummy1[16];
+	  char dummy2[16];
+	};
+
+	// Collector for possible sprintf calls
+	std::vector<struct VarDeclMatchRecord *> m_req_var_decl_collector;
+	
       private:
 
 	source_range_set_t m_macrosStringLiterals;
-	
+	source_range_set_t m_macrosIntegerLiterals;
+
 	/**
-	 * FindReqFmtMatcher
+	 * VarDeclMatcher
 	 *
 	 */
-	class FindReqFmtMatcher : public MatchFinder::MatchCallback
+	class VarDeclMatcher : public MatchFinder::MatchCallback
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindReqFmtMatcher(ExecSQLToFunctionCall *parent)
+	  explicit VarDeclMatcher(ExecSQLLOBReadToFunctionCall *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -250,21 +158,68 @@ namespace clang
 	  virtual void
 	  run(const MatchFinder::MatchResult &result)
 	  {
-	    struct ReqFmtRecord *record = new(struct ReqFmtRecord);
-	    record->callExpr = result.Nodes.getNodeAs<CallExpr>("callExpr");
-	    record->arg0 = result.Nodes.getNodeAs<DeclRefExpr>("arg0");
-	    record->callexpr_linenum =
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
+	    record->linenum =
 	      result.Context->getSourceManager()
-	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->callExpr->getLocStart()));
-	    m_parent->m_req_fmt_collector.push_back(record);
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_var_decl_collector.push_back(record);
 	  }
 
 	private:
-	  // Parent ExecSQLToFunctionCall instance
-	  ExecSQLToFunctionCall *m_parent;
+	  // Parent ExecSQLLOBReadToFunctionCall instance
+	  ExecSQLLOBReadToFunctionCall *m_parent;
+	};
+	
+      protected:
+	/*
+	 * assignment finder collector in case of a LOB Read request
+	 */
+	struct AssignmentRecord
+	{
+	  const BinaryOperator *binop;
+	  const MemberExpr *lhs;
+	  const DeclRefExpr *cxxrecord;
+	  unsigned binop_linenum;
 	};
 
-	enum ExecSQLToFunctionCallErrorKind
+	// Collector for possible assignments
+	std::vector<struct AssignmentRecord *> m_req_assign_collector;
+	
+      private:
+
+	/**
+	 * FindAssignMatcher
+	 *
+	 */
+	class FindAssignMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit FindAssignMatcher(ExecSQLLOBReadToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct AssignmentRecord *record = new(struct AssignmentRecord);
+	    record->cxxrecord = result.Nodes.getNodeAs<DeclRefExpr>("lhs");
+	    record->lhs = result.Nodes.getNodeAs<MemberExpr>("lhs");
+	    record->binop = result.Nodes.getNodeAs<BinaryOperator>("binop");
+	    record->binop_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->binop->getLocStart()));
+	    m_parent->m_req_assign_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLLOBReadToFunctionCall instance
+	  ExecSQLLOBReadToFunctionCall *m_parent;
+	};
+
+	enum ExecSQLLOBReadToFunctionCallErrorKind
 	  {
 	    // Error kind for no error
 	    EXEC_SQL_2_FUNC_ERROR_NO_ERROR = 0,
@@ -303,9 +258,32 @@ namespace clang
 	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
-		       enum ExecSQLToFunctionCallErrorKind,
+		       enum ExecSQLLOBReadToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
+	// Find a macro string literal definition at provided line number
+	bool findMacroStringLiteralDefAtLine(SourceManager &,
+					     unsigned,
+					     std::string&, std::string&,
+					     SourceRangeForIntegerNStringLiterals **record);
+
+	// Find a macro string literal expansion at provided line number
+	bool findMacroStringLiteralAtLine(SourceManager &,
+					  unsigned,
+					  std::string&, std::string&,
+					  SourceRangeForIntegerNStringLiterals **record);
+
+	// Find a specified symbol decl
+	const VarDecl* findSymbolInFunction(ClangTool *,
+					    std::string&,
+					    const FunctionDecl *);
+
+	// Find assignment from the VARCHAR declare
+	const BinaryOperator *findRequestIntoMemberAssignment(ClangTool *,
+							      std::string&, std::string&,
+							      std::string&, std::string&,
+							      const FunctionDecl *);
+	  
 	// Diag id for unexpected error
 	const unsigned unexpected_diag_id;
 	// Diag id for no error
@@ -356,4 +334,4 @@ namespace clang
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLTOFUNCTIONCALL_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBREADTOFUNCTIONCALL_H

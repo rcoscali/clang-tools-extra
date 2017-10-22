@@ -1,4 +1,4 @@
-//===--- ExecSQLOpenToFunctionCall.cpp - clang-tidy ----------------------------===//
+//===--- ExecSQLFetchToFunctionCall.cpp - clang-tidy ----------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <string>
 
-#include "ExecSQLOpenToFunctionCall.h"
+#include "ExecSQLFetchToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -41,8 +41,8 @@ namespace clang
 	class GetStringLiteralsDefines : public PPCallbacks
 	{
 	public:
-	  explicit GetStringLiteralsDefines(ExecSQLOpenToFunctionCall *parent,
-					    ExecSQLOpenToFunctionCall::source_range_set_t *srset)
+	  explicit GetStringLiteralsDefines(ExecSQLFetchToFunctionCall *parent,
+					    ExecSQLFetchToFunctionCall::source_range_set_t *srset)
 	    : m_parent(parent),
 	      m_src_mgr(m_parent->TidyContext->getASTContext()->getSourceManager()),
 	      m_diag_engine(m_parent->TidyContext->getASTContext()->getDiagnostics()),
@@ -96,7 +96,7 @@ namespace clang
 			//errs() << "*** Token for weird string (" << slKind << ") found\n";
 			m_parent->emitError(m_diag_engine,
 					    t.getLocation(),
-					    ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+					    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
 					    &slKind);
 		      }
 		  }
@@ -104,8 +104,8 @@ namespace clang
 		if (have_literal)
 		  {
 		    //outs() << "Adding macro '" << macroName << "' expansion at " << range.getBegin().printToString(m_src_mgr) << "...'\n";
-		    ExecSQLOpenToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLOpenToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
+		    ExecSQLFetchToFunctionCall::SourceRangeForStringLiterals *ent
+		      = new ExecSQLFetchToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -118,17 +118,17 @@ namespace clang
 	  }
 	  
 	private:
-	  ExecSQLOpenToFunctionCall *m_parent;
+	  ExecSQLFetchToFunctionCall *m_parent;
 	  const SourceManager &m_src_mgr; 
 	  DiagnosticsEngine &m_diag_engine;
-	  ExecSQLOpenToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
+	  ExecSQLFetchToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
 	};
       } // namespace
       
       /**
-       * ExecSQLOpenToFunctionCall constructor
+       * ExecSQLFetchToFunctionCall constructor
        *
-       * @brief Constructor for the ExecSQLOpenToFunctionCall rewriting check
+       * @brief Constructor for the ExecSQLFetchToFunctionCall rewriting check
        *
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
@@ -144,8 +144,8 @@ namespace clang
        * @param Name    A StringRef for the new check name
        * @param Context The ClangTidyContext allowing to access other contexts
        */
-      ExecSQLOpenToFunctionCall::ExecSQLOpenToFunctionCall(StringRef Name,
-							   ClangTidyContext *Context)
+      ExecSQLFetchToFunctionCall::ExecSQLFetchToFunctionCall(StringRef Name,
+							     ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
 
@@ -199,10 +199,10 @@ namespace clang
 					   "./")),
 	  /// Generation header default template (string)
 	  generation_header_template(Options.get("Generation-header-template",
-						 "./pagesjaunes_open.h.tmpl")),
+						 "./pagesjaunes_fetch.h.tmpl")),
 	  /// Generation source default template (string)
 	  generation_source_template(Options.get("Generation-source-template",
-						 "./pagesjaunes_open.pc.tmpl")),
+						 "./pagesjaunes_fetch.pc.tmpl")),
 	  /// Request grouping option: Filename containing a json map for
 	  /// a group name indexing a vector of requests name
 	  generation_request_groups(Options.get("Generation-request-groups",
@@ -242,7 +242,7 @@ namespace clang
 	    errs() << "Cannot load groups file: '" << generation_request_groups << "'\n";
 	    emitError(Context->getASTContext()->getDiagnostics(),
 		      SourceLocation(),
-		      ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+		      ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
 		      &generation_request_groups);
 	  }
       }
@@ -264,7 +264,7 @@ namespace clang
        * @param Opts	The option map in which to store supported options
        */
       void
-      ExecSQLOpenToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      ExecSQLFetchToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
@@ -289,7 +289,7 @@ namespace clang
        *                us AST node.
        */
       void 
-      ExecSQLOpenToFunctionCall::registerMatchers(MatchFinder *Finder) 
+      ExecSQLFetchToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
@@ -300,7 +300,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLOpenToFunctionCall::registerPPCallbacks
+       * ExecSQLFetchToFunctionCall::registerPPCallbacks
        *
        * @brief Register callback for intercepting all pre-processor actions
        *
@@ -310,7 +310,7 @@ namespace clang
        *
        * @param[in] compiler	the compiler instance we will intercept
        */
-      void ExecSQLOpenToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+      void ExecSQLFetchToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
 	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -319,7 +319,7 @@ namespace clang
       
       
       /*
-       * ExecSQLOpenToFunctionCall::emitDiagAndFix
+       * ExecSQLFetchToFunctionCall::emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
@@ -336,7 +336,7 @@ namespace clang
        * @param function_name   The function name that will be called
        */
       void
-      ExecSQLOpenToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
+      ExecSQLFetchToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
 					    const SourceLocation& loc_end,
 					    const std::string& function_name)
       {
@@ -360,7 +360,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLOpenToFunctionCall::processTemplate
+       * ExecSQLFetchToFunctionCall::processTemplate
        *
        * @brief Process a template file with values from the 
        *        provided map
@@ -373,7 +373,7 @@ namespace clang
        * @retval false 	if something wrong occurs
        */
       bool
-      ExecSQLOpenToFunctionCall::processTemplate(const std::string& tmpl,
+      ExecSQLFetchToFunctionCall::processTemplate(const std::string& tmpl,
 					     const std::string& fname,
 					     string2_map& values_map)
       {
@@ -447,7 +447,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLOpenToFunctionCall::doRequestSourceGeneration
+       * ExecSQLFetchToFunctionCall::doRequestSourceGeneration
        *
        * @brief Generate source file for request from template
        *
@@ -460,7 +460,7 @@ namespace clang
        *
        */
       void
-      ExecSQLOpenToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLFetchToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {
@@ -474,12 +474,12 @@ namespace clang
 	if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
 		    &fileName);
       }
       
       /**
-       * ExecSQLOpenToFunctionCall::doRequestHeaderGeneration
+       * ExecSQLFetchToFunctionCall::doRequestHeaderGeneration
        *
        * @brief Generate header file for request from template
        *
@@ -492,7 +492,7 @@ namespace clang
        *
        */
       void
-      ExecSQLOpenToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLFetchToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {	
@@ -506,7 +506,7 @@ namespace clang
 	if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
 		    &fileName);
       }
 	
@@ -526,9 +526,9 @@ namespace clang
        * @param kind            Kind of error to report
        */
       void
-      ExecSQLOpenToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
+      ExecSQLFetchToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
 				       const SourceLocation& err_loc,
-				       enum ExecSQLOpenToFunctionCallErrorKind kind,
+				       enum ExecSQLFetchToFunctionCallErrorKind kind,
 				       const std::string* msgptr)
       {
 	std::string msg;
@@ -547,42 +547,42 @@ namespace clang
 	    break;
 
 	    /** No error ID: it should never occur */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
 	    diag_engine.Report(err_loc, no_error_diag_id);
 	    break;
 
 	    /** Access char data diag ID */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
 	    diag_engine.Report(err_loc, access_char_data_diag_id);
 	    break;
 
 	    /** Can't find a comment */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
 	    diag_engine.Report(err_loc, cant_find_comment_diag_id);
 	    break;
 
 	    /** Cannot match comment */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
 	    diag_engine.Report(err_loc, comment_dont_match_diag_id);
 	    break;
 
 	    /** Cannot generate request source file (no location) */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
 	    diag_engine.Report(source_generation_failure_diag_id).AddString(msg);
 	    break;
 
 	    /** Cannot generate request header file (no location) */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
 	    diag_engine.Report(header_generation_failure_diag_id).AddString(msg);
 	    break;
 
 	    /** Unsupported String Literal charset */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
 	    diag_engine.Report(unsupported_string_literal_charset_diag_id).AddString(msg);
 	    break;
 
 	    /** Invalid groups file error */
-	  case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+	  case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
 	    diag_engine.Report(unsupported_string_literal_charset_diag_id).AddString(msg);
 	    break;
 	    
@@ -590,7 +590,7 @@ namespace clang
       }
       
       /**
-       * ExecSQLOpenToFunctionCall::findMacroStringLiteralDefAtLine
+       * ExecSQLFetchToFunctionCall::findMacroStringLiteralDefAtLine
        *
        * @brief find a macro expansion for a string literal used for a request
        *
@@ -609,7 +609,7 @@ namespace clang
        *
        */
       bool
-      ExecSQLOpenToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
+      ExecSQLFetchToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
 								    unsigned ln,
 								    std::string& name, std::string& val,
 								    SourceRangeForStringLiterals **record = nullptr)
@@ -659,7 +659,7 @@ namespace clang
        * @return The pointer to the varDecl node instance for the searched symbol
        */
       const VarDecl *
-      ExecSQLOpenToFunctionCall::findSymbolInFunction(ClangTool *tool, std::string& varName, const FunctionDecl *func)
+      ExecSQLFetchToFunctionCall::findSymbolInFunction(ClangTool *tool, std::string& varName, const FunctionDecl *func)
       {
 	const VarDecl *ret = nullptr;
 
@@ -703,7 +703,7 @@ namespace clang
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      ExecSQLOpenToFunctionCall::check(const MatchFinder::MatchResult &result) 
+      ExecSQLFetchToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
 	// Get the source manager
 	SourceManager &srcMgr = result.Context->getSourceManager();
@@ -732,7 +732,7 @@ namespace clang
 	slnos << startLineNum;
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
 
-	outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
+	outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "'\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
@@ -848,7 +848,7 @@ namespace clang
 	     */
 
 	    // Regex for processing comment for all remaining requests
-	    Regex openReqRe("^.*EXEC SQL[ \t]+(open|OPEN)[ \t]+([A-Za-z0-9]+)[ \t]*(USING|using)?(.*)[ \t]*;.*$");
+	    Regex fetchReqRe("^.*EXEC SQL[ \t]+(fetch|FETCH)[ \t]+([A-Za-z0-9]+)[ \t]*(INTO|into)?(.*)[ \t]*;.*$");
 	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
@@ -862,14 +862,14 @@ namespace clang
 	    std::string requestCursorParamsDef = "void";
 	    std::string requestExecSql;
 
-	    std::string requestUsing;
+	    std::string requestInto;
 	    std::string requestArgs;
 
 	    /*
 	     * Now we match against a more permissive regex for all other (simpler) requests
 	     * =============================================================================
 	     */
-	    if (openReqRe.match(comment, &matches))
+	    if (fetchReqRe.match(comment, &matches))
 	      {
 		/*
 		 * Find the request var assignment
@@ -877,20 +877,20 @@ namespace clang
 		
 		// The request name used in ProC
 		std::string reqName = matches[2];
-		std::string usingReqNames = matches[4];
+		std::string intoReqNames = matches[4];
 
-		// outs() << "!!!*** Prepare request comment match: using var name is '" << usingReqNames
+		// outs() << "!!!*** Prepare request comment match: into var name is '" << intoReqNames
 		//        << "' and request name is '"<< reqName << "' number of matches = " << matches.size() << "\n";
 
-		if (!usingReqNames.empty())
+		if (!intoReqNames.empty())
 		  {
 		    std::set<std::string> cursorArgsSet;
 		    emplace_ret_t emplace_ret;
 		    
 		    requestCursorParamsDef.assign("");
-		    requestUsing.assign(" using ");
+		    requestInto.assign(" into ");
 		    
-		    // The usingReqNames is of form:
+		    // The intoReqNames is of form:
 		    //     :<var_or_member_expr>[,:<var_or_member_expr>,]+
 		    // Then we need to iterate on each expr
 		    do
@@ -900,20 +900,20 @@ namespace clang
 			std::string memberName;
 
 			// Find a comma
-			std::string::size_type pos = usingReqNames.find(",", 0);
+			std::string::size_type pos = intoReqNames.find(",", 0);
 			// Not found
 			if (pos == std::string::npos)
 			  {
 			    // Last expr
-			    expr = usingReqNames;
-			    usingReqNames.clear();
+			    expr = intoReqNames;
+			    intoReqNames.clear();
 			  }
 			// We found one
 			else
 			  {
 			    // Extract expr and compute the rest
-			    expr = usingReqNames.substr(0, pos+1);
-			    usingReqNames.erase(0, pos+1);;
+			    expr = intoReqNames.substr(0, pos+1);
+			    intoReqNames.erase(0, pos+1);;
 			  }
 
 			// Removing junk chars around expr
@@ -997,7 +997,7 @@ namespace clang
 			    requestArgs.append(",");
 			  }
 		      }
-		    while (!usingReqNames.empty());
+		    while (!intoReqNames.empty());
 
 		    //outs() << "requestCursorParamsDef = '" << requestCursorParamsDef << "'\n";
 		    //outs() << "requestArgs = '" << requestArgs << "'\n";
@@ -1007,10 +1007,10 @@ namespace clang
 		  }
 		
 		requestExecSql = reqName;
-		requestExecSql.append(requestUsing);
+		requestExecSql.append(requestInto);
 		requestExecSql.append(requestArgs);
 		
-		requestFunctionName = "open";
+		requestFunctionName = "fetch";
 		reqName[0] &= ~0x20;
 		requestFunctionName.append(reqName);
 		
@@ -1023,8 +1023,8 @@ namespace clang
 		    // Build the map for templating engine
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
-		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
+		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
 					      generation_header_template,
@@ -1054,7 +1054,7 @@ namespace clang
 	      // Didn't match comment at all!
 	      emitError(diagEngine,
 	      		comment_loc_start,
-	      		ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+	      		ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
 	  }
 	else
 	  {
@@ -1062,13 +1062,13 @@ namespace clang
 	      // An error occured while accessing memory buffer for sources
 	      emitError(diagEngine,
 			loc_start,
-			ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
+			ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
 
 	    else
 	      // We didn't found the comment start ???
 	      emitError(diagEngine,
 			comment_loc_end,
-			ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
+			ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
 	  }
       }
     } // namespace pagesjaunes

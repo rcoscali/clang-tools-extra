@@ -225,6 +225,7 @@ namespace clang
 	 * !!{ ============================================================ }
 	 */
 
+	// First report
         {
           // Create diag msg for the call expr rewrite
           DiagnosticBuilder mydiag = diag(call_start,
@@ -234,6 +235,7 @@ namespace clang
           mydiag << FixItHint::CreateReplacement(call_range, replt_4call);
         }
 
+	// Second report
         {
           // Create diag msg for the call expr rewrite
           DiagnosticBuilder mydiag = diag(def_start,

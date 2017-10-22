@@ -16,6 +16,9 @@
 #include "clang/Basic/Diagnostic.h"
 #include "clang/json/json.hpp"
 
+#define GENERATION_SOURCE_FILENAME_EXTENSION ".pc"
+#define GENERATION_HEADER_FILENAME_EXTENSION ".h"
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using string2_map = std::map<std::string, std::string>;

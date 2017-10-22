@@ -69,6 +69,10 @@ struct ClangTidyOptions {
   /// main files will always be displayed.
   llvm::Optional<std::string> HeaderFilterRegex;
 
+  /// \brief Output warnings from headers matching this filter. Warnings from
+  /// main files will always be displayed.
+  llvm::Optional<std::string> ExportPatchSource;
+
   /// \brief Output warnings from system headers matching \c HeaderFilterRegex.
   llvm::Optional<bool> SystemHeaders;
 
