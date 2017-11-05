@@ -306,21 +306,6 @@ namespace clang
 		       enum ExecSQLLOBCreateToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
-	// Diag id for unexpected error
-	const unsigned unexpected_diag_id;
-	// Diag id for no error
-	const unsigned no_error_diag_id;
-	// Diag id for access char data error
-	const unsigned access_char_data_diag_id;
-	// Diag id for cannot find comment error
-	const unsigned cant_find_comment_diag_id;
-	// Diag id for comment do not match error
-	const unsigned comment_dont_match_diag_id;
-	// Diag id for source generation failure
-	const unsigned source_generation_failure_diag_id;
-	// Diag id for header generation failure
-	const unsigned header_generation_failure_diag_id;
-
 	// Json for request grouping
 	nlohmann::json request_groups;
 	// Group structure created from json and used for

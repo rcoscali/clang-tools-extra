@@ -53,34 +53,11 @@ namespace clang
                                          ClangTidyContext *Context)
         : ClangTidyCheck(Name, Context),
           TidyContext(Context),
-          unexpected_diag_id(Context->getASTContext()->getDiagnostics().
-                             getCustomDiagID(DiagnosticsEngine::Warning,
-                                             "Unexpected error occured?!")),
-          no_error_diag_id(Context->getASTContext()->getDiagnostics().
-                           getCustomDiagID(DiagnosticsEngine::Ignored,
-                                           "No error")),
-          array_type_not_found_diag_id(Context->getASTContext()->getDiagnostics().
-                                       getCustomDiagID(DiagnosticsEngine::Error,
-                                                       "Constant Array type was not found!")),
-          record_decl_not_found_diag_id(Context->getASTContext()->getDiagnostics().
-                                        getCustomDiagID(DiagnosticsEngine::Error,
-                                                        "Could not bind the Structure Access expression!")),
-          member_has_no_def_diag_id(Context->getASTContext()->getDiagnostics().
-                                    getCustomDiagID(DiagnosticsEngine::Error,
-                                                    "Member has no definition!")),
-          member_not_found_diag_id(Context->getASTContext()->getDiagnostics().
-                                   getCustomDiagID(DiagnosticsEngine::Error,
-                                                   "Could not bind the member expression!")),
-          member2_not_found_diag_id(Context->getASTContext()->getDiagnostics().
-                                    getCustomDiagID(DiagnosticsEngine::Error,
-                                                    "Could not bind the second member expression!")),
-          unexpected_ast_node_kind_diag_id(Context->getASTContext()->getDiagnostics().
-                                           getCustomDiagID(DiagnosticsEngine::Error,
-                                                           "Could not process member owning record kind!")),
 	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
 	  handle_strcpy(Options.get("Handle-strcpy", 1U)),
 	  handle_strlen(Options.get("Handle-strlen", 1U))
-      {}
+      {
+      }
 
       /**
        * storeOptions
@@ -271,35 +248,51 @@ namespace clang
         switch (kind)
           {
           default:
-            diag_id = unexpected_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Warning,
+			      "Unexpected error occured?!");
             break;
 
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_NO_ERROR:
-            diag_id = no_error_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Ignored,
+			      "No error");
             break;
 
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_ARRAY_TYPE_NOT_FOUND:
-            diag_id = array_type_not_found_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Constant Array type was not found!");
             break;
             
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_RECORD_DECL_NOT_FOUND:
-            diag_id = record_decl_not_found_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Could not bind the Structure Access expression!");
             break;
 
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF:
-            diag_id = member_has_no_def_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Member has no definition!");
             break;
 
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND:
-            diag_id = member_not_found_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Could not bind the member expression!");
             break;
 
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER2_NOT_FOUND:
-            diag_id = member2_not_found_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Could not bind the second member expression!");
             break;
             
           case CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_UNEXPECTED_AST_NODE_KIND:
-            diag_id = unexpected_ast_node_kind_diag_id;
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Could not process member owning record kind!");
             break;
           }
 	// Alloc the diag builder

@@ -127,34 +127,6 @@ namespace clang
                                                                      ClangTidyContext *Context)
         : ClangTidyCheck(Name, Context),        /** Init check (super class) */
           TidyContext(Context),                 /** Init our TidyContext instance */
-          /** Unexpected error occured */
-          unexpected_diag_id(Context->getASTContext()->getDiagnostics().
-                             getCustomDiagID(DiagnosticsEngine::Warning,
-                                             "Unexpected error occured?!")),
-          /** No error: never thrown */
-          no_error_diag_id(Context->getASTContext()->getDiagnostics().
-                           getCustomDiagID(DiagnosticsEngine::Ignored,
-                                           "No error")),
-          /** Access char data error occured */
-          access_char_data_diag_id(Context->getASTContext()->getDiagnostics().
-                                   getCustomDiagID(DiagnosticsEngine::Error,
-                                                   "Couldn't access character data in file cache memory buffers!")),
-          /** Cannot find comment error */
-          cant_find_comment_diag_id(Context->getASTContext()->getDiagnostics().
-                                    getCustomDiagID(DiagnosticsEngine::Error,
-                                                    "Couldn't find ProC comment start! This result has been discarded!")),
-          /** Cannot parse comment as a ProC SQL rqt statement */
-          comment_dont_match_diag_id(Context->getASTContext()->getDiagnostics().
-                                     getCustomDiagID(DiagnosticsEngine::Warning,
-                                                     "Couldn't match ProC comment for function name creation!")),
-          /** Cannot generate one request source file */
-          source_generation_failure_diag_id(Context->getASTContext()->getDiagnostics().
-                                            getCustomDiagID(DiagnosticsEngine::Error,
-                                                            "Couldn't generate request source file %0!")),
-          /** Cannot generate one request header file */
-          header_generation_failure_diag_id(Context->getASTContext()->getDiagnostics().
-                                            getCustomDiagID(DiagnosticsEngine::Error,
-                                                            "Couldn't generate request header file %0!")),
           /*
            * Options
            */
@@ -496,41 +468,63 @@ namespace clang
          * According to the kind of error, it is reported through 
          * diag engine.
          */
+	unsigned diag_id;
         switch (kind)
           {
             /** Default unexpected diagnostic id */
           default:
-            diag_engine.Report(err_loc, unexpected_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+                             getCustomDiagID(DiagnosticsEngine::Warning,
+                                             "Unexpected error occured?!");
+            diag_engine.Report(err_loc, diag_id);
             break;
 
             /** No error ID: it should never occur */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
-            diag_engine.Report(err_loc, no_error_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+                           getCustomDiagID(DiagnosticsEngine::Ignored,
+                                           "No error");
+            diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Access char data diag ID */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
-            diag_engine.Report(err_loc, access_char_data_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't access character data in file cache memory buffers!");
+            diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Can't find a comment */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
-            diag_engine.Report(err_loc, cant_find_comment_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't find ProC comment start! This result has been discarded!");
+            diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Cannot match comment */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
-            diag_engine.Report(err_loc, comment_dont_match_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Warning,
+			      "Couldn't match ProC comment for function name creation!");
+            diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Cannot generate request source file (no location) */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
-            diag_engine.Report(source_generation_failure_diag_id).AddString(msg);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't generate request source file %0!");
+            diag_engine.Report(diag_id).AddString(msg);
             break;
 
             /** Cannot generate request header file (no location) */
           case ExecSQLLOBCreateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
-            diag_engine.Report(header_generation_failure_diag_id).AddString(msg);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't generate request header file %0!");
+            diag_engine.Report(diag_id).AddString(msg);
             break;
           }
       }

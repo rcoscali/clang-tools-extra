@@ -86,21 +86,6 @@ namespace clang
 	std::vector<std::string> headersDirectories;
 
 	/*
-	 * Diag IDs
-	 */
-	
-	// Diag id for an unexpected error
-	const unsigned unexpected_diag_id;
-	// Diag ids
-	const unsigned no_error_diag_id;
-	// Diag ids
-	const unsigned access_char_data_diag_id;
-	// Diag ids
-	const unsigned cant_find_comment_diag_id;
-	// Diag ids
-	const unsigned comment_dont_match_diag_id;
-
-	/*
 	 * Check Options
 	 */
 	// The regex used for parsing 'include' comments

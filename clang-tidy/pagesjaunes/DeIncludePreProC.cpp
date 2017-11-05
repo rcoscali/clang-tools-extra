@@ -59,26 +59,6 @@ namespace clang
 						   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
-	  /** Unexpected error occured */
-	  unexpected_diag_id(Context->getASTContext()->getDiagnostics().
-			     getCustomDiagID(DiagnosticsEngine::Warning,
-					     "Unexpected error occured?!")),
-	  /** No error diag id: never thrown */
-	  no_error_diag_id(Context->getASTContext()->getDiagnostics().
-			   getCustomDiagID(DiagnosticsEngine::Ignored,
-					   "No error")),
-	  /** Access error diag id: Access char data error occured */
-	  access_char_data_diag_id(Context->getASTContext()->getDiagnostics().
-				   getCustomDiagID(DiagnosticsEngine::Error,
-						   "Couldn't access character data in file cache memory buffers!")),
-	  /** Comment parse diag id: Cannot find comment error */
-	  cant_find_comment_diag_id(Context->getASTContext()->getDiagnostics().
-				    getCustomDiagID(DiagnosticsEngine::Error,
-						    "Couldn't find ProC comment start! This result has been discarded!")),
-	  /** Diag ID for parse comment error: Cannot parse it as a ProC SQL rqt statement */
-	  comment_dont_match_diag_id(Context->getASTContext()->getDiagnostics().
-				     getCustomDiagID(DiagnosticsEngine::Error,
-						     "Couldn't match ProC comment for function name creation!")),
 	  /** Check option for comment regex */
 	  comment_regex(Options.get("Comment-regex", "^.*EXEC SQL[ \t]+include[ \t]+\"?([-0-9A-Za-z._]*)\"?.*$")),
 	  /** Check option for setting a restriction list of headers to process */
@@ -208,38 +188,54 @@ namespace clang
        */
       void
       DeIncludePreProC::emitError(DiagnosticsEngine &diag_engine,
-				       const SourceLocation& err_loc,
-				       enum DeIncludePreProCErrorKind kind)
+				  const SourceLocation& err_loc,
+				  enum DeIncludePreProCErrorKind kind)
       {
 	/* 
 	 * According to the kind of error, it is reported through 
 	 * diag engine.
 	 */
+        unsigned diag_id;
 	switch (kind)
 	  {
 	    /** Default unexpected diagnostic id */
 	  default:
-	    diag_engine.Report(err_loc, unexpected_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Warning,
+			      "Unexpected error occured?!");
+	    diag_engine.Report(err_loc, diag_id);
 	    break;
 
 	    /** No error ID: it should never occur */
 	  case DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_NO_ERROR:
-	    diag_engine.Report(err_loc, no_error_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Ignored,
+			      "No error");
+	    diag_engine.Report(err_loc, diag_id);
 	    break;
 
 	    /** Access char data diag ID */
 	  case DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_ACCESS_CHAR_DATA:
-	    diag_engine.Report(err_loc, access_char_data_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't access character data in file cache memory buffers!");
+	    diag_engine.Report(err_loc, diag_id);
 	    break;
 
 	    /** Can't find a comment */
 	  case DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_CANT_FIND_COMMENT_START:
-	    diag_engine.Report(err_loc, cant_find_comment_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't find ProC comment start! This result has been discarded!");
+	    diag_engine.Report(err_loc, diag_id);
 	    break;
 
 	    /** Cannot match comment */
 	  case DeIncludePreProC::DE_INCLUDE_PRE_PROC_ERROR_COMMENT_DONT_MATCH:
-	    diag_engine.Report(err_loc, comment_dont_match_diag_id);
+	    diag_id = TidyContext->getASTContext()->getDiagnostics().
+	      getCustomDiagID(DiagnosticsEngine::Error,
+			      "Couldn't match ProC comment for function name creation!");
+	    diag_engine.Report(err_loc, diag_id);
 	    break;
 	  }
       }

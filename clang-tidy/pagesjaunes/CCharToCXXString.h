@@ -95,15 +95,7 @@ namespace clang
 
 	// Context instance
 	ClangTidyContext *TidyContext;
-	// Diag ids
-	const unsigned unexpected_diag_id;
-	const unsigned no_error_diag_id;
-	const unsigned array_type_not_found_diag_id;
-	const unsigned record_decl_not_found_diag_id;
-	const unsigned member_has_no_def_diag_id;
-	const unsigned member_not_found_diag_id;
-	const unsigned member2_not_found_diag_id;
-	const unsigned unexpected_ast_node_kind_diag_id;
+
 	// Check options
 	const unsigned handle_strcmp;
 	const unsigned handle_strcpy;
