@@ -25,6 +25,8 @@ target_link_libraries(clang-tidy
   clangTidyHICPPModule
   clangTidyLLVMModule
   clangTidyMiscModule
+  clangTidyNagravisionModule
+  clangTidyPagesJaunesModule
   clangTidyModernizeModule
   clangTidyMPIModule
   clangTidyObjCModule

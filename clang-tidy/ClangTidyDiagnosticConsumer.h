@@ -15,10 +15,13 @@
 #include "clang/Basic/SourceManager.h"
 #include "clang/Tooling/Core/Diagnostic.h"
 #include "clang/Tooling/Refactoring.h"
+#include "clang/Tooling/Tooling.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Support/Regex.h"
 #include "llvm/Support/Timer.h"
+
+using namespace clang::tooling;
 
 namespace clang {
 
@@ -131,6 +134,18 @@ public:
   /// \brief Sets ASTContext for the current translation unit.
   void setASTContext(ASTContext *Context);
 
+  /// \brief Sets the tool ptr (only valid during run)
+  void setToolPtr(ClangTool *tool);
+
+  /// \brief Sets the tool ptr (only valid during run)
+  ClangTool *getToolPtr(void);
+
+  /// \brief Sets ASTContext for the current translation unit.
+  const ASTContext *getASTContext(void) const
+  {
+    return AstContext;
+  };
+
   /// \brief Gets the language options from the AST context.
   const LangOptions &getLangOpts() const { return LangOpts; }
 
@@ -186,6 +201,11 @@ public:
     return CurrentBuildDirectory;
   }
 
+  template <unsigned N>
+  unsigned getCustomDiagID(DiagnosticsEngine::Level lvl, const char (&fmt) [N]) {
+    return DiagEngine->getCustomDiagID(lvl, fmt);
+  }
+
 private:
   // Calls setDiagnosticsEngine() and storeError().
   friend class ClangTidyDiagnosticConsumer;
@@ -217,6 +237,8 @@ private:
   llvm::DenseMap<unsigned, std::string> CheckNamesByDiagnosticID;
 
   ProfileData *Profile;
+  ASTContext *AstContext;
+  ClangTool *m_tool;
 };
 
 /// \brief A diagnostic consumer that turns each \c Diagnostic into a

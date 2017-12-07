@@ -22,11 +22,10 @@ namespace llvm {
 class LLVMModule : public ClangTidyModule {
 public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<LLVMHeaderGuardCheck>("llvm-header-guard");
-    CheckFactories.registerCheck<IncludeOrderCheck>("llvm-include-order");
-    CheckFactories.registerCheck<readability::NamespaceCommentCheck>(
-        "llvm-namespace-comment");
-    CheckFactories.registerCheck<TwineLocalCheck>("llvm-twine-local");
+    CheckFactories.registerCheck<LLVMHeaderGuardCheck> ("llvm-header-guard");
+    CheckFactories.registerCheck<IncludeOrderCheck> ("llvm-include-order");
+    CheckFactories.registerCheck<readability::NamespaceCommentCheck> ("llvm-namespace-comment");
+    CheckFactories.registerCheck<TwineLocalCheck> ("llvm-twine-local");
   }
 };
 

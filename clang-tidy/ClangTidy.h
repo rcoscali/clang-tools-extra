@@ -244,6 +244,12 @@ void exportReplacements(StringRef MainFilePath,
                         const std::vector<ClangTidyError> &Errors,
                         raw_ostream &OS);
 
+/// \brief Serializes replacements into PATCH vs provided source file and writes
+/// them to the specified output stream.
+void exportReplacementsAsPatch(const llvm::StringRef MainFilePath,
+			       const llvm::StringRef ExportPatchSource,
+			       const std::vector<ClangTidyError> &Errors,
+			       raw_ostream &OS);
 } // end namespace tidy
 } // end namespace clang
 

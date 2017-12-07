@@ -18,6 +18,8 @@ add_clang_library(clangTidyPlugin
   clangTidyModernizeModule
   clangTidyMPIModule
   clangTidyObjCModule
+  clangTidyNagravisionModule
+  clangTidyPagesJaunesModule
   clangTidyPerformanceModule
   clangTidyReadabilityModule
   clangTooling

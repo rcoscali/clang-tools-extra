@@ -178,7 +178,7 @@ private:
 ClangTidyContext::ClangTidyContext(
     std::unique_ptr<ClangTidyOptionsProvider> OptionsProvider)
     : DiagEngine(nullptr), OptionsProvider(std::move(OptionsProvider)),
-      Profile(nullptr) {
+      Profile(nullptr), AstContext(nullptr) {
   // Before the first translation unit we can get errors related to command-line
   // parsing, use empty string for the file name in this case.
   setCurrentFile("");
@@ -213,8 +213,19 @@ void ClangTidyContext::setCurrentFile(StringRef File) {
 }
 
 void ClangTidyContext::setASTContext(ASTContext *Context) {
+  AstContext = Context;
   DiagEngine->SetArgToStringFn(&FormatASTNodeDiagnosticArgument, Context);
   LangOpts = Context->getLangOpts();
+}
+
+void ClangTidyContext::setToolPtr(ClangTool *tool)
+{
+  m_tool = tool;
+}
+
+ClangTool *ClangTidyContext::getToolPtr(void)
+{
+  return m_tool;
 }
 
 const ClangTidyGlobalOptions &ClangTidyContext::getGlobalOptions() const {

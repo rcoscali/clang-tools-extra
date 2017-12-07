@@ -268,7 +268,8 @@ public:
   ClangTidyASTConsumer(std::vector<std::unique_ptr<ASTConsumer>> Consumers,
                        std::unique_ptr<ast_matchers::MatchFinder> Finder,
                        std::vector<std::unique_ptr<ClangTidyCheck>> Checks)
-      : MultiplexConsumer(std::move(Consumers)), Finder(std::move(Finder)),
+      : MultiplexConsumer(std::move(Consumers)),
+	Finder(std::move(Finder)),
         Checks(std::move(Checks)) {}
 
 private:
@@ -477,6 +478,8 @@ void runClangTidy(clang::tidy::ClangTidyContext &Context,
                   ArrayRef<std::string> InputFiles, ProfileData *Profile) {
   ClangTool Tool(Compilations, InputFiles);
 
+  Context.setToolPtr(&Tool);
+
   // Add extra arguments passed by the clang-tidy command-line.
   ArgumentsAdjuster PerFileExtraArgumentsInserter =
       [&Context](const CommandLineArguments &Args, StringRef Filename) {
@@ -583,6 +586,22 @@ void exportReplacements(const llvm::StringRef MainFilePath,
   yaml::Output YAML(OS);
   YAML << TUD;
 }
+
+  void exportReplacementsAsPatch(const llvm::StringRef MainFilePath,
+				 const llvm::StringRef ExportPatchSource,
+				 const std::vector<ClangTidyError> &Errors,
+				 raw_ostream &OS)
+  {
+    TranslationUnitDiagnostics TUD;
+    TUD.MainSourceFile = MainFilePath;
+    for (const auto &Error : Errors) {
+      tooling::Diagnostic Diag = Error;
+      TUD.Diagnostics.insert(TUD.Diagnostics.end(), Diag);
+    }
+    
+    //yaml::Output YAML(OS);
+    //YAML << TUD;
+  }
 
 } // namespace tidy
 } // namespace clang
