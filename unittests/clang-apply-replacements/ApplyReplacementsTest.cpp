@@ -20,16 +20,21 @@ namespace tooling {
 static TUDiagnostics
 makeTUDiagnostics(const std::string &MainSourceFile, StringRef DiagnosticName,
                   const DiagnosticMessage &Message,
-                  const StringMap<Replacements> &Replacements,
+                  const StringMap<clang::tooling::Replacements> &xReplacements,
                   StringRef BuildDirectory) {
+  SmallVector<DiagnosticMessage, 1> notes;
+  Diagnostic d(DiagnosticName,
+	       (DiagnosticMessage &)Message,
+	       (StringMap<clang::tooling::Replacements> &)xReplacements,
+	       notes,
+	       Diagnostic::Warning,
+	       BuildDirectory);
+  struct TranslationUnitDiagnostics *tud = (struct TranslationUnitDiagnostics *)malloc(sizeof(struct TranslationUnitDiagnostics));
+  tud->MainSourceFile = MainSourceFile;
+  tud->Diagnostics.push_back(d);
   TUDiagnostics TUs;
-  TUs.push_back({MainSourceFile,
-                 {{DiagnosticName,
-                   Message,
-                   Replacements,
-                   {},
-                   Diagnostic::Warning,
-                   BuildDirectory}}});
+  TUs.push_back(*tud);
+  
   return TUs;
 }
 
@@ -42,7 +47,7 @@ TEST(ApplyReplacementsTest, mergeDiagnosticsWithNoFixes) {
   FileManager Files((FileSystemOptions()));
   SourceManager SM(Diagnostics, Files);
   TUDiagnostics TUs =
-      makeTUDiagnostics("path/to/source.cpp", "diagnostic", {}, {}, "path/to");
+    makeTUDiagnostics("path/to/source.cpp", "diagnostic", {}, {}, "path/to");
   FileToReplacementsMap ReplacementsMap;
 
   EXPECT_TRUE(mergeAndDeduplicate(TUs, ReplacementsMap, SM));
