@@ -10,19 +10,11 @@
 #ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBREADTOFUNCTIONCALL_H
 #define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_EXECSQLLOBREADTOFUNCTIONCALL_H
 
-#include "../ClangTidy.h"
+#include "ExecSQLCommon.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/Regex.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/json/json.hpp"
-
-#define GENERATION_SOURCE_FILENAME_EXTENSION ".pc"
-#define GENERATION_HEADER_FILENAME_EXTENSION ".h"
-
-using namespace clang;
-using namespace clang::ast_matchers;
-using string2_map = std::map<std::string, std::string>;
-using map_vector_string = std::map<std::string, std::vector<std::string>>;
 
 namespace clang 
 {
@@ -236,10 +228,10 @@ namespace clang
 	  };
 
 	// Emit diagnostic and eventually fix it
-        void emitDiagAndFix(const SourceLocation&,
-			    const SourceLocation&,
-			    const std::string&);
-
+        std::string emitDiagAndFix(const SourceLocation&,
+                                   const SourceLocation&,
+                                   const std::string&);
+        
 	// Process a template file with values in map
 	bool processTemplate(const std::string&,
 			     const std::string&,
@@ -255,6 +247,12 @@ namespace clang
 				       const std::string&,
 				       string2_map&);
 	
+        // Override to be called at start of translation unit
+        void onStartOfTranslationUnit();
+
+        // Override to be called at end of translation unit
+        void onEndOfTranslationUnit();
+
 	// Emit error
 	void emitError(DiagnosticsEngine&,
 		       const SourceLocation&,
@@ -284,6 +282,9 @@ namespace clang
 							      std::string&, std::string&,
 							      const FunctionDecl *);
 	  
+        // Replace the EXEC SQL statement by the function call in the .pc file
+        void replaceExecSQLinPC(void);        
+
 	// Json for request grouping
 	nlohmann::json request_groups;
 	// Group structure created from json and used for
@@ -313,6 +314,13 @@ namespace clang
 	const std::string generation_prepare_fmt_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
+        // boolean for reporting modifications in original .pc
+        const bool generation_do_report_modification_in_pc;
+        // Directory of the .pc file in which to report modifications
+        const std::string generation_report_modification_in_dir;
+
+        // Map containing comments and code to replace
+        map_comment_map_replacement_values replacement_per_comment;
       };
 
     } // namespace pagesjaunes

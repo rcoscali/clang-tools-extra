@@ -93,6 +93,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-header-template"] = "./pagesjaunes_allocate.h.tmpl";
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-source-template"] = "./pagesjaunes_allocate.pc.tmpl";
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * For requests
@@ -103,6 +105,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-header-template"] = "./pagesjaunes_for.h.tmpl";
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-source-template"] = "./pagesjaunes_for.pc.tmpl";
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * Free requests
@@ -113,6 +117,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-header-template"] = "./pagesjaunes_free.h.tmpl";
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-source-template"] = "./pagesjaunes_free.pc.tmpl";
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * LOB CLOSE requests
@@ -123,6 +129,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_close.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_close.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * LOB CREATE TEMPORARY requests
@@ -133,6 +141,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_create_temporary.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_create_temporary.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * LOB FREE TEMPORARY requests
@@ -143,6 +153,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_free_temporary.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_free_temporary.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * LOB OPEN requests
@@ -153,6 +165,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_open.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_open.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * LOB READ requests
@@ -163,6 +177,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_read.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_read.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * Fetch requests
@@ -174,6 +190,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-source-template"] = "./pagesjaunes_fetch.pc.tmpl";
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-simplify-function-args"] = "0";
+          Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * Open requests
@@ -185,6 +203,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-source-template"] = "./pagesjaunes_open.pc.tmpl";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-simplify-function-args"] = "0";
+          Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * Constant prepare requests
@@ -195,6 +215,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-header-template"] = "./pagesjaunes_prepare.h.tmpl";
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-source-template"] = "./pagesjaunes_prepare.pc.tmpl";
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
            * Sprintf formatted prepare requests
@@ -206,6 +228,8 @@ namespace clang
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-source-template"] = "./pagesjaunes_prepare_fmt.pc.tmpl";
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-simplify-function-args"] = "0";
+          Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           return Options;
         }
