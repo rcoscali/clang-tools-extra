@@ -7,7 +7,11 @@ add_clang_library(clangDaemon
   ClangdServer.cpp
   ClangdUnit.cpp
   ClangdUnitStore.cpp
+  CodeComplete.cpp
+  Context.cpp
+  Compiler.cpp
   DraftStore.cpp
+  FuzzyMatch.cpp
   GlobalCompilationDatabase.cpp
   JSONExpr.cpp
   JSONRPCDispatcher.cpp
@@ -15,6 +19,8 @@ add_clang_library(clangDaemon
   Protocol.cpp
   ProtocolHandlers.cpp
   Trace.cpp
+  index/Index.cpp
+  index/SymbolCollector.cpp
 
   LINK_LIBS
   clangAST

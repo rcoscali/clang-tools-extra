@@ -69,12 +69,12 @@ private:
   void onSignatureHelp(Ctx C, TextDocumentPositionParams &Params) override;
   void onGoToDefinition(Ctx C, TextDocumentPositionParams &Params) override;
   void onSwitchSourceHeader(Ctx C, TextDocumentIdentifier &Params) override;
+  void onDocumentHighlight(Ctx C, TextDocumentPositionParams &Params) override;
   void onFileEvent(Ctx C, DidChangeWatchedFilesParams &Params) override;
   void onCommand(Ctx C, ExecuteCommandParams &Params) override;
   void onRename(Ctx C, RenameParams &Parames) override;
 
-  std::vector<clang::tooling::Replacement>
-  getFixIts(StringRef File, const clangd::Diagnostic &D);
+  std::vector<TextEdit> getFixIts(StringRef File, const clangd::Diagnostic &D);
 
   JSONOutput &Out;
   /// Used to indicate that the 'shutdown' request was received from the
@@ -87,7 +87,7 @@ private:
   bool IsDone = false;
 
   std::mutex FixItsMutex;
-  typedef std::map<clangd::Diagnostic, std::vector<clang::tooling::Replacement>>
+  typedef std::map<clangd::Diagnostic, std::vector<TextEdit>>
       DiagnosticToReplacementMap;
   /// Caches FixIts per file and diagnostics
   llvm::StringMap<DiagnosticToReplacementMap> FixItsMap;
@@ -96,7 +96,8 @@ private:
   // before ClangdServer.
   DirectoryBasedGlobalCompilationDatabase CDB;
   RealFileSystemProvider FSProvider;
-
+  /// Options used for code completion
+  clangd::CodeCompleteOptions CCOpts;
   // Server must be the last member of the class to allow its destructor to exit
   // the worker thread that may otherwise run an async callback on partially
   // destructed instance of ClangdLSPServer.

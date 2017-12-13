@@ -29,8 +29,7 @@ std::shared_ptr<CppFile> CppFileCollection::removeIfPresent(PathRef File) {
 CppFileCollection::RecreateResult
 CppFileCollection::recreateFileIfCompileCommandChanged(
     PathRef File, PathRef ResourceDir, GlobalCompilationDatabase &CDB,
-    bool StorePreamblesInMemory, std::shared_ptr<PCHContainerOperations> PCHs,
-    clangd::Logger &Logger) {
+    bool StorePreamblesInMemory, std::shared_ptr<PCHContainerOperations> PCHs) {
   auto NewCommand = getCompileCommand(CDB, File, ResourceDir);
 
   std::lock_guard<std::mutex> Lock(Mutex);
@@ -42,14 +41,13 @@ CppFileCollection::recreateFileIfCompileCommandChanged(
     It = OpenedFiles
              .try_emplace(File, CppFile::Create(File, std::move(NewCommand),
                                                 StorePreamblesInMemory,
-                                                std::move(PCHs), Logger))
+                                                std::move(PCHs)))
              .first;
   } else if (!compileCommandsAreEqual(It->second->getCompileCommand(),
                                       NewCommand)) {
     Result.RemovedFile = std::move(It->second);
-    It->second =
-        CppFile::Create(File, std::move(NewCommand), StorePreamblesInMemory,
-                        std::move(PCHs), Logger);
+    It->second = CppFile::Create(File, std::move(NewCommand),
+                                 StorePreamblesInMemory, std::move(PCHs));
   }
   Result.FileInCollection = It->second;
   return Result;
@@ -58,16 +56,14 @@ CppFileCollection::recreateFileIfCompileCommandChanged(
 tooling::CompileCommand
 CppFileCollection::getCompileCommand(GlobalCompilationDatabase &CDB,
                                      PathRef File, PathRef ResourceDir) {
-  std::vector<tooling::CompileCommand> Commands = CDB.getCompileCommands(File);
-  if (Commands.empty())
-    // Add a fake command line if we know nothing.
-    Commands.push_back(getDefaultCompileCommand(File));
+  llvm::Optional<tooling::CompileCommand> C = CDB.getCompileCommand(File);
+  if (!C) // FIXME: Suppress diagnostics? Let the user know?
+    C = CDB.getFallbackCommand(File);
 
   // Inject the resource dir.
   // FIXME: Don't overwrite it if it's already there.
-  Commands.front().CommandLine.push_back("-resource-dir=" +
-                                         std::string(ResourceDir));
-  return std::move(Commands.front());
+  C->CommandLine.push_back("-resource-dir=" + ResourceDir.str());
+  return std::move(*C);
 }
 
 bool CppFileCollection::compileCommandsAreEqual(
