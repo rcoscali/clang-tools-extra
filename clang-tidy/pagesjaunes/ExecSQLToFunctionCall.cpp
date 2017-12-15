@@ -311,7 +311,8 @@ namespace clang
 
                     if (!size)
                       // TODO: add reported llvm error
-                      errs() << "Your original file in which to report modifications is empty !\n";
+                      outs() << originalfile << ":" << line
+                             << ":1: warning: Your original file in which to report modifications is empty !\n";
 
                     else
                       {
@@ -335,14 +336,24 @@ namespace clang
                             StringRef RpltCode(rpltcode);
                             NewBuffer = allocReqRe.sub(RpltCode, Buffer);
                           }
+
                         else
-                          NewBuffer = Buffer.str();
+                          {
+                            outs() << originalfile << ":" << line
+                                   << ":1: warning: Couldn't find 'EXEC SQL " << execsql
+                                   << ";' statement to replace with '" << rpltcode
+                                   << "' in original '" << pcFilename
+                                   << "' file ! Already replaced ?\n";
+                            NewBuffer = Buffer.str();
+                          }
                       }
                   }
 
                 else
                   // TODO: add reported llvm error
-                  errs() << "Cannot open original file in which to report modifications: " << pcFilename << "\n";
+                  outs() << originalfile << ":" << line
+                         << ":1: warning: Cannot open original file in which to report modifications: " << pcFilename
+                         << "\n";
               }
             else
               {
@@ -355,7 +366,8 @@ namespace clang
 
                     if (!size)
                       // TODO: add reported llvm error
-                      errs() << "Your original file in which to report modifications is empty !\n";
+                      outs() << originalfile << ":" << line
+                             << ":1: warning: Original file in which to report modifications is empty !\n";
 
                     else
                       {
@@ -374,24 +386,36 @@ namespace clang
                         unsigned int pcStartLineNum = pcLineNum;
                         unsigned int pcEndLineNum = pcLineNum;
                         
-                        while (linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
-                          pcStartLineNum--;
+                        if (had_cr)
+                          while (linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
+                            pcStartLineNum--;
                         
                         if (pcEndLineNum > pcStartLineNum)
                           for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
                             outs() << (n+1) << " " << linesbuf[n].str() << "\n";
                         
                         size_t startpos = linesbuf[pcStartLineNum].find(StringRef("EXEC"));
-                        size_t endpos = linesbuf[pcStartLineNum].rfind(';');
+                        size_t endpos = linesbuf[pcEndLineNum].rfind(';');
                         std::string indent = linesbuf[pcStartLineNum].substr(0, startpos).str();
-                        std::string newline = indent;
-                        newline.append(rpltcode);
-                        if (endpos != StringRef::npos)
-                          newline.append(linesbuf[pcStartLineNum].substr(endpos+1, StringRef::npos));
-                        linesbuf[pcStartLineNum] = StringRef(newline);
-                        if (pcEndLineNum > pcStartLineNum)
-                          for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                            linesbuf[n] = indent;
+                        if (startpos != StringRef::npos)
+                          {
+                            std::string newline = indent;
+                            newline.append(rpltcode);
+                            if (endpos != StringRef::npos)
+                              newline.append(linesbuf[pcEndLineNum].substr(endpos+1, StringRef::npos));
+                            linesbuf[pcStartLineNum] = StringRef(newline);
+                            if (pcEndLineNum > pcStartLineNum)
+                              for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
+                                linesbuf[n] = indent;
+                          }
+
+                        else
+                          outs() << originalfile << ":" << line
+                                 << ":1: warning: Couldn't find 'EXEC SQL " << execsql
+                                 << ";' statement to replace with '" << rpltcode
+                                 << "' in original '" << pcFilename
+                                 << "' file! Already replaced ?\n";
+                          
                         NewBuffer.clear();
                         for (auto it = linesbuf.begin(); it != linesbuf.end(); ++it)
                           {
@@ -413,7 +437,8 @@ namespace clang
 
             else
               // TODO: add reported llvm error
-              errs() << "Cannot overwrite file " << pcFilename << " !\n";
+              outs() << originalfile << ":" << line
+                     << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
 
             delete buffer;
           }
