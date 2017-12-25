@@ -20,6 +20,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
+#include "FileManipulator.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -150,10 +151,6 @@ namespace clang
 	  TidyContext(Context),			/** Init our TidyContext instance */
 
 	  /*
-	   * Custom Diagnostics IDs
-	   */
-	  
-	  /*
 	   * Options
 	   */
 	  /// Generate requests header files (bool)
@@ -228,8 +225,10 @@ namespace clang
        *
        * Override to be called at start of translation unit
        */
-      void ExecSQLFetchToFunctionCall::onStartOfTranslationUnit()
+      void
+      ExecSQLFetchToFunctionCall::onStartOfTranslationUnit()
       {
+        // Clear the map for comments location in original file
         replacement_per_comment.clear();
       }
       
@@ -240,7 +239,8 @@ namespace clang
        *
        * Override to be called at end of translation unit
        */
-      void ExecSQLFetchToFunctionCall::onEndOfTranslationUnit()
+      void
+      ExecSQLFetchToFunctionCall::onEndOfTranslationUnit()
       {
         // Get data from processed requests
         for (auto it = replacement_per_comment.begin(); it != replacement_per_comment.end(); ++it)
@@ -262,6 +262,8 @@ namespace clang
         
             std::string comment = it->first;
             auto map_for_values = it->second;
+
+            //outs() << "Processing comment: '" << comment << "'\n";
             
             for (auto iit = map_for_values.begin(); iit != map_for_values.end(); ++iit)
               {
@@ -282,7 +284,7 @@ namespace clang
 
                 else if (key.compare("originalfile") == 0)
                   {
-                    Regex fileline("^(.*)#([0-9]+)$");
+                    Regex fileline(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_FILELINE);
                     SmallVector<StringRef, 8> fileMatches;
 
                     if (fileline.match(val, &fileMatches))
@@ -323,8 +325,23 @@ namespace clang
               has_pcFileLocation = true;
 
             char* buffer = nullptr;
-            StringRef Buffer;
+            StringRef *Buffer = nullptr;
             std::string NewBuffer;
+
+            // 
+            //outs() << "================================================================\n";
+            //outs() << "    has_pcFilename : " << has_pcFilename << "\n";
+            //outs() << "    has_pcLineNum : " << has_pcLineNum << "\n";
+            //outs() << "    has_pcFileLocation : " << has_pcFileLocation << "\n";
+            //outs() << "    pcFilename : " << pcFilename << "\n";
+            //outs() << "    pcLineNum : " << pcLineNum << "\n";
+            //outs() << "    rpltcode : " << rpltcode << "\n";
+            //outs() << "    line : " << line << "\n";
+            //outs() << "    filename : " << filename << "\n";
+            //outs() << "    funcname : " << funcname << "\n";
+            //outs() << "    fullcomment : " << fullcomment << "\n";
+            //outs() << "    execsql : " << execsql << "\n";
+            //outs() << "    originalfile : " << originalfile << "\n";
             
             // If #line are not present, need to find the line in file with regex
             if (!has_pcFileLocation)
@@ -357,17 +374,26 @@ namespace clang
                         pbuf->sgetn (buffer,size);
                         ifs.close();
                         
-                        Buffer = StringRef(buffer);
+                        Buffer = new StringRef(buffer);
                         std::string allocReqReStr = "(EXEC SQL[[:space:]]+";
+
+                        size_t pos = 0;
+                        while ((pos = execsql.find(" ")) != std::string::npos )
+                          execsql.replace(pos, 1, "[[:space:]]*");
+                        pos = -1;
+                        while ((pos = execsql.find(",", pos+1)) != std::string::npos )
+                          execsql.replace(pos, 1, ",[[:space:]]*");
+                        
                         allocReqReStr.append(execsql);
-                        allocReqReStr.append(");");
+                        allocReqReStr.append(")[[:space:]]*;");
                         Regex allocReqRe(allocReqReStr.c_str(), Regex::NoFlags);
                         SmallVector<StringRef, 8> allocReqMatches;
                         
-                        if (allocReqRe.match(Buffer, &allocReqMatches))
+                        //outs() << "AllocReqReStr: '" << allocReqReStr << "'\n";
+                        if (allocReqRe.match(*Buffer, &allocReqMatches))
                           {
                             StringRef RpltCode(rpltcode);
-                            NewBuffer = allocReqRe.sub(RpltCode, Buffer);
+                            NewBuffer = allocReqRe.sub(RpltCode, *Buffer);
                           }
                         else
                           {
@@ -376,8 +402,22 @@ namespace clang
                                    << ";' statement to replace with '" << rpltcode
                                    << "' in original '" << pcFilename
                                    << "' file ! Already replaced ?\n";
-                            NewBuffer = Buffer.str();
+                            NewBuffer = Buffer->str();
                           }
+
+                        std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
+                        if (ofs.is_open())
+                          {
+                            ofs.write(NewBuffer.c_str(), NewBuffer.size());
+                            ofs.flush();
+                            ofs.close();
+                          }
+                        
+                        else
+                          // TODO: add reported llvm error
+                          outs() << originalfile << ":" << line
+                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
+                        
                       }
                   }
 
@@ -389,7 +429,7 @@ namespace clang
               }
             else
               {
-                std::ifstream ifs (pcFilename, std::ifstream::in);
+                jayacode::FileManipulator ifs(pcFilename.c_str());
                 if (ifs.is_open())
                   {
                     std::filebuf* pbuf = ifs.rdbuf();
@@ -403,42 +443,46 @@ namespace clang
 
                     else
                       {
-                        // allocate memory to contain file data
-                        buffer=new char[size];
-                        
-                        // get file data
-                        pbuf->sgetn (buffer, size);
-                        ifs.close();
-                        
-                        StringRef Buffer(buffer);
-                        SmallVector<StringRef, 10000> linesbuf;
-                        Buffer.split(linesbuf, '\n');
-                        
-                        pcLineNum--;
+                        ifs.create_line_number_mapping();
+                                                
                         unsigned int pcStartLineNum = pcLineNum;
                         unsigned int pcEndLineNum = pcLineNum;
-                        
-                        if (had_cr)
-                          while (linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
-                            pcStartLineNum--;
-                        
+                        unsigned int totallines = ifs.get_number_of_lines();
+
+                        outs() << "==> totallines = " << totallines << "\n";
+                        outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
+                        if (had_cr && pcStartLineNum < ifs.get_number_of_lines())
+                          {
+                            outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
+                            while (pcStartLineNum < ifs.get_number_of_lines() && ifs[pcStartLineNum].find("EXEC") == std::string::npos)
+                              pcStartLineNum--;
+                          }
+                          
                         if (pcEndLineNum > pcStartLineNum)
                           for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                            outs() << (n+1) << " " << linesbuf[n].str() << "\n";
-                        
-                        size_t startpos = linesbuf[pcStartLineNum].find(StringRef("EXEC"));
-                        size_t endpos = linesbuf[pcEndLineNum].rfind(';');
-                        std::string indent = linesbuf[pcStartLineNum].substr(0, startpos).str();
-                        if (startpos != StringRef::npos)
+                            outs() << n << " " << ifs[n] << "\n";
+
+                        std::string firstline = ifs[pcStartLineNum];
+                        std::string lastline = ifs[pcEndLineNum];
+                        size_t startpos = firstline.find("EXEC");
+                        size_t endpos = lastline.rfind(';');
+                        std::string indent = firstline.substr(0, startpos);
+                        std::string *newline = nullptr;
+                        if (startpos != std::string::npos)
                           {
-                            std::string newline = indent;
-                            newline.append(rpltcode);
-                            if (endpos != StringRef::npos)
-                              newline.append(linesbuf[pcEndLineNum].substr(endpos+1, StringRef::npos));
-                            linesbuf[pcStartLineNum] = StringRef(newline);
+                            newline = new std::string(indent);
+                            newline->append(rpltcode);
+                            if (endpos != std::string::npos)
+                              newline->append(lastline.substr(endpos+1, std::string::npos));
+                            outs() << "Startline = '" << ifs[pcStartLineNum] << "'\n";
+                            ifs.set_line(pcStartLineNum, std::string(*newline));
+                            outs() << "Startline = '" << ifs[pcStartLineNum] << "'\n";
                             if (pcEndLineNum > pcStartLineNum)
                               for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                                linesbuf[n] = indent;
+                                {
+                                  ifs.set_line(n, indent);
+                                  outs() << "LineBuffer[" << n << "] = '" << ifs[n] << "'\n";
+                                }
                           }
 
                         else
@@ -447,32 +491,37 @@ namespace clang
                                  << ";' statement to replace with '" << rpltcode
                                  << "' in original '" << pcFilename
                                  << "' file! Already replaced ?\n";
-                          
-                        NewBuffer.clear();
-                        for (auto it = linesbuf.begin(); it != linesbuf.end(); ++it)
+
+                        std::ofstream ofs(pcFilename.append(".new"), std::ios::out | std::ios::trunc);
+                        if (ofs.is_open())
                           {
-                            StringRef line = *it;
-                            NewBuffer.append(line.str());
-                            NewBuffer.append("\n");
+                            for (unsigned int n = 1; n <= totallines; n++)
+                              {
+                                outs() << "saving line #" << n << ": '" << ifs[n].c_str() << "'\n";
+                                ofs.write(ifs[n].c_str(), ifs[n].length());
+                                ofs.write("\n", 1);
+                              }
+                            
+                            ofs.flush();
+                            ofs.close();
                           }
+                        
+                        else
+                          // TODO: add reported llvm error
+                          outs() << originalfile << ":" << line
+                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
+
+                        ifs.close();
+                        
+                        delete newline;
                       }
                   }
               }
 
-            std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
-            if (ofs.is_open())
-              {
-                ofs.write(NewBuffer.c_str(), NewBuffer.size());
-                ofs.flush();
-                ofs.close();
-              }
-
-            else
-              // TODO: add reported llvm error
-              outs() << originalfile << ":" << line
-                     << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
-
-            delete buffer;
+            if (Buffer)
+              delete Buffer;
+            if (buffer)
+              delete buffer;
           }
       }
       
@@ -598,17 +647,19 @@ namespace clang
        * @brief Process a template file with values from the 
        *        provided map
        *
-       * @param[in] tmpl	Template file pathname
-       * @param[in] fname	Output file pathname
-       * @param[in] values_map	Map containing values to be replaced
+       * @param[in] tmpl	 Template file pathname
+       * @param[in] fname	 Output file pathname
+       * @param[in] values_map	 Map containing values to be replaced
+       * @param[in] anon_structs Map containing anonymous structs to be defined
        *
        * @retval true 	if template was processed and file was created
        * @retval false 	if something wrong occurs
        */
       bool
       ExecSQLFetchToFunctionCall::processTemplate(const std::string& tmpl,
-					     const std::string& fname,
-					     string2_map& values_map)
+                                                  const std::string& fname,
+                                                  string2_map& values_map,
+                                                  ushort_string_map& anon_structs)
       {
 	// Return value
 	bool ret = false;
@@ -637,28 +688,61 @@ namespace clang
 		// Read line in buffer
 		is.getline(buf, 255);
 		std::string aline = buf;
-		// Iterate on all map values
-		for (auto it = values_map.begin();
-		     it != values_map.end();
-		     ++it)
-		  {
-		    // Position of found value name
-		    size_t pos = 0;
-		    do
-		      {
-			// If we found the current value name
-			if ((pos = aline.find(it->first, pos)) != std::string::npos)
-			  {
-			    // Erase value name at found position in input line
-			    aline.erase(pos, it->first.length());
-			    // Insert value replacement at the same position
-			    aline.insert(pos, it->second);
-			  }
-		      }
-		    // Do it until end of line
-		    while (pos != std::string::npos);
-		  }
+                StringRef Aline = StringRef(aline);
 
+                if (aline.find("@repeat on "))
+                  {
+                    // First check consistency of request
+                    if (anon_structs.size() < 1)
+                      {
+                        outs() << "Error: Cannot instanciate repeat statement with no value\n";
+                        return false;
+                      }
+                    
+                    Regex tmplRepeatRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_RE);
+                    SmallVector<StringRef, 8> repeatMatches;
+                    if (tmplRepeatRe.match(Aline, &repeatMatches))
+                      {
+                        std::string repeatBasename = repeatMatches[1].str();
+                        long unsigned int repeatMembersNumber = repeatMatches.size() -2; // Regex enforce matches > 2
+                        std::vector<std::string> repeatMembers;
+                        for (long unsigned int n = 0; n < repeatMembersNumber; n++)
+                          repeatMembers.push_back(repeatMatches[n+2].str());
+                        do
+                          {
+                          }
+                        while (aline.compare("@") != 0);
+                      }
+                    else
+                      {
+                        outs() << "Error: Cannot match a repeat statement in template!\n";
+                        return false;
+                      }
+                  }
+                else
+
+                  // Iterate on all map values
+                  for (auto it = values_map.begin();
+                       it != values_map.end();
+                       ++it)
+                    {
+                      // Position of found value name
+                      size_t pos = 0;
+                      do
+                        {
+                          // If we found the current value name
+                          if ((pos = aline.find(it->first, pos)) != std::string::npos)
+                            {
+                              // Erase value name at found position in input line
+                              aline.erase(pos, it->first.length());
+                              // Insert value replacement at the same position
+                              aline.insert(pos, it->second);
+                            }
+                        }
+                      // Do it until end of line
+                      while (pos != std::string::npos);
+                    }
+                
 		// Output processed line
 		os << aline << std::endl;
 	      }
@@ -697,6 +781,7 @@ namespace clang
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {
+        ushort_string_map dummy_anon;
 	SourceLocation dummy;
 	// Compute output file pathname
 	std::string fileName = values_map["@RequestFunctionName@"];
@@ -704,7 +789,7 @@ namespace clang
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
 	// Process template for creating source file
-	if (!processTemplate(tmpl, fileName, values_map))
+	if (!processTemplate(tmpl, fileName, values_map, dummy_anon))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
@@ -722,12 +807,14 @@ namespace clang
        *
        * @param[in] tmpl         Template file pathname
        * @param[in] values_map   Map containing values for replacement strings
+       * @param[in] anon_structs Map containing anonymous structs to be defined
        *
        */
       void
       ExecSQLFetchToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+                                                            const std::string& tmpl,
+                                                            string2_map& values_map,
+                                                            ushort_string_map& anon_structs)
       {	
 	SourceLocation dummy;
 	// Compute output file pathname
@@ -736,7 +823,7 @@ namespace clang
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
 	// Process template for creating header file
-	if (!processTemplate(tmpl, fileName, values_map))
+	if (!processTemplate(tmpl, fileName, values_map, anon_structs))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
@@ -995,7 +1082,7 @@ namespace clang
 	slnos << startLineNum;
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
 
-	outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "'\n";
+	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "'\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
@@ -1024,6 +1111,11 @@ namespace clang
 	// Offset of comment start in file
 	size_t commentStart = 0;
 	
+        // If #line is available keep line number and filename of the .pc file
+        unsigned int pcLineNum = 0;
+        std::string pcFilename;
+        bool found_line_info = false;
+        
 	/*
 	 * Finding loop
 	 * ------------
@@ -1041,6 +1133,30 @@ namespace clang
 		// Try to get comment start in current line 
 		commentStart = lineData.find("/*");
 		
+                if (lineData.find("#line ") != std::string::npos)
+                  {
+                    // Keep the line number and file:
+                    // Format of the preprocessor #line
+                    // #line <linenum> <filepath>
+                    // linenum is an unsigned int
+                    // and filepath is a dbl-quoted string
+                    Regex lineDefineRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_LINE_DEFINE_RE);
+                    SmallVector<StringRef, 8> lineMatches;
+                    if (lineDefineRe.match(lineData, &lineMatches))
+                      {
+                        found_line_info = true;
+                        std::istringstream isstr;
+                        std::stringbuf *pbuf = isstr.rdbuf();
+                        pbuf->str(lineMatches[1]);
+                        isstr >> pcLineNum;
+                        pcFilename = lineMatches[2];
+                      }
+                    else
+                      {
+                        errs() << "Cannot match a #line definition !\n";
+                      }
+                  }
+                
 		// If found, break the loop
 		if (commentStart != std::string::npos)
 		  break;
@@ -1112,8 +1228,8 @@ namespace clang
 	     * Create function call for the request
 	     */
 
-	    // Regex for processing comment for all remaining requests
-	    Regex fetchReqRe("^.*EXEC SQL[ \t]+(fetch|FETCH)[ \t]+([A-Za-z0-9]+)[ \t]*(INTO|into)?(.*)[ \t]*;.*$");
+	    // Regex for processing comment for all remaining requests (see ExecSQLCommon.h)
+	    Regex fetchReqRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE);
 	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
@@ -1130,6 +1246,9 @@ namespace clang
 	    std::string requestInto;
 	    std::string requestArgs;
 
+            ushort_string_map anonymousStructs;
+            anonymousStructs.clear();
+
 	    /*
 	     * Now we match against a more permissive regex for all other (simpler) requests
 	     * =============================================================================
@@ -1141,6 +1260,8 @@ namespace clang
 		 */
 		
 		// The request name used in ProC
+                requestExecSql = matches[1];
+                requestExecSql.append(" ");
 		std::string reqName = matches[2];
 		std::string intoReqNames = matches[4];
 
@@ -1152,18 +1273,29 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("fullcomment", comment));
                     rv.insert(std::pair<std::string, std::string>("reqname", reqName));
                     rv.insert(std::pair<std::string, std::string>("intoreqnames", intoReqNames));
+                    if (found_line_info)
+                      {
+                        std::ostringstream pc_line_num;
+                        pc_line_num << pcLineNum;
+                        rv.insert(std::pair<std::string, std::string>("pclinenum", pc_line_num.str()));
+                        rv.insert(std::pair<std::string, std::string>("pcfilename", pcFilename));
+                        outs() << "Found #line for comment: parsed line num = " << pcLineNum << " from file: '" << pcFilename << "'\n";
+                      }
                   }
-
+                    
 		// outs() << "!!!*** Prepare request comment match: into var name is '" << intoReqNames
 		//        << "' and request name is '"<< reqName << "' number of matches = " << matches.size() << "\n";
 
+                requestInto.assign(" ");
+                requestInto.append(matches[3]);
+                requestInto.append(" ");
+                
 		if (!intoReqNames.empty())
 		  {
 		    std::set<std::string> cursorArgsSet;
 		    emplace_ret_t emplace_ret;
 		    
 		    requestCursorParamsDef.assign("");
-		    requestInto.assign(" into ");
 		    
 		    // The intoReqNames is of form:
 		    //     :<var_or_member_expr>[,:<var_or_member_expr>,]+
@@ -1172,7 +1304,11 @@ namespace clang
 		      {
 			std::string expr;
 			std::string varName;
+			std::string indicVarName;
 			std::string memberName;
+			std::string indicMemberName;
+			const VarDecl *varDecl = nullptr;
+			const VarDecl *indicVarDecl = nullptr;
 
 			// Find a comma
 			std::string::size_type pos = intoReqNames.find(",", 0);
@@ -1198,36 +1334,119 @@ namespace clang
 			  if (expr.find_first_of(" \t,") != std::string::npos)
 			    expr.erase(expr.find_first_of(" \t,"), std::string::npos);
 			}
+
+                        // TODO: Handle indicators
+                        // Indicatros are some host variables associated to another host variable
+                        // in order to indicate is the column that is bound to the host variable is NULL or not
+                        // If the column is NULL, the indicator is strictly positive (boolean true value)
+                        // Concretly it means that an indicator is another param to pass to the request function
 			
 			// According to the kind of expr
-			//  <var_symbol>
-			//  <var_symbol_ptr> -> <member>
-			//  <var_symbol_ref> . <member>
-			std::string::size_type pos_arrow = expr.find("->", 0);
-			std::string::size_type pos_dot = expr.find(".", 0);
+                        // Initial dbl colon was removed, then only indicator dbl colon remains
+			//  <var_symbol>[:<var_symbol_indic>]
+			//  <var_symbol>[:<var_symbol_ptr_indic> -> <member_indic>]
+			//  <var_symbol>[:<var_symbol_dot_indic>] . <member_indic>]
+			//  <var_symbol_ptr> -> <member>[:<var_symbol_indic>]
+			//  <var_symbol_ptr> -> <member>[:<var_symbol_ptr_indic> -> <member_indic>]
+			//  <var_symbol_ptr> -> <member>[:<var_symbol_dot_indic>] . <member_indic>]
+			//  <var_symbol_ref> . <member>[:<var_symbol_indic>]
+			//  <var_symbol_ref> . <member>[:<var_symbol_ptr_indic> -> <member_indic>]
+			//  <var_symbol_ref> . <member>[:<var_symbol_dot_indic>] . <member_indic>]
+			std::string::size_type pos_arrow = expr.find("->");
+			std::string::size_type pos_dot = expr.find(".");
+			std::string::size_type pos_indic = expr.find(":", 1);
+			std::string::size_type pos_indic_arrow = std::string::npos;
+			std::string::size_type pos_indic_dot = std::string::npos;
 
-			const VarDecl *varDecl;
+                        // Handle case where member is on indic only (host variable is not member)
+                        if (pos_indic != std::string::npos && pos_arrow > pos_indic)
+                          // swap pos_indic & pos_indic_arrow
+                          std::swap(pos_arrow, pos_indic_arrow);
+                        else
+                          {
+                            // get pos in expr for indicator arrow
+                            pos_indic_arrow = expr.find_last_of("->");
+                            // Handle case where indic as no arrow
+                            if (pos_indic_arrow == pos_arrow)
+                              pos_indic_arrow = std::string::npos;
+                          }
+
+                        if (pos_indic != std::string::npos && pos_dot > pos_indic)
+                          // swap pos_indic & pos_indic_arrow
+                          std::swap(pos_dot, pos_indic_dot);
+                        else
+                          {
+                            // get pos in expr for indicator dot
+                            pos_indic_dot = expr.find_last_of(".");
+                            // Handle case where indic as no arrow
+                            if (pos_indic_dot == pos_dot)
+                              pos_indic_dot = std::string::npos;                            
+                          }
+
 			if (pos_arrow != std::string::npos)
 			  {
 			    // It is a member of a pointer: get var symbol and member name
 			    varName = expr.substr(0, pos_arrow);
-			    memberName = expr.substr(pos_arrow+2, std::string::npos);
+			    memberName = expr.substr(pos_arrow+2, pos_indic);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
+                            if (pos_indic != std::string::npos)
+                              {
+                                // member of a pointer indicator
+                                if (pos_indic_arrow != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic, pos_indic_arrow);
+                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                // member of struct indicator
+                                else if (pos_indic_dot != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic, pos_indic_dot);
+                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                else
+                                  {
+                                    indicVarName = expr.substr(pos_indic, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                              }
 			  }
 			else if (pos_dot != std::string::npos)
 			  {
 			    // It is a member of an instance
 			    varName = expr.substr(0, pos_dot);
-			    memberName = expr.substr(pos_dot+1, std::string::npos);
+			    memberName = expr.substr(pos_dot+1, pos_indic);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
+                            if (pos_indic != std::string::npos)
+                              {
+                                if (pos_indic_arrow != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic, pos_indic_arrow);
+                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                else if (pos_indic_dot != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic, pos_indic_dot);
+                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                else
+                                  {
+                                    indicVarName = expr.substr(pos_indic, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                              }
 			  }
 			else
 			  {
 			    // It is a var symbol
-			    varName = expr;
+			    varName = expr.substr(0, pos_indic);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
 			  }
 
+                        // Then once we got all infos we generate the code for call, decl and impl
 			if (varDecl != nullptr)
 			  {
 			    QualType qtype = varDecl->getType();
@@ -1253,11 +1472,20 @@ namespace clang
 					 qtype->isStructureType() ||
 					 qtype->isClassType())
 				  {
-				    requestCursorParamsDef.append(typeName);
-				      requestCursorParamsDef.append("& ");
-				    requestCursorParamsDef.append(varName);
-				    requestCursorParamsDef.append(", ");
-				  }
+                                    // In the struct case we should handle anonymous struct case
+                                    if (typeName.find("anonymous struct"))
+                                      {
+                                        // We should declare the struct locally
+                                        
+                                      }
+                                    else
+                                      {
+                                        requestCursorParamsDef.append(typeName);
+                                        requestCursorParamsDef.append("& ");
+                                        requestCursorParamsDef.append(varName);
+                                        requestCursorParamsDef.append(", ");
+                                      }
+                                  }
 				else
 				  {
 				    requestCursorParamsDef.append(typeName);
@@ -1267,9 +1495,53 @@ namespace clang
 				    requestCursorParamsDef.append(", ");
 				  }
 			      }
+                            // Only need to do it here, expr already contains indicator,
+                            // then we do it for host var and its indicator, only for main host var
 			    requestArgs.append(":");
 			    requestArgs.append(expr);
 			    requestArgs.append(",");
+			  }
+                        
+                        // Then once we got all infos we generate the code for call, decl and impl
+			if (indicVarDecl != nullptr)
+			  {
+			    QualType qtype = indicVarDecl->getType();
+			    std::string typeName = qtype.getAsString();
+
+			    if (generation_simplify_function_args)
+			      emplace_ret = cursorArgsSet.emplace(indicVarName);
+
+			    if (!generation_simplify_function_args || emplace_ret.second)
+			      {
+				if (qtype->isConstantArrayType())
+				  {
+				    const ConstantArrayType *catype = indicVarDecl->getASTContext()
+				      .getAsConstantArrayType(qtype);
+				    requestCursorParamsDef.append(catype->getElementType().getAsString());
+				    requestCursorParamsDef.append(" ");
+				    requestCursorParamsDef.append(indicVarName);
+				    requestCursorParamsDef.append("[");
+				    requestCursorParamsDef.append(catype->getSize().toString(10, false));
+				    requestCursorParamsDef.append("], ");
+				  }
+				else if (qtype->isRecordType() ||
+					 qtype->isStructureType() ||
+					 qtype->isClassType())
+				  {
+				    requestCursorParamsDef.append(typeName);
+				      requestCursorParamsDef.append("& ");
+				    requestCursorParamsDef.append(indicVarName);
+				    requestCursorParamsDef.append(", ");
+				  }
+				else
+				  {
+				    requestCursorParamsDef.append(typeName);
+				    if (!qtype.getTypePtr()->isPointerType())
+				      requestCursorParamsDef.append(" ");
+				    requestCursorParamsDef.append(indicVarName);
+				    requestCursorParamsDef.append(", ");
+				  }
+			      }
 			  }
 		      }
 		    while (!intoReqNames.empty());
@@ -1277,13 +1549,15 @@ namespace clang
 		    //outs() << "requestCursorParamsDef = '" << requestCursorParamsDef << "'\n";
 		    //outs() << "requestArgs = '" << requestArgs << "'\n";
 
-		    requestCursorParamsDef.erase(requestCursorParamsDef.length()-2,2);
-		    requestArgs.erase(requestArgs.length()-1,1);
+                    if (requestCursorParamsDef.length() >= 2)
+                      requestCursorParamsDef.erase(requestCursorParamsDef.length()-2,2);
+                    if (requestArgs.length() >= 1)
+                      requestArgs.erase(requestArgs.length()-1,1);
 		  }
 		
-		requestExecSql = reqName;
+                requestExecSql.append(reqName);
 		requestExecSql.append(requestInto);
-		requestExecSql.append(requestArgs);
+		requestExecSql.append(matches[4]);
 		
 		requestFunctionName = "fetch";
 		reqName[0] &= ~0x20;
@@ -1292,6 +1566,12 @@ namespace clang
 		// Got it, emit changes
 		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
 		
+                if (generation_do_report_modification_in_pc)
+                  {
+                    rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
+                    rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
+                  }
+
 		// If headers generation was requested
 		if (generate_req_headers)
 		  {
@@ -1300,10 +1580,12 @@ namespace clang
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
 					      generation_header_template,
-					      values_map);
+					      values_map,
+                                              anonymousStructs);
 		  }
 		
 		// If source generation was requested
