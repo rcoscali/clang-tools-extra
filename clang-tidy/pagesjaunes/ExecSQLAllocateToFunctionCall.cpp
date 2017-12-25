@@ -227,6 +227,8 @@ namespace clang
         
             std::string comment = it->first;
             auto map_for_values = it->second;
+
+            //outs() << "Processing comment: '" << comment << "'\n";
             
             for (auto iit = map_for_values.begin(); iit != map_for_values.end(); ++iit)
               {
@@ -288,8 +290,23 @@ namespace clang
               has_pcFileLocation = true;
 
             char* buffer = nullptr;
-            StringRef Buffer;
+            StringRef *Buffer;
             std::string NewBuffer;
+
+            // 
+            //outs() << "================================================================\n";
+            //outs() << "    has_pcFilename : " << has_pcFilename << "\n";
+            //outs() << "    has_pcLineNum : " << has_pcLineNum << "\n";
+            //outs() << "    has_pcFileLocation : " << has_pcFileLocation << "\n";
+            //outs() << "    pcFilename : " << pcFilename << "\n";
+            //outs() << "    pcLineNum : " << pcLineNum << "\n";
+            //outs() << "    rpltcode : " << rpltcode << "\n";
+            //outs() << "    line : " << line << "\n";
+            //outs() << "    filename : " << filename << "\n";
+            //outs() << "    funcname : " << funcname << "\n";
+            //outs() << "    fullcomment : " << fullcomment << "\n";
+            //outs() << "    execsql : " << execsql << "\n";
+            //outs() << "    originalfile : " << originalfile << "\n";
             
             // If #line are not present, need to find the line in file with regex
             if (!has_pcFileLocation)
@@ -322,19 +339,27 @@ namespace clang
                         pbuf->sgetn (buffer,size);
                         ifs.close();
                         
-                        Buffer = StringRef(buffer);
+                        Buffer = new StringRef(buffer);
                         std::string allocReqReStr = "(EXEC SQL[[:space:]]+";
+
+                        size_t pos = 0;
+                        while ((pos = execsql.find(" ")) != std::string::npos )
+                          execsql.replace(pos, 1, "[[:space:]]*");
+                        pos = -1;
+                        while ((pos = execsql.find(",", pos+1)) != std::string::npos )
+                          execsql.replace(pos, 1, ",[[:space:]]*");
+                        
                         allocReqReStr.append(execsql);
-                        allocReqReStr.append(");");
+                        allocReqReStr.append(")[[:space:]]*;");
                         Regex allocReqRe(allocReqReStr.c_str(), Regex::NoFlags);
                         SmallVector<StringRef, 8> allocReqMatches;
                         
-                        if (allocReqRe.match(Buffer, &allocReqMatches))
+                        //outs() << "AllocReqReStr: '" << allocReqReStr << "'\n";
+                        if (allocReqRe.match(*Buffer, &allocReqMatches))
                           {
                             StringRef RpltCode(rpltcode);
-                            NewBuffer = allocReqRe.sub(RpltCode, Buffer);
+                            NewBuffer = allocReqRe.sub(RpltCode, *Buffer);
                           }
-
                         else
                           {
                             outs() << originalfile << ":" << line
@@ -342,8 +367,22 @@ namespace clang
                                    << ";' statement to replace with '" << rpltcode
                                    << "' in original '" << pcFilename
                                    << "' file ! Already replaced ?\n";
-                            NewBuffer = Buffer.str();
+                            NewBuffer = Buffer->str();
                           }
+
+                        std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
+                        if (ofs.is_open())
+                          {
+                            ofs.write(NewBuffer.c_str(), NewBuffer.size());
+                            ofs.flush();
+                            ofs.close();
+                          }
+                        
+                        else
+                          // TODO: add reported llvm error
+                          outs() << originalfile << ":" << line
+                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
+                        
                       }
                   }
 
@@ -376,35 +415,48 @@ namespace clang
                         pbuf->sgetn (buffer, size);
                         ifs.close();
                         
-                        StringRef Buffer(buffer);
-                        SmallVector<StringRef, 10000> linesbuf;
-                        Buffer.split(linesbuf, '\n');
+                        Buffer = new StringRef(buffer);
+                        SmallVector<StringRef, 40000> linesbuf;
+                        Buffer->split(linesbuf, '\n');
                         
                         pcLineNum--;
                         unsigned int pcStartLineNum = pcLineNum;
                         unsigned int pcEndLineNum = pcLineNum;
+                        unsigned int totallines = linesbuf.size();
 
-                        if (had_cr)
-                          while (linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
-                            pcStartLineNum--;
-                        
-                        if (pcEndLineNum > pcStartLineNum)
-                          for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                            outs() << (n+1) << " " << linesbuf[n].str() << "\n";
-                        
-                        size_t startpos = linesbuf[pcStartLineNum].find(StringRef("EXEC"));
-                        size_t endpos = linesbuf[pcEndLineNum].rfind(';');
-                        std::string indent = linesbuf[pcStartLineNum].substr(0, startpos).str();
+                        //outs() << "==> totallines = " << totallines << "\n";
+                        //outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
+                        if (had_cr && pcStartLineNum < linesbuf.size())
+                          {
+                            //outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
+                            while (pcStartLineNum < linesbuf.size() && linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
+                              pcStartLineNum--;
+                          }
+                          
+                        //if (pcEndLineNum > pcStartLineNum)
+                          //for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
+                            //outs() << n << " " << linesbuf[n].str() << "\n";
+
+                        StringRef firstline = linesbuf[pcStartLineNum];
+                        StringRef lastline = linesbuf[pcEndLineNum];
+                        size_t startpos = firstline.find(StringRef("EXEC"));
+                        size_t endpos = lastline.rfind(';');
+                        StringRef indent = firstline.substr(0, startpos);
+                        std::string *newline = nullptr;
                         if (startpos != StringRef::npos)
                           {
-                            std::string newline = indent;
-                            newline.append(rpltcode);
+                            newline = new std::string(indent.str());
+                            newline->append(rpltcode);
                             if (endpos != StringRef::npos)
-                              newline.append(linesbuf[pcEndLineNum].substr(endpos+1, StringRef::npos));
-                            linesbuf[pcStartLineNum] = StringRef(newline);
+                              newline->append(lastline.substr(endpos+1, StringRef::npos));
+                            linesbuf[pcStartLineNum] = StringRef(newline->c_str());
+                            //outs() << "Startline = '" << linesbuf[pcStartLineNum].str() << "'\n";
                             if (pcEndLineNum > pcStartLineNum)
                               for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                                linesbuf[n] = indent;
+                                {
+                                  linesbuf[n] = StringRef(indent);
+                                  //outs() << "linesbuf[" << n << "] = '" << linesbuf[n].str() << "'\n";
+                                }
                           }
 
                         else
@@ -413,31 +465,32 @@ namespace clang
                                  << ";' statement to replace with '" << rpltcode
                                  << "' in original '" << pcFilename
                                  << "' file! Already replaced ?\n";
-
-                        NewBuffer.clear();
-                        for (auto it = linesbuf.begin(); it != linesbuf.end(); ++it)
+                          
+                        std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
+                        if (ofs.is_open())
                           {
-                            StringRef line = *it;
-                            NewBuffer.append(line.str());
-                            NewBuffer.append("\n");
+                            for (unsigned int n = 0; n < totallines; n++)
+                              {
+                                //outs() << "saving line #" << n++ << ": '" << linesbuf[n].str().c_str() << "'\n";
+                                ofs.write(linesbuf[n].str().c_str(), linesbuf[n].str().size());
+                                ofs.write("\n", 1);
+                              }
+                            
+                            ofs.flush();
+                            ofs.close();
                           }
+                        
+                        else
+                          // TODO: add reported llvm error
+                          outs() << originalfile << ":" << line
+                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
+                        
+                        delete newline;
                       }
                   }
               }
 
-            std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
-            if (ofs.is_open())
-              {
-                ofs.write(NewBuffer.c_str(), NewBuffer.size());
-                ofs.flush();
-                ofs.close();
-              }
-
-            else
-              // TODO: add reported llvm error
-              outs() << originalfile << ":" << line
-                     << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
-
+            delete Buffer;
             delete buffer;
           }
       }
@@ -1021,8 +1074,6 @@ namespace clang
                   {
                     std::ostringstream had_cr_strstream;
                     had_cr_strstream << had_cr;
-                    std::ostringstream pc_line_num;
-                    pc_line_num << pcLineNum;
                     rv.insert(std::pair<std::string, std::string>("had_cr", had_cr_strstream.str()));
                     rv.insert(std::pair<std::string, std::string>("fullcomment", comment));
                     rv.insert(std::pair<std::string, std::string>("reqname", reqAllocName));
@@ -1030,6 +1081,8 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
                     if (found_line_info)
                       {
+                        std::ostringstream pc_line_num;
+                        pc_line_num << pcLineNum;
                         rv.insert(std::pair<std::string, std::string>("pclinenum", pc_line_num.str()));
                         rv.insert(std::pair<std::string, std::string>("pcfilename", pcFilename));
                         outs() << "Found #line for comment: parsed line num = " << pcLineNum << " from file: '" << pcFilename << "'\n";
