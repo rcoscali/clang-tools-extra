@@ -17,6 +17,7 @@ add_clang_library(clangTidyPagesJaunesModule
   ExecSQLPrepareFmtdToFunctionCall.cpp
   ExecSQLPrepareToFunctionCall.cpp
   ExecSQLToFunctionCall.cpp
+  FileManipulator.cpp
   PagesJaunesTidyModule.cpp
   
   LINK_LIBS
@@ -47,4 +48,23 @@ set_property(SOURCE ExecSQLOpenToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE
 set_property(SOURCE ExecSQLPrepareFmtdToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLPrepareToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
+set_property(SOURCE FileManipulator.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE PagesJaunesTidyModule.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
+
+# Googletest directory
+set(LLVM_GOOGLETEST_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../../utils/unittest/googletest")
+
+# Add GoogleTest static library target
+add_library(gtestall STATIC ${LLVM_GOOGLETEST_DIR}/src/gtest-all.cc)
+target_compile_options(gtestall PUBLIC "-std=c++11")
+target_include_directories(gtestall PRIVATE ${LLVM_GOOGLETEST_DIR})
+target_include_directories(gtestall SYSTEM BEFORE PRIVATE ${LLVM_GOOGLETEST_DIR}/include)
+
+# Enable testing for pagesjaunes
+enable_testing()
+add_test(
+  NAME fetch_regex_test
+  COMMAND fetch_regex_test
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test)
+add_executable(fetch_regex_test test/test_main.cpp test/fetch_regex_test.cpp)
+target_link_libraries(fetch_regex_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;gtestall;pthread")
