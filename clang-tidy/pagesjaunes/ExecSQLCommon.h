@@ -20,18 +20,32 @@
 #define GENERATION_HEADER_FILENAME_EXTENSION ".h"
 
 // Regex values
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE \
-  "EXEC[[:space:]]+SQL[[:space:]]+(fetch|FETCH)[[:space:]]*(:?[[:space:]]*[A-Za-z0-9]+)[[:space:]]+(INTO|into)?[[:space:]]*(.*)[[:space:]]*;"
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_FILELINE \
-  "^(.*)#([0-9]+)$"
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_RE \
-  "@repeat[[:blank:]]+on[[:blank:]]+([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*{[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*,(.+)*}"
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE \
-  "[[:blank:]]*(,[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*)+"
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE2 \
-  ",(([^,]+)|(?R))*$"	// Using PCRE group recursion: don't run with llvm::Regex 
+#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE                         \
+  "EXEC[[:space:]]+SQL[[:space:]]+([Ff][Ee][Tt][Cc][Hh])[[:space:]]*(:?[[:space:]]*[_A-Za-z][A-Za-z0-9_]+)[[:space:]]+([Ii][Nn][Tt][Oo])?[[:space:]]*(.*)[[:space:]]*;"
 
-#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_LINE_DEFINE_RE \
+#define PAGESJAUNES_REGEX_EXEC_SQL_OPEN_REQ_RE                         \
+  "EXEC[[:space:]]+SQL[[:space:]]+([Oo][Pp][Ee][Nn])[[:space:]]*([[:space:]]*[_A-Za-z][A-Za-z0-9_]+)[[:space:]]*;$"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_CLOSE_REQ_RE                         \
+  "EXEC[[:space:]]+SQL[[:space:]]+([Cc][Ll][Oo][Ss][Ee])[[:space:]]*([[:space:]]*[_A-Za-z][A-Za-z0-9_]+)[[:space:]]*;$"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_DECLARE_REQ_RE                       \
+  "EXEC[[:space:]]+SQL[[:space:]]+([Dd][Ee][Cc][Ll][Aa][Rr][Ee])[[:space:]]+([Cc][Uu][Rr][Ss][Oo][Rr])[[:space:]]+([_A-Za-z][A-Za-z0-9_]+)" \
+  "[[:space:]]+([Ff][Oo][Rr])[[:space:]]+([[:space:]]*[_A-Za-z][A-Za-z0-9_]+)[[:space:]]*;"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALL_FILELINE \
+  "^(.*)#([0-9]+)$"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_RE                   \
+  "@repeat[[:blank:]]+on[[:blank:]]+([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*{[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*,(.+)*}"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_MEMBERS_RE           \
+  "[[:blank:]]*(,[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*)+"
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_MEMBERS_RE2          \
+  ",(([^,]+)|(?R))*$"   // Using PCRE group recursion: don't run with llvm::Regex 
+
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALL_LINE_DEFINE_RE   \
   "^#line ([0-9]+) \"(.*)\"$"
 
 // Common types
@@ -49,7 +63,12 @@ namespace clang
   {
     namespace pagesjaunes
     {
-
+      void
+      onStartOfTranslationUnit(map_comment_map_replacement_values &);
+      
+      void
+      onEndOfTranslationUnit(map_comment_map_replacement_values &, std::string &);
+      
     } // !namespace pagesjaunes
   } // !namespace tidy 
 }// !namespace clang

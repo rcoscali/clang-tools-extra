@@ -1,4 +1,4 @@
-//===--- ExecSQLCloseToFunctionCall.cpp - clang-tidy ----------------------------===//
+//===--- ExecSQLDeclareToFunctionCall.cpp - clang-tidy ----------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 
-#include "ExecSQLCloseToFunctionCall.h"
+#include "ExecSQLDeclareToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -44,8 +44,8 @@ namespace clang
 	class GetStringLiteralsDefines : public PPCallbacks
 	{
 	public:
-	  explicit GetStringLiteralsDefines(ExecSQLCloseToFunctionCall *parent,
-					    ExecSQLCloseToFunctionCall::source_range_set_t *srset)
+	  explicit GetStringLiteralsDefines(ExecSQLDeclareToFunctionCall *parent,
+					    ExecSQLDeclareToFunctionCall::source_range_set_t *srset)
 	    : m_parent(parent),
 	      m_src_mgr(m_parent->TidyContext->getASTContext()->getSourceManager()),
 	      m_diag_engine(m_parent->TidyContext->getASTContext()->getDiagnostics()),
@@ -99,7 +99,7 @@ namespace clang
 			//errs() << "*** Token for weird string (" << slKind << ") found\n";
 			m_parent->emitError(m_diag_engine,
 					    t.getLocation(),
-					    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+					    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
 					    &slKind);
 		      }
 		  }
@@ -107,8 +107,8 @@ namespace clang
 		if (have_literal)
 		  {
 		    //outs() << "Adding macro '" << macroName << "' expansion at " << range.getBegin().printToString(m_src_mgr) << "...'\n";
-		    ExecSQLCloseToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLCloseToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
+		    ExecSQLDeclareToFunctionCall::SourceRangeForStringLiterals *ent
+		      = new ExecSQLDeclareToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -121,17 +121,17 @@ namespace clang
 	  }
 	  
 	private:
-	  ExecSQLCloseToFunctionCall *m_parent;
+	  ExecSQLDeclareToFunctionCall *m_parent;
 	  const SourceManager &m_src_mgr; 
 	  DiagnosticsEngine &m_diag_engine;
-	  ExecSQLCloseToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
+	  ExecSQLDeclareToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
 	};
       } // namespace
       
       /**
-       * ExecSQLCloseToFunctionCall constructor
+       * ExecSQLDeclareToFunctionCall constructor
        *
-       * @brief Constructor for the ExecSQLCloseToFunctionCall rewriting check
+       * @brief Constructor for the ExecSQLDeclareToFunctionCall rewriting check
        *
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
@@ -147,7 +147,7 @@ namespace clang
        * @param Name    A StringRef for the new check name
        * @param Context The ClangTidyContext allowing to access other contexts
        */
-      ExecSQLCloseToFunctionCall::ExecSQLCloseToFunctionCall(StringRef Name,
+      ExecSQLDeclareToFunctionCall::ExecSQLDeclareToFunctionCall(StringRef Name,
 							   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
@@ -163,13 +163,13 @@ namespace clang
 					   false)),
 	  /// Generation directory (string)
 	  generation_directory(Options.get("Generation-directory",
-					   "./")),
+					   ".")),
 	  /// Generation header default template (string)
 	  generation_header_template(Options.get("Generation-header-template",
-						 "./pagesjaunes_close.h.tmpl")),
+						 "./pagesjaunes_declare.h.tmpl")),
 	  /// Generation source default template (string)
 	  generation_source_template(Options.get("Generation-source-template",
-						 "./pagesjaunes_close.pc.tmpl")),
+						 "./pagesjaunes_declare.pc.tmpl")),
 	  /// Request grouping option: Filename containing a json map for
 	  /// a group name indexing a vector of requests name
 	  generation_request_groups(Options.get("Generation-request-groups",
@@ -182,7 +182,7 @@ namespace clang
                                                               false)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
-                                                             "./"))
+                                                             "."))
       {
 	req_groups.clear();
 	std::filebuf fb;
@@ -215,7 +215,7 @@ namespace clang
 	    errs() << "Cannot load groups file: '" << generation_request_groups << "'\n";
 	    emitError(Context->getASTContext()->getDiagnostics(),
 		      SourceLocation(),
-		      ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+		      ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
 		      &generation_request_groups);
 	  }
       }
@@ -228,7 +228,7 @@ namespace clang
        * Override to be called at start of translation unit
        */
       void
-      ExecSQLCloseToFunctionCall::onStartOfTranslationUnit()
+      ExecSQLDeclareToFunctionCall::onStartOfTranslationUnit()
       {
         clang::tidy::pagesjaunes::onStartOfTranslationUnit(replacement_per_comment);
       }
@@ -241,7 +241,7 @@ namespace clang
        * Override to be called at end of translation unit
        */
       void
-      ExecSQLCloseToFunctionCall::onEndOfTranslationUnit()
+      ExecSQLDeclareToFunctionCall::onEndOfTranslationUnit()
       {
         clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
                                                          generation_report_modification_in_dir);
@@ -264,7 +264,7 @@ namespace clang
        * @param Opts	The option map in which to store supported options
        */
       void
-      ExecSQLCloseToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      ExecSQLDeclareToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
@@ -291,7 +291,7 @@ namespace clang
        *                us AST node.
        */
       void 
-      ExecSQLCloseToFunctionCall::registerMatchers(MatchFinder *Finder) 
+      ExecSQLDeclareToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
@@ -302,7 +302,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLCloseToFunctionCall::registerPPCallbacks
+       * ExecSQLDeclareToFunctionCall::registerPPCallbacks
        *
        * @brief Register callback for intercepting all pre-processor actions
        *
@@ -312,7 +312,7 @@ namespace clang
        *
        * @param[in] compiler	the compiler instance we will intercept
        */
-      void ExecSQLCloseToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+      void ExecSQLDeclareToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
 	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -321,7 +321,7 @@ namespace clang
       
       
       /*
-       * ExecSQLCloseToFunctionCall::emitDiagAndFix
+       * ExecSQLDeclareToFunctionCall::emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
@@ -338,7 +338,7 @@ namespace clang
        * @param function_name   The function name that will be called
        */
       std::string
-      ExecSQLCloseToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
+      ExecSQLDeclareToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
 					    const SourceLocation& loc_end,
 					    const std::string& function_name)
       {
@@ -364,7 +364,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLCloseToFunctionCall::processTemplate
+       * ExecSQLDeclareToFunctionCall::processTemplate
        *
        * @brief Process a template file with values from the 
        *        provided map
@@ -377,9 +377,9 @@ namespace clang
        * @retval false 	if something wrong occurs
        */
       bool
-      ExecSQLCloseToFunctionCall::processTemplate(const std::string& tmpl,
-					     const std::string& fname,
-					     string2_map& values_map)
+      ExecSQLDeclareToFunctionCall::processTemplate(const std::string& tmpl,
+                                                    const std::string& fname,
+                                                    string2_map& values_map)
       {
 	// Return value
 	bool ret = false;
@@ -451,7 +451,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLCloseToFunctionCall::doRequestSourceGeneration
+       * ExecSQLDeclareToFunctionCall::doRequestSourceGeneration
        *
        * @brief Generate source file for request from template
        *
@@ -464,9 +464,9 @@ namespace clang
        *
        */
       void
-      ExecSQLCloseToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+      ExecSQLDeclareToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
+                                                              const std::string& tmpl,
+                                                              string2_map& values_map)
       {
 	SourceLocation dummy;
         struct stat buffer;   
@@ -492,23 +492,23 @@ namespace clang
         if (mkdret == -1 && errno != EEXIST)
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
 		    &fileName);          
         else if ((stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating source file
 	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
 		    &fileName);
       }
       
       /**
-       * ExecSQLCloseToFunctionCall::doRequestHeaderGeneration
+       * ExecSQLDeclareToFunctionCall::doRequestHeaderGeneration
        *
        * @brief Generate header file for request from template
        *
@@ -521,9 +521,9 @@ namespace clang
        *
        */
       void
-      ExecSQLCloseToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+      ExecSQLDeclareToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
+                                                              const std::string& tmpl,
+                                                              string2_map& values_map)
       {	
 	SourceLocation dummy;
         struct stat buffer;   
@@ -549,18 +549,18 @@ namespace clang
         if (mkdret == -1 && errno != EEXIST)
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
 		    &fileName);          
         else if ((stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating header file
 	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+		    ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
 		    &fileName);
       }
 	
@@ -580,10 +580,10 @@ namespace clang
        * @param kind            Kind of error to report
        */
       void
-      ExecSQLCloseToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
-				       const SourceLocation& err_loc,
-				       enum ExecSQLCloseToFunctionCallErrorKind kind,
-				       const std::string* msgptr)
+      ExecSQLDeclareToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
+                                              const SourceLocation& err_loc,
+                                              enum ExecSQLDeclareToFunctionCallErrorKind kind,
+                                              const std::string* msgptr)
       {
 	std::string msg;
 	if (msgptr != nullptr && !msgptr->empty())
@@ -605,7 +605,7 @@ namespace clang
             break;
 
             /** No error ID: it should never occur */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Remark,
                               "No error");
@@ -613,7 +613,7 @@ namespace clang
             break;
 
             /** Access char data diag ID */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't access character data in file cache memory buffers!");
@@ -621,7 +621,7 @@ namespace clang
             break;
 
             /** Can't find a comment */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't find ProC comment start! This result has been discarded!");
@@ -629,7 +629,7 @@ namespace clang
             break;
 
             /** Cannot match comment */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Warning,
                               "Couldn't match ProC comment for function name creation!");
@@ -637,7 +637,7 @@ namespace clang
             break;
 
             /** Cannot generate request source file (no location) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't generate request source file %0!");
@@ -645,7 +645,7 @@ namespace clang
             break;
 
             /** Cannot generate request header file (no location) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't generate request header file %0!");
@@ -653,7 +653,7 @@ namespace clang
             break;
 
             /** Cannot generate request source file (already exists) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Source file '%0' already exists: will not overwrite!");
@@ -661,7 +661,7 @@ namespace clang
             break;
 
             /** Cannot generate request header file (no location) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Header file '%0' already exists: will not overwrite!");
@@ -669,7 +669,7 @@ namespace clang
             break;
 
             /** Cannot generate request source file (create dir) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't create directory for '%0'!");
@@ -677,7 +677,7 @@ namespace clang
             break;
 
             /** Cannot generate request header file (no location) */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't create directory for '%0'!");
@@ -685,7 +685,7 @@ namespace clang
             break;
 
             /** Unsupported String Literal charset */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Token for weird charset string (%0) found!");
@@ -693,7 +693,7 @@ namespace clang
            break;
 
             /** Invalid groups file error */
-          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+          case ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Cannot parse invalid groups file '%0'!");
@@ -704,7 +704,7 @@ namespace clang
       }
       
       /**
-       * ExecSQLCloseToFunctionCall::findMacroStringLiteralDefAtLine
+       * ExecSQLDeclareToFunctionCall::findMacroStringLiteralDefAtLine
        *
        * @brief find a macro expansion for a string literal used for a request
        *
@@ -723,7 +723,7 @@ namespace clang
        *
        */
       bool
-      ExecSQLCloseToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
+      ExecSQLDeclareToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
 								    unsigned ln,
 								    std::string& name, std::string& val,
 								    SourceRangeForStringLiterals **record = nullptr)
@@ -759,7 +759,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLCloseToFunctionCall::findSymbolInFunction
+       * ExecSQLDeclareToFunctionCall::findSymbolInFunction
        *
        * @brief Find a symbol, its definition and line number in the current function
        *
@@ -773,7 +773,9 @@ namespace clang
        * @return The pointer to the varDecl node instance for the searched symbol
        */
       const VarDecl *
-      ExecSQLCloseToFunctionCall::findSymbolInFunction(ClangTool *tool, std::string& varName, const FunctionDecl *func)
+      ExecSQLDeclareToFunctionCall::findSymbolInFunction(ClangTool *tool,
+                                                         std::string& varName,
+                                                         const FunctionDecl *func)
       {
 	const VarDecl *ret = nullptr;
 
@@ -817,7 +819,7 @@ namespace clang
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      ExecSQLCloseToFunctionCall::check(const MatchFinder::MatchResult &result) 
+      ExecSQLDeclareToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
         map_replacement_values rv;
         
@@ -1004,7 +1006,7 @@ namespace clang
 	     */
 
 	    // Regex for processing comment for all remaining requests
-	    Regex closeReqRe(PAGESJAUNES_REGEX_EXEC_SQL_CLOSE_REQ_RE);
+	    Regex declareReqRe(PAGESJAUNES_REGEX_EXEC_SQL_DECLARE_REQ_RE);
 	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
@@ -1025,14 +1027,15 @@ namespace clang
 	     * Now we match against a more permissive regex for all other (simpler) requests
 	     * =============================================================================
 	     */
-	    if (closeReqRe.match(comment, &matches))
+	    if (declareReqRe.match(comment, &matches))
 	      {
 		/*
 		 * Find the request var assignment
 		 */
 		
 		// The request name used in ProC
-		std::string reqName = matches[2];
+		std::string reqName = matches[5];
+                std::string cursorName = matches[3];
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -1057,15 +1060,21 @@ namespace clang
                       }
                   }
 		
-		requestExecSql = reqName;
+		requestExecSql.assign("CURSOR ");
+		requestExecSql.append(cursorName);
+		requestExecSql.append(" FOR ");
+		requestExecSql.append(reqName);
 		
-		requestFunctionName = "close";
+		requestFunctionName = "declare";
 		reqName[0] &= ~0x20;
+		cursorName[0] &= ~0x20;
+		requestFunctionName.append(cursorName);
+		requestFunctionName.append("For");
 		requestFunctionName.append(reqName);
 		
                 if (generation_do_report_modification_in_pc)
                   {
-                    rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
+                    rv.insert(std::pair<std::string, std::string>("funcname",requestFunctionName ));
                     rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
                   }
 
@@ -1075,7 +1084,7 @@ namespace clang
 		    // Build the map for templating engine
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
-		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.rfind("/")+1);
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
 		    // And call it
@@ -1090,9 +1099,9 @@ namespace clang
 		    // Build the map for templating engine
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
-		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@RequestExecSql@"] = requestExecSql;
+		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.rfind("/")+1);
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
 		    // And call it
 		    doRequestSourceGeneration(diagEngine,
@@ -1117,7 +1126,7 @@ namespace clang
 	      // Didn't match comment at all!
 	      emitError(diagEngine,
 	      		comment_loc_start,
-	      		ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+	      		ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
 	  }
 	else
 	  {
@@ -1125,13 +1134,13 @@ namespace clang
 	      // An error occured while accessing memory buffer for sources
 	      emitError(diagEngine,
 			loc_start,
-			ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
+			ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
 
 	    else
 	      // We didn't found the comment start ???
 	      emitError(diagEngine,
 			comment_loc_end,
-			ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
+			ExecSQLDeclareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
 	  }
       }
     } // namespace pagesjaunes

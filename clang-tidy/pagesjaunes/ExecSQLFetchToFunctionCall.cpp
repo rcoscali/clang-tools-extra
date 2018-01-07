@@ -285,7 +285,7 @@ namespace clang
 
                 else if (key.compare("originalfile") == 0)
                   {
-                    Regex fileline(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_FILELINE);
+                    Regex fileline(PAGESJAUNES_REGEX_EXEC_SQL_ALL_FILELINE);
                     SmallVector<StringRef, 8> fileMatches;
 
                     if (fileline.match(val, &fileMatches))
@@ -700,7 +700,7 @@ namespace clang
                         return false;
                       }
                     
-                    Regex tmplRepeatRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_RE);
+                    Regex tmplRepeatRe(PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_RE);
                     SmallVector<StringRef, 8> repeatMatches;
                     if (tmplRepeatRe.match(Aline, &repeatMatches))
                       {
@@ -708,7 +708,7 @@ namespace clang
                         std::vector<std::string> repeatMembers;
                         StringRef membersString = repeatMatches[3];
                         StringRef firstMember = repeatMatches[2];
-                        Regex membersTmplRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE);
+                        Regex membersTmplRe(PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_MEMBERS_RE);
                         SmallVector<StringRef, 8> repeatMembersMatches;
                         while (membersTmplRe.match(membersString, &repeatMembersMatches))
                           {
@@ -1205,7 +1205,7 @@ namespace clang
                     // #line <linenum> <filepath>
                     // linenum is an unsigned int
                     // and filepath is a dbl-quoted string
-                    Regex lineDefineRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_LINE_DEFINE_RE);
+                    Regex lineDefineRe(PAGESJAUNES_REGEX_EXEC_SQL_ALL_LINE_DEFINE_RE);
                     SmallVector<StringRef, 8> lineMatches;
                     if (lineDefineRe.match(lineData, &lineMatches))
                       {
