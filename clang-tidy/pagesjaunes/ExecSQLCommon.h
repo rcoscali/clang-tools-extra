@@ -67,7 +67,7 @@ namespace clang
       onStartOfTranslationUnit(map_comment_map_replacement_values &);
       
       void
-      onEndOfTranslationUnit(map_comment_map_replacement_values &, std::string &);
+      onEndOfTranslationUnit(map_comment_map_replacement_values &, const std::string &);
       
     } // !namespace pagesjaunes
   } // !namespace tidy 

@@ -65,7 +65,7 @@ namespace clang
        */
       void
       onEndOfTranslationUnit(map_comment_map_replacement_values &replacement_per_comment,
-                             std::string &generation_report_modification_in_dir)
+                             const std::string &generation_report_modification_in_dir)
       {
         // Get data from processed requests
         for (auto it = replacement_per_comment.begin(); it != replacement_per_comment.end(); ++it)
