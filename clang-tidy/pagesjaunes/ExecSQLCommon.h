@@ -25,7 +25,12 @@
 #define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_FILELINE \
   "^(.*)#([0-9]+)$"
 #define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_RE \
-  "@repeat on ([[:word:]]+)\\{[[:space::]]*([[:word:]]+)[[:space::]]*(,[[:space::]]*([[:word:]]+))\\}"
+  "@repeat[[:blank:]]+on[[:blank:]]+([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*{[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*,(.+)*}"
+#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE \
+  "[[:blank:]]*(,[[:blank:]]*([[:alpha:]][[:alnum:]_-]+)[[:blank:]]*)+"
+#define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE2 \
+  ",(([^,]+)|(?R))*$"	// Using PCRE group recursion: don't run with llvm::Regex 
+
 #define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_LINE_DEFINE_RE \
   "^#line ([0-9]+) \"(.*)\"$"
 

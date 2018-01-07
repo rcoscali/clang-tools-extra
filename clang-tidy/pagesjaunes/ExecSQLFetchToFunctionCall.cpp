@@ -7,6 +7,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <sys/stat.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -704,14 +705,47 @@ namespace clang
                     if (tmplRepeatRe.match(Aline, &repeatMatches))
                       {
                         std::string repeatBasename = repeatMatches[1].str();
-                        long unsigned int repeatMembersNumber = repeatMatches.size() -2; // Regex enforce matches > 2
                         std::vector<std::string> repeatMembers;
-                        for (long unsigned int n = 0; n < repeatMembersNumber; n++)
-                          repeatMembers.push_back(repeatMatches[n+2].str());
+                        StringRef membersString = repeatMatches[3];
+                        StringRef firstMember = repeatMatches[2];
+                        Regex membersTmplRe(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE);
+                        SmallVector<StringRef, 8> repeatMembersMatches;
+                        while (membersTmplRe.match(membersString, &repeatMembersMatches))
+                          {
+                            repeatMembers.push_back(repeatMembersMatches[2].str());
+                            membersString = membersString.take_front(membersString.rfind(repeatMembersMatches[1]));
+                          }
+                        repeatMembers.push_back(firstMember.str());
+                        
                         do
                           {
+                            is.getline(buf, 255);
+                            aline = buf;
+                            for (auto anonit = anon_structs.begin(); anonit != anon_structs.end(); anonit++)
+                              {
+                                for (auto mit = repeatMembers.end(); mit != repeatMembers.begin(); mit--)
+                                  {
+                                    std::string struct_name = (*mit);
+                                    std::string map_key = "@";
+                                    map_key.append(repeatBasename);
+                                    map_key.append("#");
+                                    map_key.append(struct_name);
+                                    map_key.append("@");
+                                    auto map_values = (*anonit).second;
+                                    std::string map_value = map_values[struct_name];
+                                    size_t sp = aline.find(map_key);
+                                    if (sp != std::string::npos)
+                                      aline.replace(sp, map_key.length(), map_value);
+                                  }
+
+                                // Output processed line
+                                os << aline << std::endl;
+                              }
                           }
                         while (aline.compare("@") != 0);
+
+                        // Add empty line
+                        os << std::endl;
                       }
                     else
                       {
@@ -783,13 +817,20 @@ namespace clang
       {
         ushort_string_map dummy_anon;
 	SourceLocation dummy;
+        struct stat buffer;   
+
 	// Compute output file pathname
 	std::string fileName = values_map["@RequestFunctionName@"];
 	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
+        if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    &fileName);
 	// Process template for creating source file
-	if (!processTemplate(tmpl, fileName, values_map, dummy_anon))
+	else if (!processTemplate(tmpl, fileName, values_map, dummy_anon))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
@@ -817,13 +858,20 @@ namespace clang
                                                             ushort_string_map& anon_structs)
       {	
 	SourceLocation dummy;
+        struct stat buffer;   
+
 	// Compute output file pathname
 	std::string fileName = values_map["@RequestFunctionName@"];
 	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
 	fileName.insert(0, "/");
 	fileName.insert(0, generation_directory);
+        if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+		    &fileName);
 	// Process template for creating header file
-	if (!processTemplate(tmpl, fileName, values_map, anon_structs))
+	else if (!processTemplate(tmpl, fileName, values_map, anon_structs))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
@@ -915,6 +963,22 @@ namespace clang
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Couldn't generate request header file %0!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request source file (already exists) */
+          case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Source file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (already exists) */
+          case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Header file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
@@ -1012,7 +1076,7 @@ namespace clang
 	const VarDecl *ret = nullptr;
 
 	DeclarationMatcher m_matcher
-	  // find a sprintf call expr
+	  // find a varDecl
 	  = varDecl(hasName(varName.c_str()),
 		    // and this decl is in the current function (call bound to varDecl))
 		    hasAncestor(functionDecl(hasName(func->getNameAsString().insert(0, "::"))))).bind("varDecl");
@@ -1056,8 +1120,9 @@ namespace clang
         map_replacement_values rv;
         
 	// Get the source manager
-	SourceManager &srcMgr = result.Context->getSourceManager();
-	DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
+        ASTContext* astCtxt = result.Context;
+	SourceManager &srcMgr = astCtxt->getSourceManager();
+	DiagnosticsEngine &diagEngine = astCtxt->getDiagnostics();
 	ClangTool *tool = TidyContext->getToolPtr();
 
 	/*
@@ -1335,7 +1400,6 @@ namespace clang
 			    expr.erase(expr.find_first_of(" \t,"), std::string::npos);
 			}
 
-                        // TODO: Handle indicators
                         // Indicatros are some host variables associated to another host variable
                         // in order to indicate is the column that is bound to the host variable is NULL or not
                         // If the column is NULL, the indicator is strictly positive (boolean true value)
@@ -1352,13 +1416,14 @@ namespace clang
 			//  <var_symbol_ref> . <member>[:<var_symbol_indic>]
 			//  <var_symbol_ref> . <member>[:<var_symbol_ptr_indic> -> <member_indic>]
 			//  <var_symbol_ref> . <member>[:<var_symbol_dot_indic>] . <member_indic>]
-			std::string::size_type pos_arrow = expr.find("->");
-			std::string::size_type pos_dot = expr.find(".");
-			std::string::size_type pos_indic = expr.find(":", 1);
-			std::string::size_type pos_indic_arrow = std::string::npos;
-			std::string::size_type pos_indic_dot = std::string::npos;
+			std::string::size_type pos_arrow = expr.find("->");		// Search for the arrow of the host var (could also find arrow of the indic)
+			std::string::size_type pos_dot = expr.find(".");		// Search for the dot of the host var (could also find dot of the indic)
+			std::string::size_type pos_indic = expr.find(":", 1);		// Search for an indicator
+			std::string::size_type pos_indic_arrow = std::string::npos;	// Init pos of indic arrow
+			std::string::size_type pos_indic_dot = std::string::npos;	// Init pos of indic dot
 
-                        // Handle case where member is on indic only (host variable is not member)
+                        // Handle case where member is on indic only (host variable is not member,
+                        // hence handling case where arrow is in indic and not in host var: ex :toto:ptr->tata)
                         if (pos_indic != std::string::npos && pos_arrow > pos_indic)
                           // swap pos_indic & pos_indic_arrow
                           std::swap(pos_arrow, pos_indic_arrow);
@@ -1371,6 +1436,8 @@ namespace clang
                               pos_indic_arrow = std::string::npos;
                           }
 
+                        // Handle case where member is on indic only (host variable is not member,
+                        // hence handling case where dot is in indic and not in host var: ex :toto:var.tata)
                         if (pos_indic != std::string::npos && pos_dot > pos_indic)
                           // swap pos_indic & pos_indic_arrow
                           std::swap(pos_dot, pos_indic_dot);
@@ -1383,75 +1450,132 @@ namespace clang
                               pos_indic_dot = std::string::npos;                            
                           }
 
+                        // If host var is a memeber of a pointer to struct (:ptr->tata)
 			if (pos_arrow != std::string::npos)
 			  {
 			    // It is a member of a pointer: get var symbol and member name
 			    varName = expr.substr(0, pos_arrow);
-			    memberName = expr.substr(pos_arrow+2, pos_indic);
+			    memberName = expr.substr(pos_arrow+2, pos_indic-pos_dot-1);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
+                            // Handle indicator (:host_var:indic, with or without dot/arrow)
                             if (pos_indic != std::string::npos)
                               {
-                                // member of a pointer indicator
+                                // member of a pointer indicator (:host_var:ptr->indicMember)
                                 if (pos_indic_arrow != std::string::npos)
                                   {
-                                    indicVarName = expr.substr(pos_indic, pos_indic_arrow);
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow - pos_indic);
                                     indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
-                                // member of struct indicator
+                                // member of struct indicator (:host_var:struct.member)
                                 else if (pos_indic_dot != std::string::npos)
                                   {
-                                    indicVarName = expr.substr(pos_indic, pos_indic_dot);
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot - pos_indic);
                                     indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
                                 else
                                   {
-                                    indicVarName = expr.substr(pos_indic, std::string::npos);
+                                    // Host var is pointed member and indic is var
+                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
                               }
 			  }
+                        // Host var is a member of a struct var
 			else if (pos_dot != std::string::npos)
 			  {
 			    // It is a member of an instance
 			    varName = expr.substr(0, pos_dot);
-			    memberName = expr.substr(pos_dot+1, pos_indic);
+			    memberName = expr.substr(pos_dot+1, pos_indic-pos_dot-1);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
                             if (pos_indic != std::string::npos)
                               {
+                                // Indic is a member of a record pointer 
                                 if (pos_indic_arrow != std::string::npos)
                                   {
-                                    indicVarName = expr.substr(pos_indic, pos_indic_arrow);
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow - pos_indic);
                                     indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
+                                // Indic is a member of a record
                                 else if (pos_indic_dot != std::string::npos)
                                   {
-                                    indicVarName = expr.substr(pos_indic, pos_indic_dot);
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot - pos_indic);
                                     indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
+                                // Indic is a host variable
                                 else
                                   {
-                                    indicVarName = expr.substr(pos_indic, std::string::npos);
+                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
                                     indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
                                   }
                               }
 			  }
+                        // Finally host var is just variable
 			else
 			  {
 			    // It is a var symbol
 			    varName = expr.substr(0, pos_indic);
 			    varDecl = findSymbolInFunction(tool, varName, curFunc);
+                            if (pos_indic != std::string::npos)
+                              {
+                                // If indicator is a member of a record pointer 
+                                if (pos_indic_arrow != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow-pos_indic-1);
+                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                // If indicator is a member of a record var
+                                else if (pos_indic_dot != std::string::npos)
+                                  {
+                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot-pos_indic-1);
+                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                                // Or indicator is a var
+                                else
+                                  {
+                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
+                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
+                                  }
+                              }
 			  }
 
                         // Then once we got all infos we generate the code for call, decl and impl
 			if (varDecl != nullptr)
 			  {
-			    QualType qtype = varDecl->getType();
-			    std::string typeName = qtype.getAsString();
+                            std::string Name;
+                            std::string TypeName;
 
+                            outs() << "varDecl dump: ";
+                            varDecl->dump();
+                            outs() << "\n";
+                            
+                            const NamedDecl* ndecl = dyn_cast<NamedDecl>(varDecl);
+                            if (ndecl->getDeclName())
+                              {
+                                Name = ndecl->getNameAsString();
+                                outs() << "Name from varDecl dyn cast as NamedDecl: " <<  Name << "\n";
+                              }
+                            const ValueDecl* vdecl = dyn_cast<ValueDecl>(varDecl);
+			    QualType qtype = vdecl->getType();
+                            SplitQualType qt_split = qtype.split();
+                            TypeName = QualType::getAsString(qt_split);
+                            
+                            DeclarationName dname = varDecl->getDeclName();
+                            const DeclContext *dctxt = varDecl->getParentFunctionOrMethod();
+                            DeclContext::lookup_result R = dctxt->lookup(dname);
+                            for (auto lit = R.begin(); lit != R.end(); lit++)
+                              {
+                                ValueDecl *vdecl = dyn_cast<ValueDecl>(*lit);
+                                Name = vdecl->getNameAsString();
+                                TypeName = QualType::getAsString(vdecl->getType().split());
+                                outs() << "Typename for var decl '" << Name << "' =  '" << TypeName << "'\n";
+                              }
+                            
 			    if (generation_simplify_function_args)
 			      emplace_ret = cursorArgsSet.emplace(varName);
 
@@ -1473,14 +1597,14 @@ namespace clang
 					 qtype->isClassType())
 				  {
                                     // In the struct case we should handle anonymous struct case
-                                    if (typeName.find("anonymous struct"))
+                                    if (TypeName.find("anonymous struct"))
                                       {
                                         // We should declare the struct locally
                                         
                                       }
                                     else
                                       {
-                                        requestCursorParamsDef.append(typeName);
+                                        requestCursorParamsDef.append(TypeName);
                                         requestCursorParamsDef.append("& ");
                                         requestCursorParamsDef.append(varName);
                                         requestCursorParamsDef.append(", ");
@@ -1488,7 +1612,7 @@ namespace clang
                                   }
 				else
 				  {
-				    requestCursorParamsDef.append(typeName);
+				    requestCursorParamsDef.append(TypeName);
 				    if (!qtype.getTypePtr()->isPointerType())
 				      requestCursorParamsDef.append(" ");
 				    requestCursorParamsDef.append(varName);
@@ -1505,8 +1629,15 @@ namespace clang
                         // Then once we got all infos we generate the code for call, decl and impl
 			if (indicVarDecl != nullptr)
 			  {
+                            std::string IndicName;
+                            std::string IndicTypeName;
+                            
+                            outs() << "indicVarDecl dump: ";
+                            indicVarDecl->dump();
+                            outs() << "\n";
+                            
 			    QualType qtype = indicVarDecl->getType();
-			    std::string typeName = qtype.getAsString();
+			    std::string typeName = QualType::getAsString(qtype.split());
 
 			    if (generation_simplify_function_args)
 			      emplace_ret = cursorArgsSet.emplace(indicVarName);

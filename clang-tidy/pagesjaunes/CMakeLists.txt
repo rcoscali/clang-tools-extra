@@ -14,6 +14,7 @@ add_clang_library(clangTidyPagesJaunesModule
   ExecSQLLOBCloseToFunctionCall.cpp
   ExecSQLLOBFreeToFunctionCall.cpp
   ExecSQLOpenToFunctionCall.cpp
+  ExecSQLCloseToFunctionCall.cpp
   ExecSQLPrepareFmtdToFunctionCall.cpp
   ExecSQLPrepareToFunctionCall.cpp
   ExecSQLToFunctionCall.cpp
@@ -62,9 +63,16 @@ target_include_directories(gtestall SYSTEM BEFORE PRIVATE ${LLVM_GOOGLETEST_DIR}
 
 # Enable testing for pagesjaunes
 enable_testing()
+set(PAGESJAUNES_CPPTEST_COMMAND fetch_regex_test CACHE FILEPATH "Executable generated for C++ tests run")
 add_test(
   NAME fetch_regex_test
   COMMAND fetch_regex_test
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test)
-add_executable(fetch_regex_test test/test_main.cpp test/fetch_regex_test.cpp)
-target_link_libraries(fetch_regex_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;gtestall;pthread")
+add_executable(fetch_regex_test
+  test/test_main.cpp
+  test/fetch_regex_test.cpp
+  test/fetch_tmpl_repeat_test.cpp
+  test/fetch_tmpl_repeat_members_test.cpp
+  test/fetch_tmpl_repeat_members2_test.cpp
+  test/fetch_fileline_test.cpp)
+target_link_libraries(fetch_regex_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;LLVMSupport;gtestall;pthread")

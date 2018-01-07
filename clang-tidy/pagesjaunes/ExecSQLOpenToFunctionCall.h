@@ -40,8 +40,16 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
 	    // Error kind for source generation failure
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+	    // Error kind for source generation failure (already exists)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+	    // Error kind for source generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
 	    // Error kind for header generation failure
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+	    // Error kind for header generation failure
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+	    // Error kind for header generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
 	    // Error kind for unsupported string literal charset
 	    EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
 	    // Error kind for invalid group file

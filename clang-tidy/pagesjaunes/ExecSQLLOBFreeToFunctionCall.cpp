@@ -7,6 +7,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <sys/stat.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -716,13 +717,20 @@ namespace clang
                                                                 string2_map& values_map)
       {
         SourceLocation dummy;
+        struct stat buffer;   
+
         // Compute output file pathname
         std::string fileName = values_map["@RequestFunctionName@"];
         fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
         fileName.insert(0, "/");
         fileName.insert(0, generation_directory);
+        if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    &fileName);
         // Process template for creating source file
-        if (!processTemplate(tmpl, fileName, values_map))
+        else if (!processTemplate(tmpl, fileName, values_map))
           emitError(diag_engine,
                     dummy,
                     ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
@@ -748,13 +756,20 @@ namespace clang
                                                                 string2_map& values_map)
       { 
         SourceLocation dummy;
+        struct stat buffer;   
+
         // Compute output file pathname
         std::string fileName = values_map["@RequestFunctionName@"];
         fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
         fileName.insert(0, "/");
         fileName.insert(0, generation_directory);
+        if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+		    &fileName);
         // Process template for creating header file
-        if (!processTemplate(tmpl, fileName, values_map))
+        else if (!processTemplate(tmpl, fileName, values_map))
           emitError(diag_engine,
                     dummy,
                     ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
@@ -848,6 +863,23 @@ namespace clang
 			      "Couldn't generate request header file %0!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
+
+            /** Cannot generate request source file (already exists) */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Source file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Header file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
           }
       }
       

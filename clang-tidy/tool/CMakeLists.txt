@@ -17,6 +17,7 @@ target_link_libraries(clang-tidy
   clangASTMatchers
   clangBasic
   clangTidy
+  clangDriver
   clangTidyAndroidModule
   clangTidyBoostModule
   clangTidyBugproneModule
@@ -36,6 +37,7 @@ target_link_libraries(clang-tidy
   clangTidyReadabilityModule
   clangTooling
   clangToolingCore
+  LLVMOption
   )
 
 install(PROGRAMS clang-tidy-diff.py

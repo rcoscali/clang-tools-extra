@@ -48,6 +48,10 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
 	    // Error kind for assignment not found
 	    EXEC_SQL_2_FUNC_ERROR_ASSIGNMENT_NOT_FOUND,
+	    // Error kind for source generation failure (already exists)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+	    // Error kind for header generation failure (already exists)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 	  };
 
 	// AST Context instance

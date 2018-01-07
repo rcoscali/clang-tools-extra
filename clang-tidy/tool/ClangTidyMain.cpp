@@ -52,8 +52,9 @@ Configuration files:
 )");
 
 const char DefaultChecks[] = // Enable these checks by default:
-    "clang-diagnostic-*,"    //   * compiler diagnostics
-    "clang-analyzer-*";      //   * Static Analyzer checks
+  "pagesjaunes-exec-sql-*"; // PagesJaunes diagnostics
+//  "clang-diagnostic-*,"    //   * compiler diagnostics
+//    "clang-analyzer-*";      //   * Static Analyzer checks
 
 static cl::opt<std::string> Checks("checks", cl::desc(R"(
 Comma-separated list of globs with optional '-'

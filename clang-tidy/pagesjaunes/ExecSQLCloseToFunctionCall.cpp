@@ -1,4 +1,4 @@
-//===--- ExecSQLToFunctionCall.cpp - clang-tidy ----------------------------===//
+//===--- ExecSQLCloseToFunctionCall.cpp - clang-tidy ----------------------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -16,7 +18,7 @@
 #include <sstream>
 #include <string>
 
-#include "ExecSQLToFunctionCall.h"
+#include "ExecSQLCloseToFunctionCall.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -34,16 +36,19 @@ namespace clang
     namespace pagesjaunes
     {
 
-      namespace {
+      namespace
+      {
 	// Keep track of macro expansions that defines a StringLiteral
 	// then keep the associated source_range_set_t to be able to get the
 	// original define (for keeping indentation)
-	class GetStringLiteralsDefines : public PPCallbacks {
+	class GetStringLiteralsDefines : public PPCallbacks
+	{
 	public:
-	  explicit GetStringLiteralsDefines(ExecSQLToFunctionCall *parent,
-					    ExecSQLToFunctionCall::source_range_set_t *srset)
+	  explicit GetStringLiteralsDefines(ExecSQLCloseToFunctionCall *parent,
+					    ExecSQLCloseToFunctionCall::source_range_set_t *srset)
 	    : m_parent(parent),
 	      m_src_mgr(m_parent->TidyContext->getASTContext()->getSourceManager()),
+	      m_diag_engine(m_parent->TidyContext->getASTContext()->getDiagnostics()),
 	      m_macrosStringLiteralsPtr(srset)
 	  {
 	  }
@@ -78,15 +83,32 @@ namespace clang
 			     t.is(tok::utf16_string_literal) ||
 			     t.is(tok::utf32_string_literal))
 		      {
-			errs() << "*** Token for weird string (wide, utf etc) found\n";
+			// TODO: handle that kind of string charsets
+			std::string slKind;
+			if (t.is(tok::wide_string_literal))
+			  slKind = "Wide String";
+			else if (t.is(tok::angle_string_literal))
+			  slKind = "Angle String";
+			else if (t.is(tok::utf8_string_literal))
+			  slKind = "UTF8 String";
+			else if (t.is(tok::utf16_string_literal))
+			  slKind = "UTF16 String";
+			else if (t.is(tok::utf32_string_literal))
+			  slKind = "UTF32 String";
+
+			//errs() << "*** Token for weird string (" << slKind << ") found\n";
+			m_parent->emitError(m_diag_engine,
+					    t.getLocation(),
+					    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+					    &slKind);
 		      }
 		  }
 		
 		if (have_literal)
 		  {
 		    //outs() << "Adding macro '" << macroName << "' expansion at " << range.getBegin().printToString(m_src_mgr) << "...'\n";
-		    ExecSQLToFunctionCall::SourceRangeForStringLiterals *ent
-		      = new ExecSQLToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
+		    ExecSQLCloseToFunctionCall::SourceRangeForStringLiterals *ent
+		      = new ExecSQLCloseToFunctionCall::SourceRangeForStringLiterals(range, sr, macroName);
 		    m_macrosStringLiteralsPtr->insert(ent);
 		  }
 	      }
@@ -99,16 +121,17 @@ namespace clang
 	  }
 	  
 	private:
-	  ExecSQLToFunctionCall *m_parent;
+	  ExecSQLCloseToFunctionCall *m_parent;
 	  const SourceManager &m_src_mgr; 
-	  ExecSQLToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
+	  DiagnosticsEngine &m_diag_engine;
+	  ExecSQLCloseToFunctionCall::source_range_set_t *m_macrosStringLiteralsPtr;
 	};
       } // namespace
       
       /**
-       * ExecSQLToFunctionCall constructor
+       * ExecSQLCloseToFunctionCall constructor
        *
-       * @brief Constructor for the ExecSQLToFunctionCall rewriting check
+       * @brief Constructor for the ExecSQLCloseToFunctionCall rewriting check
        *
        * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
@@ -124,10 +147,11 @@ namespace clang
        * @param Name    A StringRef for the new check name
        * @param Context The ClangTidyContext allowing to access other contexts
        */
-      ExecSQLToFunctionCall::ExecSQLToFunctionCall(StringRef Name,
-						   ClangTidyContext *Context)
+      ExecSQLCloseToFunctionCall::ExecSQLCloseToFunctionCall(StringRef Name,
+							   ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
+
 	  /*
 	   * Options
 	   */
@@ -142,14 +166,17 @@ namespace clang
 					   "./")),
 	  /// Generation header default template (string)
 	  generation_header_template(Options.get("Generation-header-template",
-						 "./pagesjaunes.h.tmpl")),
+						 "./pagesjaunes_close.h.tmpl")),
 	  /// Generation source default template (string)
 	  generation_source_template(Options.get("Generation-source-template",
-						 "./pagesjaunes.pc.tmpl")),
+						 "./pagesjaunes_close.pc.tmpl")),
 	  /// Request grouping option: Filename containing a json map for
 	  /// a group name indexing a vector of requests name
 	  generation_request_groups(Options.get("Generation-request-groups",
 						"./request_groups.json")),
+	  /// Simplify request args list if possible
+	  generation_simplify_function_args(Options.get("Generation-simplify-function-args",
+							false)),
           /// Conditionnaly report modification in .pc file if this is true
           generation_do_report_modification_in_pc(Options.get("Generation-do-report-modification-in-PC",
                                                               false)),
@@ -157,8 +184,6 @@ namespace clang
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
                                                              "./"))
       {
-	//outs() << "Opening request group file: '" << generation_request_groups << "'\n";
-
 	req_groups.clear();
 	std::filebuf fb;
 	if (fb.open(generation_request_groups, std::ios::in))
@@ -177,11 +202,21 @@ namespace clang
 		  errs() << "ERROR!! Couldn't add group '" << it->first
 			 << "': a group with same name already exists  in file '"
 			 << generation_request_groups << "' !!\n";
+		// for (auto it2 = agroup.begin();
+		//      it2 != agroup.end();
+		//      ++it2)
+		//   {
+		//     outs() << "    " << (*it2) << "\n";
+		//   }
 	      }
 	  }
 	else
 	  {
 	    errs() << "Cannot load groups file: '" << generation_request_groups << "'\n";
+	    emitError(Context->getASTContext()->getDiagnostics(),
+		      SourceLocation(),
+		      ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+		      &generation_request_groups);
 	  }
       }
       
@@ -193,7 +228,7 @@ namespace clang
        * Override to be called at start of translation unit
        */
       void
-      ExecSQLToFunctionCall::onStartOfTranslationUnit()
+      ExecSQLCloseToFunctionCall::onStartOfTranslationUnit()
       {
         // Clear the map for comments location in original file
         replacement_per_comment.clear();
@@ -207,12 +242,11 @@ namespace clang
        * Override to be called at end of translation unit
        */
       void
-      ExecSQLToFunctionCall::onEndOfTranslationUnit()
+      ExecSQLCloseToFunctionCall::onEndOfTranslationUnit()
       {
         // Get data from processed requests
         for (auto it = replacement_per_comment.begin(); it != replacement_per_comment.end(); ++it)
           {
-            bool had_cr = false;
             std::string execsql;
             std::string fullcomment;
             std::string funcname;
@@ -221,7 +255,8 @@ namespace clang
             unsigned int line = 0;
             std::string reqname;
             std::string rpltcode;
-            unsigned int pcLineNum = 0;
+            unsigned int pcLineNumStart = 0;
+            unsigned int pcLineNumEnd = 0;
             std::string pcFilename;
             bool has_pcFilename = false;
             bool has_pcLineNum = false;
@@ -230,17 +265,12 @@ namespace clang
             std::string comment = it->first;
             auto map_for_values = it->second;
 
-            //outs() << "Processing comment: '" << comment << "'\n";
-            
             for (auto iit = map_for_values.begin(); iit != map_for_values.end(); ++iit)
               {
                 std::string key = iit->first;
                 std::string val = iit->second;
 
-                if (key.compare("had_cr") == 0)
-                  had_cr = (val.compare("1") == 0);
-
-                else if (key.compare("execsql") == 0)
+                if (key.compare("execsql") == 0)
                   execsql = val;
 
                 else if (key.compare("fullcomment") == 0)
@@ -273,12 +303,20 @@ namespace clang
                 else if (key.compare("rpltcode") == 0)
                   rpltcode = val;
 
-                else if (key.compare("pclinenum") == 0)
+                else if (key.compare("pclinenumstart") == 0)
                   {
                     std::istringstream isstr;
                     std::stringbuf *pbuf = isstr.rdbuf();
                     pbuf->str(val);
-                    isstr >> pcLineNum;
+                    isstr >> pcLineNumStart;
+                    has_pcLineNum = true;
+                  }
+                else if (key.compare("pclinenumend") == 0)
+                  {
+                    std::istringstream isstr;
+                    std::stringbuf *pbuf = isstr.rdbuf();
+                    pbuf->str(val);
+                    isstr >> pcLineNumEnd;
                     has_pcLineNum = true;
                   }
                 else if (key.compare("pcfilename") == 0)
@@ -295,21 +333,6 @@ namespace clang
             StringRef *Buffer;
             std::string NewBuffer;
 
-            // 
-            //outs() << "================================================================\n";
-            //outs() << "    has_pcFilename : " << has_pcFilename << "\n";
-            //outs() << "    has_pcLineNum : " << has_pcLineNum << "\n";
-            //outs() << "    has_pcFileLocation : " << has_pcFileLocation << "\n";
-            //outs() << "    pcFilename : " << pcFilename << "\n";
-            //outs() << "    pcLineNum : " << pcLineNum << "\n";
-            //outs() << "    rpltcode : " << rpltcode << "\n";
-            //outs() << "    line : " << line << "\n";
-            //outs() << "    filename : " << filename << "\n";
-            //outs() << "    funcname : " << funcname << "\n";
-            //outs() << "    fullcomment : " << fullcomment << "\n";
-            //outs() << "    execsql : " << execsql << "\n";
-            //outs() << "    originalfile : " << originalfile << "\n";
-            
             // If #line are not present, need to find the line in file with regex
             if (!has_pcFileLocation)
               {
@@ -356,7 +379,6 @@ namespace clang
                         Regex allocReqRe(allocReqReStr.c_str(), Regex::NoFlags);
                         SmallVector<StringRef, 8> allocReqMatches;
                         
-                        //outs() << "AllocReqReStr: '" << allocReqReStr << "'\n";
                         if (allocReqRe.match(*Buffer, &allocReqMatches))
                           {
                             StringRef RpltCode(rpltcode);
@@ -394,6 +416,7 @@ namespace clang
                          << ":1: warning: Cannot open original file in which to report modifications: " << pcFilename
                          << "\n";
               }
+            // Line # are generated by preprocessor, let's use it
             else
               {
                 std::ifstream ifs (pcFilename, std::ifstream::in);
@@ -420,24 +443,17 @@ namespace clang
                         Buffer = new StringRef(buffer);
                         SmallVector<StringRef, 40000> linesbuf;
                         Buffer->split(linesbuf, '\n');
-                        
-                        pcLineNum--;
-                        unsigned int pcStartLineNum = pcLineNum;
-                        unsigned int pcEndLineNum = pcLineNum;
+
+                        // We start counting at 0, file lines are generally counted from 1
+                        pcLineNumStart--;
+                        pcLineNumEnd--;
+                        unsigned int pcStartLineNum = pcLineNumStart;
+                        unsigned int pcEndLineNum = pcLineNumEnd;
                         unsigned int totallines = linesbuf.size();
 
-                        //outs() << "==> totallines = " << totallines << "\n";
-                        //outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
-                        if (had_cr && pcStartLineNum < linesbuf.size())
-                          {
-                            //outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
-                            while (pcStartLineNum < linesbuf.size() && linesbuf[pcStartLineNum].find("EXEC") == StringRef::npos)
-                              pcStartLineNum--;
-                          }
-                          
-                        //if (pcEndLineNum > pcStartLineNum)
-                          //for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                            //outs() << n << " " << linesbuf[n].str() << "\n";
+                        if (pcEndLineNum > pcStartLineNum)
+                          for (unsigned int n = pcStartLineNum; n <= pcEndLineNum; n++)
+                            outs() << n << " " << linesbuf[n].str() << "\n";
 
                         StringRef firstline = linesbuf[pcStartLineNum];
                         StringRef lastline = linesbuf[pcEndLineNum];
@@ -451,14 +467,10 @@ namespace clang
                             newline->append(rpltcode);
                             if (endpos != StringRef::npos)
                               newline->append(lastline.substr(endpos+1, StringRef::npos));
-                            linesbuf[pcStartLineNum] = StringRef(newline->c_str());
-                            //outs() << "Startline = '" << linesbuf[pcStartLineNum].str() << "'\n";
+                            linesbuf[pcStartLineNum] = std::move(StringRef(newline->c_str()));
                             if (pcEndLineNum > pcStartLineNum)
                               for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                                {
-                                  linesbuf[n] = StringRef(indent);
-                                  //outs() << "linesbuf[" << n << "] = '" << linesbuf[n].str() << "'\n";
-                                }
+                                linesbuf[n] = std::move(StringRef(indent));
                           }
 
                         else
@@ -471,13 +483,12 @@ namespace clang
                         std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
                         if (ofs.is_open())
                           {
-                            for (unsigned int n = 0; n < totallines; n++)
+                            for (unsigned int n = 1; n < totallines; n++)
                               {
-                                //outs() << "saving line #" << n++ << ": '" << linesbuf[n].str().c_str() << "'\n";
-                                ofs.write(linesbuf[n].str().c_str(), linesbuf[n].str().size());
+                                ofs.write(linesbuf[n-1].str().c_str(), linesbuf[n-1].str().length());
                                 ofs.write("\n", 1);
                               }
-                            
+                                                        
                             ofs.flush();
                             ofs.close();
                           }
@@ -509,11 +520,12 @@ namespace clang
        * - Generation-header-template
        * - Generation-source-template
        * - Generation-request-groups
+       * - Generation-simplify-function-args
        *
        * @param Opts	The option map in which to store supported options
        */
       void
-      ExecSQLToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      ExecSQLCloseToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
@@ -521,6 +533,7 @@ namespace clang
 	Options.store(Opts, "Generation-header-template", generation_header_template);
 	Options.store(Opts, "Generation-source-template", generation_source_template);
 	Options.store(Opts, "Generation-request-groups", generation_request_groups);
+	Options.store(Opts, "Generation-simplify-function-args", generation_simplify_function_args);
         Options.store(Opts, "Generation-do-report-modification-in-PC", generation_do_report_modification_in_pc);
         Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);        
       }
@@ -539,7 +552,7 @@ namespace clang
        *                us AST node.
        */
       void 
-      ExecSQLToFunctionCall::registerMatchers(MatchFinder *Finder) 
+      ExecSQLCloseToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
@@ -550,7 +563,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLToFunctionCall::registerPPCallbacks
+       * ExecSQLCloseToFunctionCall::registerPPCallbacks
        *
        * @brief Register callback for intercepting all pre-processor actions
        *
@@ -560,7 +573,7 @@ namespace clang
        *
        * @param[in] compiler	the compiler instance we will intercept
        */
-      void ExecSQLToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+      void ExecSQLCloseToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
 	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -569,7 +582,7 @@ namespace clang
       
       
       /*
-       * ExecSQLToFunctionCall::emitDiagAndFix
+       * ExecSQLCloseToFunctionCall::emitDiagAndFix
        *
        * @brief Emit a diagnostic message and possible replacement fix for each
        *        statement we will be notified with.
@@ -586,7 +599,7 @@ namespace clang
        * @param function_name   The function name that will be called
        */
       std::string
-      ExecSQLToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
+      ExecSQLCloseToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
 					    const SourceLocation& loc_end,
 					    const std::string& function_name)
       {
@@ -612,7 +625,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLToFunctionCall::processTemplate
+       * ExecSQLCloseToFunctionCall::processTemplate
        *
        * @brief Process a template file with values from the 
        *        provided map
@@ -625,7 +638,7 @@ namespace clang
        * @retval false 	if something wrong occurs
        */
       bool
-      ExecSQLToFunctionCall::processTemplate(const std::string& tmpl,
+      ExecSQLCloseToFunctionCall::processTemplate(const std::string& tmpl,
 					     const std::string& fname,
 					     string2_map& values_map)
       {
@@ -699,7 +712,7 @@ namespace clang
       }
 
       /**
-       * ExecSQLToFunctionCall::doRequestSourceGeneration
+       * ExecSQLCloseToFunctionCall::doRequestSourceGeneration
        *
        * @brief Generate source file for request from template
        *
@@ -712,32 +725,51 @@ namespace clang
        *
        */
       void
-      ExecSQLToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLCloseToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {
 	SourceLocation dummy;
         struct stat buffer;   
+
 	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileBasename = values_map["@originalSourceFileBasename@"];
 	std::string fileName = values_map["@RequestFunctionName@"];
+
+        // Replace %B with original file basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+        dirName.append("/");
+        fileName.insert(0, "/");
+        fileName.insert(0, dirName);
 	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
-	fileName.insert(0, "/");
-	fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+
+        if (mkdret == -1 && errno != EEXIST)
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating source file
 	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
 		    &fileName);
       }
       
       /**
-       * ExecSQLToFunctionCall::doRequestHeaderGeneration
+       * ExecSQLCloseToFunctionCall::doRequestHeaderGeneration
        *
        * @brief Generate header file for request from template
        *
@@ -750,27 +782,46 @@ namespace clang
        *
        */
       void
-      ExecSQLToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
+      ExecSQLCloseToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
 						       const std::string& tmpl,
 						       string2_map& values_map)
       {	
 	SourceLocation dummy;
         struct stat buffer;   
+
 	// Compute output file pathname
+        std::string dirName = generation_directory;
 	std::string fileName = values_map["@RequestFunctionName@"];
+	std::string fileBasename = values_map["@originalSourceFileBasename@"];
+
+        // Replace %B with original .pc file Basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+	dirName.append("/");
+        fileName.insert(0, "/");
+        fileName.insert(0, dirName);
 	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
-	fileName.insert(0, "/");
-	fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+
+        if (mkdret == -1 && errno != EEXIST)
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating header file
 	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+		    ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
 		    &fileName);
       }
 	
@@ -790,9 +841,9 @@ namespace clang
        * @param kind            Kind of error to report
        */
       void
-      ExecSQLToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
+      ExecSQLCloseToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
 				       const SourceLocation& err_loc,
-				       enum ExecSQLToFunctionCallErrorKind kind,
+				       enum ExecSQLCloseToFunctionCallErrorKind kind,
 				       const std::string* msgptr)
       {
 	std::string msg;
@@ -804,66 +855,66 @@ namespace clang
 	 * diag engine.
 	 */
 	unsigned diag_id;
-        switch (kind)
+	switch (kind)
           {
             /** Default unexpected diagnostic id */
           default:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-                             getCustomDiagID(DiagnosticsEngine::Warning,
-                                             "Unexpected error occured?!");
+            diag_id =TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Unexpected error occured?!") ;
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** No error ID: it should never occur */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-                           getCustomDiagID(DiagnosticsEngine::Ignored,
-                                           "No error");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Remark,
+                              "No error");
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Access char data diag ID */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
-			      "Couldn't access character data in file cache memory buffers!");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't access character data in file cache memory buffers!");
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Can't find a comment */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
-			      "Couldn't find ProC comment start! This result has been discarded!");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't find ProC comment start! This result has been discarded!");
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Cannot match comment */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Warning,
-			      "Couldn't match ProC comment for function name creation!");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Couldn't match ProC comment for function name creation!");
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** Cannot generate request source file (no location) */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
-			      "Couldn't generate request source file %0!");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't generate request source file %0!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
             /** Cannot generate request header file (no location) */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
-			      "Couldn't generate request header file %0!");
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't generate request header file %0!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
             /** Cannot generate request source file (already exists) */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Source file '%0' already exists: will not overwrite!");
@@ -871,16 +922,147 @@ namespace clang
             break;
 
             /** Cannot generate request header file (no location) */
-          case ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Header file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
-          }
+            /** Cannot generate request source file (create dir) */
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Unsupported String Literal charset */
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Token for weird charset string (%0) found!");
+            diag_engine.Report(diag_id).AddString(msg);
+           break;
+
+            /** Invalid groups file error */
+          case ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Cannot parse invalid groups file '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+            
+	  }
       }
       
+      /**
+       * ExecSQLCloseToFunctionCall::findMacroStringLiteralDefAtLine
+       *
+       * @brief find a macro expansion for a string literal used for a request
+       *
+       * Search the set of macro expansion collected from Pre Processor work.
+       * This set contains string literals and macro names used for request formatting.
+       * String literals values preserve the original source indentation.
+       *
+       * @param[in]    src_mgr	the source manager for translating locations 
+       *                        in line nums
+       * @param[in]    ln	the origin location line number for which we 
+       *                        want string literal
+       * @param[inout] name	the name of the macro
+       * @param[inout] val	the value of the string literal
+       * @param[out]   record	the pointer to the found record is one was found.
+       *                        if no record were found a null is returned
+       *
+       */
+      bool
+      ExecSQLCloseToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
+								    unsigned ln,
+								    std::string& name, std::string& val,
+								    SourceRangeForStringLiterals **record = nullptr)
+      {
+	bool ret = false;
+	if (record)
+	  *record = nullptr;
+	for (auto it = m_macrosStringLiterals.begin();
+	     it != m_macrosStringLiterals.end();
+	     ++it)
+	  {
+	    auto sr = (*it);
+	    SourceLocation sl = sr.m_macro_range.getBegin();
+	    unsigned sln = src_mgr.getSpellingLineNumber(sl);
+	    //outs() << "Macro def at line#" << sln << " versus searching line#" << ln << " or line #" << ln+1 << "\n";
+	    if (sln == ln || sln + 1 == ln)
+	      {
+		name = sr.m_macro_name.str();
+		if (record)
+		  *record = new SourceRangeForStringLiterals(sr);
+		unsigned ldl =
+		  src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getEnd()))
+		  - src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getBegin()));
+		StringRef lstr(src_mgr.getCharacterData(src_mgr.getFileLoc(sr.m_macro_range.getBegin())),
+			       ldl);
+		val = lstr.str();
+		ret = true;
+		break;
+	      }
+	  }
+
+	return ret;
+      }
+
+      /**
+       * ExecSQLCloseToFunctionCall::findSymbolInFunction
+       *
+       * @brief Find a symbol, its definition and line number in the current function
+       *
+       * This method search the AST from the current function for a given symbol. When
+       * found it return a record struct having pointer to AST nodes of interrest.
+       *
+       * @param[in] tool	The clang::tooling::Tool instance
+       * @param[in] varName	The name of the symbol to find
+       * @param[in] func	The AST node of the function to search into
+       *
+       * @return The pointer to the varDecl node instance for the searched symbol
+       */
+      const VarDecl *
+      ExecSQLCloseToFunctionCall::findSymbolInFunction(ClangTool *tool, std::string& varName, const FunctionDecl *func)
+      {
+	const VarDecl *ret = nullptr;
+
+	DeclarationMatcher m_matcher
+	  // find a sprintf call expr
+	  = varDecl(hasName(varName.c_str()),
+		    // and this decl is in the current function (call bound to varDecl))
+		    hasAncestor(functionDecl(hasName(func->getNameAsString().insert(0, "::"))))).bind("varDecl");
+	
+	// Prepare matcher finder for our customized matcher
+	VarDeclMatcher vdMatcher(this);
+	// The matcher implementing visitor pattern
+	MatchFinder finder;
+	// Add our matcher to our processing class
+	finder.addMatcher(m_matcher, &vdMatcher);
+	// Clear collector vector (the result filled with found patterns)
+	m_req_var_decl_collector.clear();
+	// Run the visitor pattern for collecting matches
+	tool->run(newFrontendActionFactory(&finder).get());
+
+	if (!m_req_var_decl_collector.empty())
+	  {
+	    ret = m_req_var_decl_collector[0]->varDecl;
+	  }
+
+	return ret;
+      }
+
       /**
        * check
        *
@@ -896,13 +1078,14 @@ namespace clang
        *                        allowing us to access AST nodes bound to variables
        */
       void
-      ExecSQLToFunctionCall::check(const MatchFinder::MatchResult &result) 
+      ExecSQLCloseToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
         map_replacement_values rv;
         
 	// Get the source manager
 	SourceManager &srcMgr = result.Context->getSourceManager();
 	DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
+	//ClangTool *tool = TidyContext->getToolPtr();
 
 	/*
 	 * Init check context
@@ -911,6 +1094,7 @@ namespace clang
 	
 	// Get the compound statement AST node as the bounded var 'proCBlock'
 	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
+	//const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
 
 	// Get start/end locations for the statement
 	SourceLocation loc_start = stmt->getLocStart();
@@ -923,20 +1107,26 @@ namespace clang
 	std::stringbuf slnbuffer;
 	std::ostream slnos (&slnbuffer);
 	slnos << startLineNum;
+	std::string originalSourceFileBasename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str();
+        // If original file name is a path, keep only basename
+        // (erase all before / and all after .)
+        if (originalSourceFileBasename.rfind("/") != std::string::npos)
+          originalSourceFileBasename.erase(0, originalSourceFileBasename.rfind("/")+1);
+        originalSourceFileBasename.erase(originalSourceFileBasename.rfind("."), std::string::npos);
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
 
-	outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
-	
+	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
+
 	/*
 	 * Find the comment for the EXEC SQL statement
 	 * -------------------------------------------
 	 *
-	 * Iterate from line -2 to line -5 until finding the whole EXEC SQL comment
-	 * comments are MAX_NUMBER_OF_LINE_TO_SEARCH lines max
+	 * Iterate from line +2 until finding the whole EXEC SQL comment
+	 * Line +2 because line+1, when line numbers are generated by ProC, contains start of EXEC SQL
 	 */
 	
 	// Current line number
-	size_t lineNum = startLineNum-2;
+	size_t lineNum = startLineNum+2;
 	
 	// Get end comment loc
 	SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
@@ -955,7 +1145,8 @@ namespace clang
 	size_t commentStart = 0;
 	
         // If #line is available keep line number and filename of the .pc file
-        unsigned int pcLineNum = 0;
+        unsigned int pcLineNumStart = 0;
+        unsigned int pcLineNumEnd = 0;
         std::string pcFilename;
         bool found_line_info = false;
         
@@ -991,7 +1182,10 @@ namespace clang
                         std::istringstream isstr;
                         std::stringbuf *pbuf = isstr.rdbuf();
                         pbuf->str(lineMatches[1]);
-                        isstr >> pcLineNum;
+                        if (pcLineNumStart)
+                          isstr >> pcLineNumEnd;
+                        else
+                          isstr >> pcLineNumStart;
                         pcFilename = lineMatches[2];
                       }
                     else
@@ -1065,40 +1259,42 @@ namespace clang
 	    // Until no more is found
 	    while (crpos != std::string::npos);
 
-	    outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
+	    //outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
 	    /*
 	     * Create function call for the request
 	     */
 
 	    // Regex for processing comment for all remaining requests
-	    Regex reqRe("^.*EXEC SQL[ \t]+([A-Za-z]+)[ \t]+([A-Za-z0-9]+).*;.*$");
+	    Regex closeReqRe("^.*EXEC SQL[ \t]+(close|CLOSE)[ \t]+([A-Za-z0-9]+)[ \t]*;.*$");
 	    
 	    // Returned matches
 	    SmallVector<StringRef, 8> matches;
+
+	    /* Templating engines vars
+	     *   - RequestFunctionName
+	     *   - RequestCursorParamsDef
+	     *   - RequestExecSql
+	     */
+	    std::string requestFunctionName;
+	    std::string requestCursorParamsDef = "void";
+	    std::string requestExecSql;
+
+	    std::string requestUsing;
+	    std::string requestArgs;
 
 	    /*
 	     * Now we match against a more permissive regex for all other (simpler) requests
 	     * =============================================================================
 	     */
-	    if (reqRe.match(comment, &matches))
+	    if (closeReqRe.match(comment, &matches))
 	      {
-		// Start at first match ($0 is the whole match)
-		auto it = matches.begin();
-		// Skip it
-		it++;
-		//outs() << "match #1  = '" << (*it).str() << "'\n";
-		// Append first match (action) to function name
-		function_name.append((*it).lower());
-		// Get next match
-		it++;
-		//outs() << "match #2  = '" << (*it).str() << "'\n";
-		// Get match in rest string
-		std::string rest((*it).str());
-		// Capitalize it
-		rest[0] &= ~0x20;
-		// And append to function name
-		function_name.append(rest);
+		/*
+		 * Find the request var assignment
+		 */
+		
+		// The request name used in ProC
+		std::string reqName = matches[2];
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -1106,49 +1302,72 @@ namespace clang
                     had_cr_strstream << had_cr;
                     rv.insert(std::pair<std::string, std::string>("had_cr", had_cr_strstream.str()));
                     rv.insert(std::pair<std::string, std::string>("fullcomment", comment));
-                    rv.insert(std::pair<std::string, std::string>("funcname", function_name));
+                    rv.insert(std::pair<std::string, std::string>("reqname", reqName));
                     if (found_line_info)
                       {
-                        std::ostringstream pc_line_num;
-                        pc_line_num << pcLineNum;
-                        rv.insert(std::pair<std::string, std::string>("pclinenum", pc_line_num.str()));
                         rv.insert(std::pair<std::string, std::string>("pcfilename", pcFilename));
-                        outs() << "Found #line for comment: parsed line num = " << pcLineNum << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL Start line
+                        std::ostringstream pc_line_num_start;
+                        pc_line_num_start << pcLineNumStart;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumstart", pc_line_num_start.str()));
+                        outs() << "Found #line for comment: parsed line num start = " << pcLineNumStart << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL End line
+                        std::ostringstream pc_line_num_end;
+                        pc_line_num_end << pcLineNumEnd;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumend", pc_line_num_end.str()));
+                        outs() << "Found #line for comment: parsed line num end = " << pcLineNumEnd << " from file: '" << pcFilename << "'\n";
                       }
+                  }
+		
+		requestExecSql = reqName;
+		
+		requestFunctionName = "close";
+		reqName[0] &= ~0x20;
+		requestFunctionName.append(reqName);
+		
+                if (generation_do_report_modification_in_pc)
+                  {
+                    rv.insert(std::pair<std::string, std::string>("funcname", function_name));
+                    rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
                   }
 
 		// Got it, emit changes
 		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
-
+		
 		// If headers generation was requested
 		if (generate_req_headers)
 		  {
 		    // Build the map for templating engine
 		    string2_map values_map;
-		    values_map["@RequestFunctionName@"] = function_name;
+		    values_map["@RequestFunctionName@"] = requestFunctionName;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
+                    values_map["@originalSourceFileBasename@"] = originalSourceFileBasename;
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
 					      generation_header_template,
 					      values_map);
 		  }
-
+		
 		// If source generation was requested
 		if (generate_req_sources)
 		  {
 		    // Build the map for templating engine
 		    string2_map values_map;
-		    values_map["@RequestFunctionName@"] = function_name;
+		    values_map["@RequestFunctionName@"] = requestFunctionName;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
+		    values_map["@RequestExecSql@"] = requestExecSql;
+                    values_map["@originalSourceFileBasename@"] = originalSourceFileBasename;
 		    // And call it
 		    doRequestSourceGeneration(diagEngine,
 					      generation_source_template,
 					      values_map);
 		  }
-
+		
 		// Emit errors, warnings and fixes
-		std::string rplt_code = emitDiagAndFix(loc_start, loc_end, function_name);
-                
+		std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName);
+
                 if (generation_do_report_modification_in_pc)
                   {
                     rv.insert(std::pair<std::string, std::string>("rpltcode", rplt_code));
@@ -1156,13 +1375,14 @@ namespace clang
                     std::ostringstream commentStartLineNum;
                     commentStartLineNum << comment << ":" << startLineNum;
                     replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
-                  }               
+                  }                
 	      }
+	    
 	    else
 	      // Didn't match comment at all!
 	      emitError(diagEngine,
-			comment_loc_start,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+	      		comment_loc_start,
+	      		ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
 	  }
 	else
 	  {
@@ -1170,13 +1390,13 @@ namespace clang
 	      // An error occured while accessing memory buffer for sources
 	      emitError(diagEngine,
 			loc_start,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
+			ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
 
 	    else
 	      // We didn't found the comment start ???
 	      emitError(diagEngine,
 			comment_loc_end,
-			ExecSQLToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
+			ExecSQLCloseToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
 	  }
       }
     } // namespace pagesjaunes

@@ -225,6 +225,10 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
 	    // Error kind for header generation failure
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+	    // Error kind for source generation failure (already exists)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+	    // Error kind for header generation failure (already exists)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 	  };
 
 	// Emit diagnostic and eventually fix it
