@@ -10,8 +10,8 @@
 #include "../ClangTidy.h"
 #include "../ClangTidyModule.h"
 #include "../ClangTidyModuleRegistry.h"
-#include "CCharToCXXString.h"
-#include "DeIncludePreProC.h"
+//#include "CCharToCXXString.h"
+//#include "DeIncludePreProC.h"
 #include "ExecSQLAllocateToFunctionCall.h"
 #include "ExecSQLForToFunctionCall.h"
 #include "ExecSQLFreeToFunctionCall.h"
@@ -23,6 +23,7 @@
 #include "ExecSQLFetchToFunctionCall.h"
 #include "ExecSQLOpenToFunctionCall.h"
 #include "ExecSQLCloseToFunctionCall.h"
+#include "ExecSQLDeclareToFunctionCall.h"
 #include "ExecSQLPrepareToFunctionCall.h"
 #include "ExecSQLPrepareFmtdToFunctionCall.h"
 
@@ -43,7 +44,7 @@ namespace clang
         void
         addCheckFactories(ClangTidyCheckFactories &CheckFactories) override 
         {
-          CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
+          //CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
           CheckFactories.registerCheck<ExecSQLAllocateToFunctionCall> ("pagesjaunes-exec-sql-allocate-to-function-call");
           CheckFactories.registerCheck<ExecSQLFetchToFunctionCall> ("pagesjaunes-exec-sql-fetch-to-function-call");
           CheckFactories.registerCheck<ExecSQLForToFunctionCall> ("pagesjaunes-exec-sql-for-to-function-call");
@@ -55,9 +56,10 @@ namespace clang
           CheckFactories.registerCheck<ExecSQLLOBReadToFunctionCall> ("pagesjaunes-exec-sql-lob-read-to-function-call");
           CheckFactories.registerCheck<ExecSQLOpenToFunctionCall> ("pagesjaunes-exec-sql-open-to-function-call");
           CheckFactories.registerCheck<ExecSQLCloseToFunctionCall> ("pagesjaunes-exec-sql-close-to-function-call");
+          CheckFactories.registerCheck<ExecSQLDeclareToFunctionCall> ("pagesjaunes-exec-sql-declare-to-function-call");
           CheckFactories.registerCheck<ExecSQLPrepareFmtdToFunctionCall> ("pagesjaunes-exec-sql-prepare-fmtd-to-function-call");
           CheckFactories.registerCheck<ExecSQLPrepareToFunctionCall> ("pagesjaunes-exec-sql-prepare-to-function-call");
-          CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
+          //CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
         }
 
         /**
@@ -73,18 +75,18 @@ namespace clang
            * Options are available in order to enable(1)/disable(0) processing
            * of each possible string manipulation functions.
            */
-          Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcpy"] = "1";
-          Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
-          Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
+          // Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcpy"] = "1";
+          // Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
+          // Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
 
           /*
            * Options are available in order to select processed headers
            * and indicated their location.
            */
-          Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$";
-          Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
-          Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
-          Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
+          // Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$";
+          // Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
+          // Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
+          // Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
 
           /*
            * Allocate requests
@@ -222,7 +224,20 @@ namespace clang
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
-           * Constant prepare requests
+           * Declare requests
+           */
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generate-requests-headers"] = "1";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generate-requests-sources"] = "1";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-directory"] = ".";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-header-template"] = "./pagesjaunes_declare.h.tmpl";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-source-template"] = "./pagesjaunes_declare.pc.tmpl";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-request-groups"] = "request_groups.json";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-simplify-function-args"] = "0";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-declare-to-function-call.Generation-report-modification-in-dir"] = "./";
+
+          /*
+           * Prepare requests (sprintf from define with no params)
            */
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generate-requests-sources"] = "1";
@@ -234,7 +249,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-report-modification-in-dir"] = "./";
 
           /*
-           * Sprintf formatted prepare requests
+           * Sprintf formatted prepare requests (sprintf from define with params)
            */
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generate-requests-sources"] = "1";
