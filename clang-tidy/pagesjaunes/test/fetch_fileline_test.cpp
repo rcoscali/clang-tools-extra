@@ -24,7 +24,7 @@ namespace clang
       {
 
         FetchFilelineTest::FetchFilelineTest()
-          : fetch_re_m(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_FILELINE)
+          : fetch_re_m(PAGESJAUNES_REGEX_EXEC_SQL_ALL_FILELINE)
         {
         }
 

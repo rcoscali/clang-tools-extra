@@ -24,7 +24,7 @@ namespace clang
       {
 
         FetchTmplRepeatMembers2Test::FetchTmplRepeatMembers2Test()
-          : fetch_re_m(PAGESJAUNES_REGEX_EXEC_SQL_FETCH_TMPL_REPEAT_MEMBERS_RE2)
+          : fetch_re_m(PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_MEMBERS_RE2)
         {
         }
 
