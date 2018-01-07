@@ -1,5 +1,6 @@
 set(LLVM_LINK_COMPONENTS support)
 
+## Removed unused rules
 add_clang_library(clangTidyPagesJaunesModule
 
   CCharToCXXString.cpp
@@ -15,9 +16,11 @@ add_clang_library(clangTidyPagesJaunesModule
   ExecSQLLOBFreeToFunctionCall.cpp
   ExecSQLOpenToFunctionCall.cpp
   ExecSQLCloseToFunctionCall.cpp
+  ExecSQLDeclareToFunctionCall.cpp
   ExecSQLPrepareFmtdToFunctionCall.cpp
   ExecSQLPrepareToFunctionCall.cpp
   ExecSQLToFunctionCall.cpp
+  ExecSQLCommon.cpp
   FileManipulator.cpp
   PagesJaunesTidyModule.cpp
   
@@ -46,6 +49,8 @@ set_property(SOURCE ExecSQLLOBReadToFunctionCall.cpp APPEND_STRING PROPERTY COMP
 set_property(SOURCE ExecSQLLOBCloseToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLLOBFreeToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLOpenToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
+set_property(SOURCE ExecSQLCloseToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
+set_property(SOURCE ExecSQLDeclareToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLPrepareFmtdToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLPrepareToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
@@ -63,16 +68,19 @@ target_include_directories(gtestall SYSTEM BEFORE PRIVATE ${LLVM_GOOGLETEST_DIR}
 
 # Enable testing for pagesjaunes
 enable_testing()
-set(PAGESJAUNES_CPPTEST_COMMAND fetch_regex_test CACHE FILEPATH "Executable generated for C++ tests run")
+set(PAGESJAUNES_CPPTEST_COMMAND pagesjaunes_test CACHE FILEPATH "Executable generated for C++ tests run")
 add_test(
-  NAME fetch_regex_test
-  COMMAND fetch_regex_test
+  NAME pagesjaunes_test
+  COMMAND pagesjaunes_test
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test)
-add_executable(fetch_regex_test
+add_executable(pagesjaunes_test
   test/test_main.cpp
+  test/open_regex_test.cpp
+  test/close_regex_test.cpp
+  test/declare_regex_test.cpp
   test/fetch_regex_test.cpp
   test/fetch_tmpl_repeat_test.cpp
   test/fetch_tmpl_repeat_members_test.cpp
   test/fetch_tmpl_repeat_members2_test.cpp
   test/fetch_fileline_test.cpp)
-target_link_libraries(fetch_regex_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;LLVMSupport;gtestall;pthread")
+target_link_libraries(pagesjaunes_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;LLVMSupport;gtestall;pthread")
