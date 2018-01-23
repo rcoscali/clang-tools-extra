@@ -432,13 +432,19 @@ static int clangTidyMain(int argc, const char **argv) {
   llvm::InitializeAllAsmParsers();
 
   ClangTidyContext Context(std::move(OwningOptionsProvider));
-  runClangTidy(Context, OptionsParser.getCompilations(), PathList,
+
+  runClangTidy(Context,
+               OptionsParser.getCompilations(),
+               PathList,
                EnableCheckProfile ? &Profile : nullptr);
+
   ArrayRef<ClangTidyError> Errors = Context.getErrors();
   bool FoundErrors =
-      std::find_if(Errors.begin(), Errors.end(), [](const ClangTidyError &E) {
-        return E.DiagLevel == ClangTidyError::Error;
-      }) != Errors.end();
+    std::find_if(Errors.begin(),
+                 Errors.end(),
+                 [](const ClangTidyError &E) {
+                   return E.DiagLevel == ClangTidyError::Error;
+                 }) != Errors.end();
 
   const bool DisableFixes = Fix && FoundErrors && !FixErrors;
 
@@ -447,45 +453,50 @@ static int clangTidyMain(int argc, const char **argv) {
   // -fix-errors implies -fix.
   handleErrors(Context, (FixErrors || Fix) && !DisableFixes, WErrorCount);
 
-  if (!ExportFixes.empty() && !Errors.empty()) {
-    std::error_code EC;
-    llvm::raw_fd_ostream OS(ExportFixes, EC, llvm::sys::fs::F_None);
-    if (EC) {
-      llvm::errs() << "Error opening fixes output file: " << EC.message() << '\n';
-      return 1;
-    }
-    exportReplacements(FilePath.str(), Errors, OS);
+  if (!ExportFixes.empty() && !Errors.empty())
+    {
+      std::error_code EC;
+      llvm::raw_fd_ostream OS(ExportFixes, EC, llvm::sys::fs::F_None);
+      if (EC)
+        {
+          llvm::errs() << "Error opening fixes output file: " << EC.message() << '\n';
+          return 1;
+        }
+      exportReplacements(FilePath.str(), Errors, OS);
   }
 
   if (!ExportPatch.empty() && !Errors.empty()) {
     std::error_code EC;
     llvm::raw_fd_ostream OS(ExportPatch, EC, llvm::sys::fs::F_None);
-    if (EC) {
-      llvm::errs() << "Error opening patch output file: " << EC.message() << '\n';
-      return 1;
-    }
+    if (EC)
+      {
+        llvm::errs() << "Error opening patch output file: " << EC.message() << '\n';
+        return 1;
+      }
     exportReplacementsAsPatch(FilePath.str(), ExportPatchSource, Errors, OS);
   }
 
-  if (!Quiet) {
-    printStats(Context.getStats());
-    if (DisableFixes)
-      llvm::errs()
+  if (!Quiet)
+    {
+      printStats(Context.getStats());
+      if (DisableFixes)
+        llvm::errs()
           << "Found compiler errors, but -fix-errors was not specified.\n"
-             "Fixes have NOT been applied.\n\n";
-  }
-
+          "Fixes have NOT been applied.\n\n";
+    }
+  
   if (EnableCheckProfile)
     printProfileData(Profile, llvm::errs());
 
-  if (WErrorCount) {
-    if (!Quiet) {
-      StringRef Plural = WErrorCount == 1 ? "" : "s";
-      llvm::errs() << WErrorCount << " warning" << Plural << " treated as error"
-                   << Plural << "\n";
+  if (WErrorCount)
+    {
+      if (!Quiet) {
+        StringRef Plural = WErrorCount == 1 ? "" : "s";
+        llvm::errs() << WErrorCount << " warning" << Plural << " treated as error"
+                     << Plural << "\n";
+      }
+      return WErrorCount;
     }
-    return WErrorCount;
-  }
 
   return 0;
 }

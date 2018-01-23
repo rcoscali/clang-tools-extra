@@ -1308,10 +1308,7 @@ namespace clang
              */
 
             // Regex for processing comment for all remaining requests
-            Regex lobReadReqRe("^.*EXEC SQL[ \t]+(LOB|lob)[ \t]+(READ|read)[ \t]+:([A-Za-z0-9]+)"
-                               "[ \t]+(FROM|from)[ \t]+:([A-Za-z0-9]+)"
-                               "[ \t]+(INTO|into)[ \t]+:([A-Za-z0-9]+)"
-                               "[ \t]+(WITH LENGTH|with length)[ \t]+:([A-Za-z0-9]+);.*$");
+            Regex lobReadReqRe(PAGESJAUNES_REGEX_EXEC_SQL_LOB_READ_REQ_RE);
             
             // Returned matches
             SmallVector<StringRef, 12> matches;

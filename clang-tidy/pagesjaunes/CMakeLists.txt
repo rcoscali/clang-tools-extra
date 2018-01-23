@@ -16,7 +16,6 @@ add_clang_library(clangTidyPagesJaunesModule
   ExecSQLLOBFreeToFunctionCall.cpp
   ExecSQLOpenToFunctionCall.cpp
   ExecSQLCloseToFunctionCall.cpp
-  ExecSQLDeclareToFunctionCall.cpp
   ExecSQLPrepareFmtdToFunctionCall.cpp
   ExecSQLPrepareToFunctionCall.cpp
   ExecSQLToFunctionCall.cpp
@@ -50,7 +49,6 @@ set_property(SOURCE ExecSQLLOBCloseToFunctionCall.cpp APPEND_STRING PROPERTY COM
 set_property(SOURCE ExecSQLLOBFreeToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLOpenToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLCloseToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
-set_property(SOURCE ExecSQLDeclareToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLPrepareFmtdToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLPrepareToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
 set_property(SOURCE ExecSQLToFunctionCall.cpp APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-cast-qual -fpermissive -fexceptions ")
@@ -75,8 +73,13 @@ add_test(
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test)
 add_executable(pagesjaunes_test
   test/test_main.cpp
+  ExecSQLCommon.cpp
+  test/decode_host_vars.cpp
   test/open_regex_test.cpp
+  test/open_request_test.cpp
   test/close_regex_test.cpp
+  test/allocate_regex_test.cpp
+  test/free_regex_test.cpp
   test/declare_regex_test.cpp
   test/fetch_regex_test.cpp
   test/fetch_tmpl_repeat_test.cpp

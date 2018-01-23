@@ -276,6 +276,8 @@ namespace clang
         const bool generation_do_report_modification_in_pc;
         // Directory of the .pc file in which to report modifications
         const std::string generation_report_modification_in_dir;
+        // Keep commented out EXEC SQL statement
+        const bool generation_do_keep_commented_out_exec_sql;
 
         // Map containing comments and code to replace
         map_comment_map_replacement_values replacement_per_comment;

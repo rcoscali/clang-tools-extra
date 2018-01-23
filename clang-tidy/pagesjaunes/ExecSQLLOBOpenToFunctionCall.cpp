@@ -1073,7 +1073,7 @@ namespace clang
              */
 
             // Regex for processing comment for all remaining requests
-            Regex lobOpenReqRe("^.*EXEC SQL[ \t]+(LOB|lob)[ \t]+(OPEN|open)[ \t]+:([A-Za-z0-9]+)[ \t]*(READ ONLY|read only)?;.*$");
+            Regex lobOpenReqRe(PAGESJAUNES_REGEX_EXEC_SQL_LOB_OPEN_REQ_RE);
             
             // Returned matches
             SmallVector<StringRef, 8> matches;

@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -178,9 +180,12 @@ namespace clang
           /// Conditionnaly report modification in .pc file if this is true
           generation_do_report_modification_in_pc(Options.get("Generation-do-report-modification-in-PC",
                                                               false)),
+          /// Keep commented out exec sql statement
+          generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
+                                                                false)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
-                                                             "./"))
+                                                            "./"))
       {
 	req_groups.clear();
 	std::filebuf fb;
@@ -242,7 +247,8 @@ namespace clang
       ExecSQLOpenToFunctionCall::onEndOfTranslationUnit()
       {
         clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
-                                                         generation_report_modification_in_dir);
+                                                         generation_report_modification_in_dir,
+                                                         generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -272,7 +278,8 @@ namespace clang
 	Options.store(Opts, "Generation-request-groups", generation_request_groups);
 	Options.store(Opts, "Generation-simplify-function-args", generation_simplify_function_args);
         Options.store(Opts, "Generation-do-report-modification-in-PC", generation_do_report_modification_in_pc);
-        Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);        
+        Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);  
+        Options.store(Opts, "Generation-keep-commented-out-exec-sql-in-PC", generation_do_keep_commented_out_exec_sql);  
       }
       
       /**
@@ -310,7 +317,9 @@ namespace clang
        *
        * @param[in] compiler	the compiler instance we will intercept
        */
-      void ExecSQLOpenToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+      void
+      ExecSQLOpenToFunctionCall::registerPPCallbacks(CompilerInstance &compiler)
+      {
 	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -463,8 +472,8 @@ namespace clang
        */
       void
       ExecSQLOpenToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+                                                           const std::string& tmpl,
+                                                           string2_map& values_map)
       {
 	SourceLocation dummy;
         struct stat buffer;   
@@ -579,9 +588,9 @@ namespace clang
        */
       void
       ExecSQLOpenToFunctionCall::emitError(DiagnosticsEngine &diag_engine,
-				       const SourceLocation& err_loc,
-				       enum ExecSQLOpenToFunctionCallErrorKind kind,
-				       const std::string* msgptr)
+                                           const SourceLocation& err_loc,
+                                           enum ExecSQLOpenToFunctionCallErrorKind kind,
+                                           const std::string* msgptr)
       {
 	std::string msg;
 	if (msgptr != nullptr && !msgptr->empty())
@@ -598,7 +607,7 @@ namespace clang
           default:
             diag_id =TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Warning,
-                              "Unexpected error occured?!") ;
+                              "Unexpected error occured?!");
             diag_engine.Report(err_loc, diag_id);
             break;
 
@@ -650,6 +659,38 @@ namespace clang
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
+            /** Cannot generate request source file (already exists) */
+          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Source file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Header file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request source file (create dir) */
+          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
             /** Unsupported String Literal charset */
           case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
@@ -666,22 +707,6 @@ namespace clang
             diag_engine.Report(diag_id).AddString(msg);
             break;
             
-            /** Cannot generate request source file (already exists) */
-          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
-            diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
-                              "Source file '%0' already exists: will not overwrite!");
-            diag_engine.Report(diag_id).AddString(msg);
-            break;
-
-            /** Cannot generate request header file (no location) */
-          case ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
-            diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
-                              "Header file '%0' already exists: will not overwrite!");
-            diag_engine.Report(diag_id).AddString(msg);
-            break;
-
 	  }
       }
       
@@ -784,6 +809,12 @@ namespace clang
 	return ret;
       }
 
+      map_host_vars
+      ExecSQLOpenToFunctionCall::decodeHostVars(const std::string &hostVarsList)
+      {
+        return clang::tidy::pagesjaunes::decodeHostVars(hostVarsList);
+      }
+
       /**
        * check
        *
@@ -801,6 +832,7 @@ namespace clang
       void
       ExecSQLOpenToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
+        outs() << "void ExecSQLOpenToFunctionCall::check(const MatchFinder::MatchResult &result): ENTRY!\n";
         map_replacement_values rv;
         
 	// Get the source manager
@@ -979,7 +1011,7 @@ namespace clang
 	    // Until no more is found
 	    while (crpos != std::string::npos);
 
-	    //outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
+	    outs() << "comment found for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
 	    /*
 	     * Create function call for the request
@@ -1014,7 +1046,23 @@ namespace clang
 		 */
 		
 		// The request name used in ProC
-		std::string reqName = matches[2];
+		std::string reqName = matches[PAGESJAUNES_REGEX_EXEC_SQL_OPEN_REQ_RE_REQNAME];
+                const std::string hostVarList = matches[PAGESJAUNES_REGEX_EXEC_SQL_OPEN_REQ_RE_HOSTVARS];
+
+                map_host_vars mhv = decodeHostVars(hostVarList);
+                for (auto mhvit = mhv.begin(); mhvit != mhv.end(); ++mhvit)
+                  {
+                    int hvn = mhvit->first;
+                    auto hvm = mhvit->second;
+                    if (!hvm["hostvar"].empty())
+                      {
+                        outs() << "Host var #" << hvn << ": " << hvm["hostvar"] << "\n";
+                      }
+                    if (!hvm["hostvari"].empty())
+                      {
+                        outs() << "Host var indicator #" << hvn << ": " << hvm["hostvari"] << "\n";
+                      }
+                  }
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -1040,7 +1088,7 @@ namespace clang
                   }
 
 		requestExecSql = reqName;
-		
+	
 		requestFunctionName = "open";
 		reqName[0] &= ~0x20;
 		requestFunctionName.append(reqName);
@@ -1115,6 +1163,7 @@ namespace clang
 			comment_loc_end,
 			ExecSQLOpenToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
 	  }
+        outs() << "void ExecSQLOpenToFunctionCall::check(const MatchFinder::MatchResult &result): EXIT!\n";
       }
     } // namespace pagesjaunes
   } // namespace tidy

@@ -247,7 +247,7 @@ namespace clang
 					    const FunctionDecl *);
 	  
         // Replace the EXEC SQL statement by the function call in the .pc file
-        void replaceExecSQLinPC(void);        
+        map_host_vars decodeHostVars(const std::string &);
 
 	// Json for request grouping
 	nlohmann::json request_groups;
@@ -274,6 +274,8 @@ namespace clang
 	const bool generation_simplify_function_args;
         // boolean for reporting modifications in original .pc
         const bool generation_do_report_modification_in_pc;
+        // boolean for keeping commented out EXEC SQL
+        const bool generation_do_keep_commented_out_exec_sql;
         // Directory of the .pc file in which to report modifications
         const std::string generation_report_modification_in_dir;
 

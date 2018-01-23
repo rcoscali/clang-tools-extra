@@ -54,10 +54,15 @@ namespace clang
           
           llvm::StringRef req0(REQ);
           SmallVector<StringRef, 8> matches0;
-          EXPECT_TRUE(get_close_re().match(req0, &matches0));
-          EXPECT_EQ(matches0.size(), 3);
-          EXPECT_STREQ(matches0[1].str().c_str(), "CLOSE");
-          EXPECT_STREQ(matches0[2].str().c_str(), "crsCountInsEPJ0");
+          bool retbool0 = get_close_re().match(req0, &matches0);
+          EXPECT_TRUE(retbool0);
+          int retsize0 = matches0.size();
+          EXPECT_EQ(retsize0, 3);
+          if (retbool0 && retsize0 == 3)
+            {
+              EXPECT_STREQ(matches0[1].str().c_str(), "CLOSE");
+              EXPECT_STREQ(matches0[2].str().c_str(), "crsCountInsEPJ0");
+            }
 #undef REQ
 
 #define REQ                                                             \
@@ -66,10 +71,15 @@ namespace clang
           
           llvm::StringRef req1(REQ);
           SmallVector<StringRef, 8> matches1;
-          EXPECT_TRUE(get_close_re().match(req1, &matches1));
-          EXPECT_EQ(matches1.size(), 3);
-          EXPECT_STREQ(matches1[1].str().c_str(), "CLOSE");
-          EXPECT_STREQ(matches1[2].str().c_str(), "crsCountInsEPJ1");
+          bool retbool1 = get_close_re().match(req1, &matches1);
+          EXPECT_TRUE(retbool1);
+          int retsize1 = matches1.size();
+          EXPECT_EQ(retsize1, 3);
+          if (retbool1 && retsize1 == 3)
+            {
+              EXPECT_STREQ(matches1[1].str().c_str(), "CLOSE");
+              EXPECT_STREQ(matches1[2].str().c_str(), "crsCountInsEPJ1");
+            }
 #undef REQ
         }
 
@@ -82,10 +92,15 @@ namespace clang
           
           llvm::StringRef reqweird0(REQWEIRD);
           SmallVector<StringRef, 8> matches0;
-          EXPECT_TRUE(get_close_re().match(reqweird0, &matches0));
-          EXPECT_EQ(matches0.size(), 3);
-          EXPECT_STREQ(matches0[1].str().c_str(), "CLOSE");
-          EXPECT_STREQ(matches0[2].str().c_str(), "crsCountIns_EPJ0");
+          bool retbool0 = get_close_re().match(reqweird0, &matches0);
+          EXPECT_TRUE(retbool0);
+          int retsize0 = matches0.size();
+          EXPECT_EQ(retsize0, 3);
+          if (retbool0 && retsize0 == 3)
+            {
+              EXPECT_STREQ(matches0[1].str().c_str(), "CLOSE");
+              EXPECT_STREQ(matches0[2].str().c_str(), "crsCountIns_EPJ0");
+            }
 #undef REQWEIRD
 
 #define REQWEIRD                                                        \
@@ -105,10 +120,15 @@ namespace clang
           
           llvm::StringRef reqweird2(REQWEIRD);
           SmallVector<StringRef, 8> matches2;
-          EXPECT_TRUE(get_close_re().match(reqweird2, &matches2));
-          EXPECT_EQ(matches2.size(), 3);
-          EXPECT_STREQ(matches2[1].str().c_str(), "CLOSE");
-          EXPECT_STREQ(matches2[2].str().c_str(), "__crsCount_Ins_EPJ_0__");
+          bool retbool2 = get_close_re().match(reqweird2, &matches2);
+          EXPECT_TRUE(retbool2);
+          int retsize2 = matches2.size();
+          EXPECT_EQ(retsize2, 3);
+          if (retbool2 && retsize2 == 3)
+            {
+              EXPECT_STREQ(matches2[1].str().c_str(), "CLOSE");
+              EXPECT_STREQ(matches2[2].str().c_str(), "__crsCount_Ins_EPJ_0__");
+            }
 #undef REQWEIRD
           
 #define REQWEIRD                                                        \
@@ -119,10 +139,15 @@ namespace clang
           
           llvm::StringRef reqweird3(REQWEIRD);
           SmallVector<StringRef, 8> matches3;
-          EXPECT_TRUE(get_close_re().match(reqweird3, &matches3));
-          EXPECT_EQ(matches3.size(), 3);
-          EXPECT_STREQ(matches3[1].str().c_str(), "cLOsE");
-          EXPECT_STREQ(matches3[2].str().c_str(), "__crsCount_Ins_EPJ_0__");
+          bool retbool3 = get_close_re().match(reqweird3, &matches3);
+          EXPECT_TRUE(retbool3);
+          int retsize3 = matches3.size();
+          EXPECT_EQ(retsize3, 3);
+          if (retbool3 && retsize3 == 3)
+            {
+              EXPECT_STREQ(matches3[1].str().c_str(), "cLOsE");
+              EXPECT_STREQ(matches3[2].str().c_str(), "__crsCount_Ins_EPJ_0__");
+            }
 #undef REQWEIRD
           
         }

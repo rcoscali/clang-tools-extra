@@ -182,7 +182,10 @@ namespace clang
                                                               false)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
-                                                             "./"))
+                                                             "./")),
+          /// Keep EXEC SQL comments
+          generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
+                                                                false))
       {
 	req_groups.clear();
 	std::filebuf fb;
@@ -244,7 +247,8 @@ namespace clang
       ExecSQLCloseToFunctionCall::onEndOfTranslationUnit()
       {
         clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
-                                                         generation_report_modification_in_dir);
+                                                         generation_report_modification_in_dir,
+                                                         generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -275,6 +279,7 @@ namespace clang
 	Options.store(Opts, "Generation-simplify-function-args", generation_simplify_function_args);
         Options.store(Opts, "Generation-do-report-modification-in-PC", generation_do_report_modification_in_pc);
         Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);        
+        Options.store(Opts, "Generation-keep-commented-out-exec-sql-in-PC", generation_do_keep_commented_out_exec_sql);        
       }
       
       /**
@@ -312,7 +317,9 @@ namespace clang
        *
        * @param[in] compiler	the compiler instance we will intercept
        */
-      void ExecSQLCloseToFunctionCall::registerPPCallbacks(CompilerInstance &compiler) {
+      void
+      ExecSQLCloseToFunctionCall::registerPPCallbacks(CompilerInstance &compiler)
+      {
 	compiler
 	  .getPreprocessor()
 	  .addPPCallbacks(llvm::make_unique<GetStringLiteralsDefines>(this,
@@ -853,8 +860,6 @@ namespace clang
           originalSourceFileBasename.erase(0, originalSourceFileBasename.rfind("/")+1);
         originalSourceFileBasename.erase(originalSourceFileBasename.rfind("."), std::string::npos);
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
-
-	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement

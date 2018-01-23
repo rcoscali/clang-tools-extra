@@ -13,28 +13,29 @@
 
 #include "ClangTidyModule.h"
 
-namespace clang {
-namespace tidy {
-
-  void ClangTidyCheckFactories::registerCheckFactory(StringRef Name,
-						     CheckFactory Factory)
+namespace clang
+{
+  namespace tidy
   {
-    Factories[Name] = std::move(Factory);
-  }
-  
-  void ClangTidyCheckFactories::createChecks(ClangTidyContext *Context,
-					     std::vector<std::unique_ptr<ClangTidyCheck>> &Checks)
-  {
-    for (const auto &Factory : Factories)
-      {
-	if (Context->isCheckEnabled(Factory.first))
-	  Checks.emplace_back(Factory.second(Factory.first, Context));
-      }
-  }
-  
-  ClangTidyOptions ClangTidyModule::getModuleOptions() {
-    return ClangTidyOptions();
-  }
-  
-} // namespace tidy
+    
+    void ClangTidyCheckFactories::registerCheckFactory(StringRef Name,
+                                                       CheckFactory Factory)
+    {
+      Factories[Name] = std::move(Factory);
+    }
+    
+    void ClangTidyCheckFactories::createChecks(ClangTidyContext *Context,
+                                               std::vector<std::unique_ptr<ClangTidyCheck>> &Checks)
+    {
+      for (const auto &Factory : Factories)
+        if (Context->isCheckEnabled(Factory.first))
+          Checks.emplace_back(Factory.second(Factory.first, Context));
+    }
+    
+    ClangTidyOptions ClangTidyModule::getModuleOptions()
+    {
+      return ClangTidyOptions();
+    }
+    
+  } // namespace tidy
 } // namespace clang

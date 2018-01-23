@@ -46,6 +46,10 @@ namespace clang
             EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
             // Error kind for header generation failure (already exists)
             EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+            // Error kind for source generation failure (create dir)
+            EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+            // Error kind for header generation failure (create dir)
+            EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
             // Error kind for unsupported string literal charset
             EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
             // Error kind for invalid group file
@@ -173,6 +177,7 @@ namespace clang
          */
         struct VarDeclMatchRecord
         {
+          ASTContext *astCtxt;
           const VarDecl *varDecl;
           unsigned linenum;
           char dummy1[16];
@@ -201,6 +206,7 @@ namespace clang
           run(const MatchFinder::MatchResult &result)
           {
             struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+            record->astCtxt = result.Context;
             record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
             record->linenum =
               result.Context->getSourceManager()
@@ -226,7 +232,8 @@ namespace clang
         // Generate source file for request
         void doRequestSourceGeneration(DiagnosticsEngine&,
                                        const std::string&,
-                                       string2_map&);
+                                       string2_map&,
+                                       ushort_string_map&);
 
         // Generate header file for request
         void doRequestHeaderGeneration(DiagnosticsEngine&,
@@ -274,6 +281,8 @@ namespace clang
         const bool generation_do_report_modification_in_pc;
         // Directory of .pc file in which to report modifications
         const std::string generation_report_modification_in_dir;
+        // Keep commented out EXEC SQL statement
+        const bool generation_do_keep_commented_out_exec_sql;
 
         // Map containing comments and code to replace
         map_comment_map_replacement_values replacement_per_comment;

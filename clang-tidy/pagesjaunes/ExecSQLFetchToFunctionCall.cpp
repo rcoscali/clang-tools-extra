@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -21,7 +23,6 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
-#include "FileManipulator.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -181,7 +182,10 @@ namespace clang
                                                               false)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
-                                                             "./"))
+                                                            "./")),
+          /// Keep EXEC SQL comments
+          generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
+                                                                false))
       {
 	req_groups.clear();
 	std::filebuf fb;
@@ -229,8 +233,7 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::onStartOfTranslationUnit()
       {
-        // Clear the map for comments location in original file
-        replacement_per_comment.clear();
+        clang::tidy::pagesjaunes::onStartOfTranslationUnit(replacement_per_comment);
       }
       
       /**
@@ -243,287 +246,9 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::onEndOfTranslationUnit()
       {
-        // Get data from processed requests
-        for (auto it = replacement_per_comment.begin(); it != replacement_per_comment.end(); ++it)
-          {
-            bool had_cr = false;
-            std::string execsql;
-            std::string fullcomment;
-            std::string funcname;
-            std::string originalfile;
-            std::string filename;
-            unsigned int line = 0;
-            std::string reqname;
-            std::string rpltcode;
-            unsigned int pcLineNum = 0;
-            std::string pcFilename;
-            bool has_pcFilename = false;
-            bool has_pcLineNum = false;
-            bool has_pcFileLocation = false;
-        
-            std::string comment = it->first;
-            auto map_for_values = it->second;
-
-            //outs() << "Processing comment: '" << comment << "'\n";
-            
-            for (auto iit = map_for_values.begin(); iit != map_for_values.end(); ++iit)
-              {
-                std::string key = iit->first;
-                std::string val = iit->second;
-
-                if (key.compare("had_cr") == 0)
-                  had_cr = (val.compare("1") == 0);
-
-                else if (key.compare("execsql") == 0)
-                  execsql = val;
-
-                else if (key.compare("fullcomment") == 0)
-                  fullcomment = val;
-
-                else if (key.compare("funcname") == 0)
-                  funcname = val;
-
-                else if (key.compare("originalfile") == 0)
-                  {
-                    Regex fileline(PAGESJAUNES_REGEX_EXEC_SQL_ALL_FILELINE);
-                    SmallVector<StringRef, 8> fileMatches;
-
-                    if (fileline.match(val, &fileMatches))
-                      {
-                        originalfile = fileMatches[1];
-                        std::istringstream isstr;
-                        std::stringbuf *pbuf = isstr.rdbuf();
-                        pbuf->str(fileMatches[2]);
-                        isstr >> line;
-                      }
-
-                    else
-                      originalfile = val;
-
-                  }
-                else if (key.compare("reqname") == 0)
-                  reqname = val;
-
-                else if (key.compare("rpltcode") == 0)
-                  rpltcode = val;
-
-                else if (key.compare("pclinenum") == 0)
-                  {
-                    std::istringstream isstr;
-                    std::stringbuf *pbuf = isstr.rdbuf();
-                    pbuf->str(val);
-                    isstr >> pcLineNum;
-                    has_pcLineNum = true;
-                  }
-                else if (key.compare("pcfilename") == 0)
-                  {
-                    pcFilename = val;
-                    has_pcFilename = true;
-                  }                
-              }
-
-            if (has_pcLineNum && has_pcFilename)
-              has_pcFileLocation = true;
-
-            char* buffer = nullptr;
-            StringRef *Buffer = nullptr;
-            std::string NewBuffer;
-
-            // 
-            //outs() << "================================================================\n";
-            //outs() << "    has_pcFilename : " << has_pcFilename << "\n";
-            //outs() << "    has_pcLineNum : " << has_pcLineNum << "\n";
-            //outs() << "    has_pcFileLocation : " << has_pcFileLocation << "\n";
-            //outs() << "    pcFilename : " << pcFilename << "\n";
-            //outs() << "    pcLineNum : " << pcLineNum << "\n";
-            //outs() << "    rpltcode : " << rpltcode << "\n";
-            //outs() << "    line : " << line << "\n";
-            //outs() << "    filename : " << filename << "\n";
-            //outs() << "    funcname : " << funcname << "\n";
-            //outs() << "    fullcomment : " << fullcomment << "\n";
-            //outs() << "    execsql : " << execsql << "\n";
-            //outs() << "    originalfile : " << originalfile << "\n";
-            
-            // If #line are not present, need to find the line in file with regex
-            if (!has_pcFileLocation)
-              {
-                // Without #line, we need to compute the filename
-                pcFilename = generation_report_modification_in_dir;
-                pcFilename.append("/");
-                std::string::size_type dot_c_pos = originalfile.find('.');
-                pcFilename.append(originalfile.substr(0, dot_c_pos +1));
-                pcFilename.append("pc");
-
-                std::ifstream ifs (pcFilename, std::ifstream::in);
-                if (ifs.is_open())
-                  {
-                    std::filebuf* pbuf = ifs.rdbuf();
-                    std::size_t size = pbuf->pubseekoff (0,ifs.end,ifs.in);
-
-                    if (!size)
-                      // TODO: add reported llvm error
-                      outs() << originalfile << ":" << line
-                             << ":1: warning: Your original file in which to report modifications is empty !\n";
-
-                    else
-                      {
-                        pbuf->pubseekpos (0,ifs.in);
-                        // allocate memory to contain file data
-                        buffer=new char[size];
-                        
-                        // get file data
-                        pbuf->sgetn (buffer,size);
-                        ifs.close();
-                        
-                        Buffer = new StringRef(buffer);
-                        std::string allocReqReStr = "(EXEC SQL[[:space:]]+";
-
-                        size_t pos = 0;
-                        while ((pos = execsql.find(" ")) != std::string::npos )
-                          execsql.replace(pos, 1, "[[:space:]]*");
-                        pos = -1;
-                        while ((pos = execsql.find(",", pos+1)) != std::string::npos )
-                          execsql.replace(pos, 1, ",[[:space:]]*");
-                        
-                        allocReqReStr.append(execsql);
-                        allocReqReStr.append(")[[:space:]]*;");
-                        Regex allocReqRe(allocReqReStr.c_str(), Regex::NoFlags);
-                        SmallVector<StringRef, 8> allocReqMatches;
-                        
-                        //outs() << "AllocReqReStr: '" << allocReqReStr << "'\n";
-                        if (allocReqRe.match(*Buffer, &allocReqMatches))
-                          {
-                            StringRef RpltCode(rpltcode);
-                            NewBuffer = allocReqRe.sub(RpltCode, *Buffer);
-                          }
-                        else
-                          {
-                            outs() << originalfile << ":" << line
-                                   << ":1: warning: Couldn't find 'EXEC SQL " << execsql
-                                   << ";' statement to replace with '" << rpltcode
-                                   << "' in original '" << pcFilename
-                                   << "' file ! Already replaced ?\n";
-                            NewBuffer = Buffer->str();
-                          }
-
-                        std::ofstream ofs(pcFilename, std::ios::out | std::ios::trunc);
-                        if (ofs.is_open())
-                          {
-                            ofs.write(NewBuffer.c_str(), NewBuffer.size());
-                            ofs.flush();
-                            ofs.close();
-                          }
-                        
-                        else
-                          // TODO: add reported llvm error
-                          outs() << originalfile << ":" << line
-                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
-                        
-                      }
-                  }
-
-                else
-                  // TODO: add reported llvm error
-                  outs() << originalfile << ":" << line
-                         << ":1: warning: Cannot open original file in which to report modifications: " << pcFilename
-                         << "\n";
-              }
-            else
-              {
-                jayacode::FileManipulator ifs(pcFilename.c_str());
-                if (ifs.is_open())
-                  {
-                    std::filebuf* pbuf = ifs.rdbuf();
-                    std::size_t size = pbuf->pubseekoff (0,ifs.end,ifs.in);
-                    pbuf->pubseekpos (0,ifs.in);
-
-                    if (!size)
-                      // TODO: add reported llvm error
-                      outs() << originalfile << ":" << line
-                             << ":1: warning: Original file in which to report modifications is empty !\n";
-
-                    else
-                      {
-                        ifs.create_line_number_mapping();
-                                                
-                        unsigned int pcStartLineNum = pcLineNum;
-                        unsigned int pcEndLineNum = pcLineNum;
-                        unsigned int totallines = ifs.get_number_of_lines();
-
-                        outs() << "==> totallines = " << totallines << "\n";
-                        outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
-                        if (had_cr && pcStartLineNum < ifs.get_number_of_lines())
-                          {
-                            outs() << "pcStartLineNum = " << pcStartLineNum << "\n";
-                            while (pcStartLineNum < ifs.get_number_of_lines() && ifs[pcStartLineNum].find("EXEC") == std::string::npos)
-                              pcStartLineNum--;
-                          }
-                          
-                        if (pcEndLineNum > pcStartLineNum)
-                          for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                            outs() << n << " " << ifs[n] << "\n";
-
-                        std::string firstline = ifs[pcStartLineNum];
-                        std::string lastline = ifs[pcEndLineNum];
-                        size_t startpos = firstline.find("EXEC");
-                        size_t endpos = lastline.rfind(';');
-                        std::string indent = firstline.substr(0, startpos);
-                        std::string *newline = nullptr;
-                        if (startpos != std::string::npos)
-                          {
-                            newline = new std::string(indent);
-                            newline->append(rpltcode);
-                            if (endpos != std::string::npos)
-                              newline->append(lastline.substr(endpos+1, std::string::npos));
-                            outs() << "Startline = '" << ifs[pcStartLineNum] << "'\n";
-                            ifs.set_line(pcStartLineNum, std::string(*newline));
-                            outs() << "Startline = '" << ifs[pcStartLineNum] << "'\n";
-                            if (pcEndLineNum > pcStartLineNum)
-                              for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                                {
-                                  ifs.set_line(n, indent);
-                                  outs() << "LineBuffer[" << n << "] = '" << ifs[n] << "'\n";
-                                }
-                          }
-
-                        else
-                          outs() << originalfile << ":" << line
-                                 << ":1: warning: Couldn't find 'EXEC SQL " << execsql
-                                 << ";' statement to replace with '" << rpltcode
-                                 << "' in original '" << pcFilename
-                                 << "' file! Already replaced ?\n";
-
-                        std::ofstream ofs(pcFilename.append(".new"), std::ios::out | std::ios::trunc);
-                        if (ofs.is_open())
-                          {
-                            for (unsigned int n = 1; n <= totallines; n++)
-                              {
-                                outs() << "saving line #" << n << ": '" << ifs[n].c_str() << "'\n";
-                                ofs.write(ifs[n].c_str(), ifs[n].length());
-                                ofs.write("\n", 1);
-                              }
-                            
-                            ofs.flush();
-                            ofs.close();
-                          }
-                        
-                        else
-                          // TODO: add reported llvm error
-                          outs() << originalfile << ":" << line
-                                 << ":1: warning: Cannot overwrite file " << pcFilename << " !\n";
-
-                        ifs.close();
-                        
-                        delete newline;
-                      }
-                  }
-              }
-
-            if (Buffer)
-              delete Buffer;
-            if (buffer)
-              delete buffer;
-          }
+        clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
+                                                         generation_report_modification_in_dir,
+                                                         generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -812,25 +537,43 @@ namespace clang
        */
       void
       ExecSQLFetchToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
-						       const std::string& tmpl,
-						       string2_map& values_map)
+                                                            const std::string& tmpl,
+                                                            string2_map& values_map,
+                                                            ushort_string_map& anon_structs)
       {
-        ushort_string_map dummy_anon;
 	SourceLocation dummy;
         struct stat buffer;   
 
 	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
 	std::string fileName = values_map["@RequestFunctionName@"];
+
+        // Replace %B with original file basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+        dirName.append("/");
+        fileName.insert(0, "/");
+        fileName.insert(0, dirName);
 	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
-	fileName.insert(0, "/");
-	fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+
+        if (mkdret == -1 && errno != EEXIST)
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating source file
-	else if (!processTemplate(tmpl, fileName, values_map, dummy_anon))
+	else if (!processTemplate(tmpl, fileName, values_map, anon_structs))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
@@ -861,14 +604,32 @@ namespace clang
         struct stat buffer;   
 
 	// Compute output file pathname
+        std::string dirName = generation_directory;
 	std::string fileName = values_map["@RequestFunctionName@"];
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
+
+        // Replace %B with original .pc file Basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+	dirName.append("/");
+        fileName.insert(0, "/");
+        fileName.insert(0, dirName);
 	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
-	fileName.insert(0, "/");
-	fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+
+        if (mkdret == -1 && errno != EEXIST)
 	  emitError(diag_engine,
 		    dummy,
-		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating header file
 	else if (!processTemplate(tmpl, fileName, values_map, anon_structs))
@@ -979,6 +740,22 @@ namespace clang
             diag_id = TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Error,
                               "Header file '%0' already exists: will not overwrite!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request source file (create dir) */
+          case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
@@ -1145,20 +922,24 @@ namespace clang
 	std::stringbuf slnbuffer;
 	std::ostream slnos (&slnbuffer);
 	slnos << startLineNum;
+	std::string originalSourceFileBasename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str();
+        // If original file name is a path, keep only basename
+        // (erase all before / and all after .)
+        if (originalSourceFileBasename.rfind("/") != std::string::npos)
+          originalSourceFileBasename.erase(0, originalSourceFileBasename.rfind("/")+1);
+        originalSourceFileBasename.erase(originalSourceFileBasename.rfind("."), std::string::npos);
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
-
-	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "'\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
 	 * -------------------------------------------
 	 *
-	 * Iterate from line -2 to line -5 until finding the whole EXEC SQL comment
-	 * comments are MAX_NUMBER_OF_LINE_TO_SEARCH lines max
+	 * Iterate from line +2 until finding the whole EXEC SQL comment
+	 * Line +2 because line+1, when line numbers are generated by ProC, contains start of EXEC SQL
 	 */
 	
 	// Current line number
-	size_t lineNum = startLineNum-2;
+	size_t lineNum = startLineNum+2;
 	
 	// Get end comment loc
 	SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
@@ -1177,7 +958,8 @@ namespace clang
 	size_t commentStart = 0;
 	
         // If #line is available keep line number and filename of the .pc file
-        unsigned int pcLineNum = 0;
+        unsigned int pcLineNumStart = 0;
+        unsigned int pcLineNumEnd = 0;
         std::string pcFilename;
         bool found_line_info = false;
         
@@ -1213,7 +995,10 @@ namespace clang
                         std::istringstream isstr;
                         std::stringbuf *pbuf = isstr.rdbuf();
                         pbuf->str(lineMatches[1]);
-                        isstr >> pcLineNum;
+                        if (pcLineNumStart)
+                          isstr >> pcLineNumEnd;
+                        else
+                          isstr >> pcLineNumStart;
                         pcFilename = lineMatches[2];
                       }
                     else
@@ -1245,7 +1030,6 @@ namespace clang
 	 * Comment found
 	 */
 	std::string comment;
-	std::string function_name;
 
 	// If found comment start & no error occured
 	if (lineNum > 0 && !errOccured)
@@ -1340,16 +1124,22 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("intoreqnames", intoReqNames));
                     if (found_line_info)
                       {
-                        std::ostringstream pc_line_num;
-                        pc_line_num << pcLineNum;
-                        rv.insert(std::pair<std::string, std::string>("pclinenum", pc_line_num.str()));
                         rv.insert(std::pair<std::string, std::string>("pcfilename", pcFilename));
-                        outs() << "Found #line for comment: parsed line num = " << pcLineNum << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL Start line
+                        std::ostringstream pc_line_num_start;
+                        pc_line_num_start << pcLineNumStart;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumstart", pc_line_num_start.str()));
+                        outs() << "Found #line for comment: parsed line num start = " << pcLineNumStart << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL End line
+                        std::ostringstream pc_line_num_end;
+                        pc_line_num_end << pcLineNumEnd;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumend", pc_line_num_end.str()));
+                        outs() << "Found #line for comment: parsed line num end = " << pcLineNumEnd << " from file: '" << pcFilename << "'\n";
                       }
                   }
                     
-		// outs() << "!!!*** Prepare request comment match: into var name is '" << intoReqNames
-		//        << "' and request name is '"<< reqName << "' number of matches = " << matches.size() << "\n";
+		outs() << "!!!*** Prepare request comment match: into var name is '" << intoReqNames
+		       << "' and request name is '"<< reqName << "' number of matches = " << matches.size() << "\n";
 
                 requestInto.assign(" ");
                 requestInto.append(matches[3]);
@@ -1550,24 +1340,27 @@ namespace clang
                             std::string Name;
                             std::string TypeName;
 
-                            outs() << "varDecl dump: ";
-                            varDecl->dump();
-                            outs() << "\n";
+                            //outs() << "varDecl dump: ";
+                            //varDecl->dump();
+                            //outs() << "\n";
                             
-                            const NamedDecl* ndecl = dyn_cast<NamedDecl>(varDecl);
-                            if (ndecl->getDeclName())
-                              {
-                                Name = ndecl->getNameAsString();
-                                outs() << "Name from varDecl dyn cast as NamedDecl: " <<  Name << "\n";
-                              }
-                            const ValueDecl* vdecl = dyn_cast<ValueDecl>(varDecl);
-			    QualType qtype = vdecl->getType();
-                            SplitQualType qt_split = qtype.split();
-                            TypeName = QualType::getAsString(qt_split);
+                            // const NamedDecl* ndecl = dyn_cast<NamedDecl>(varDecl);
+                            // if (ndecl->getDeclName())
+                            //   {
+                            //     Name = ndecl->getNameAsString();
+                            //     outs() << "Name from varDecl dyn cast as NamedDecl: " <<  Name << "\n";
+                            //   }
+                            // const ValueDecl* vdecl = dyn_cast<ValueDecl>(varDecl);
+			    // QualType qtype = vdecl->getType();
+                            // SplitQualType qt_split = qtype.split();
+                            // TypeName = QualType::getAsString(qt_split);
                             
                             DeclarationName dname = varDecl->getDeclName();
-                            const DeclContext *dctxt = varDecl->getParentFunctionOrMethod();
-                            DeclContext::lookup_result R = dctxt->lookup(dname);
+                            outs() << "VarDecl name is '" << dname.getAsString() << "'\n";
+                            QualType qtype = dname.getCXXNameType();
+                            TypeName = QualType::getAsString(qtype.split());
+                            outs() << "VarDecl type name is '" << TypeName << "'\n";
+                            DeclContext::lookup_result R = curFunc->lookup(dname);
                             for (auto lit = R.begin(); lit != R.end(); lit++)
                               {
                                 ValueDecl *vdecl = dyn_cast<ValueDecl>(*lit);
@@ -1632,9 +1425,9 @@ namespace clang
                             std::string IndicName;
                             std::string IndicTypeName;
                             
-                            outs() << "indicVarDecl dump: ";
-                            indicVarDecl->dump();
-                            outs() << "\n";
+                            // outs() << "indicVarDecl dump: ";
+                            // indicVarDecl->dump();
+                            // outs() << "\n";
                             
 			    QualType qtype = indicVarDecl->getType();
 			    std::string typeName = QualType::getAsString(qtype.split());
@@ -1711,6 +1504,7 @@ namespace clang
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                    values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
 
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
@@ -1726,12 +1520,14 @@ namespace clang
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                    values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@RequestExecSql@"] = requestExecSql;
 		    // And call it
 		    doRequestSourceGeneration(diagEngine,
 					      generation_source_template,
-					      values_map);
+					      values_map,
+                                              anonymousStructs);
 		  }
 		
 		// Emit errors, warnings and fixes

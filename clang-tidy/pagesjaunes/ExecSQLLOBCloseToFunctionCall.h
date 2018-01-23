@@ -30,30 +30,55 @@ namespace clang
 	// AST Context instance
 	ClangTidyContext *TidyContext;
 
+	// Constructor
+	ExecSQLLOBCloseToFunctionCall(StringRef, ClangTidyContext *);
+
+	// Store check Options
+	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+	// Register matrchers
+	void registerMatchers(ast_matchers::MatchFinder *) override;
+	// Register our PreProcessor callback 
+	void registerPPCallbacks(CompilerInstance &Compiler) override;
+	// Check a matched node
+	void check(const ast_matchers::MatchFinder::MatchResult &) override;
+
+        // Override to be called at start of translation unit
+        void onStartOfTranslationUnit();
+
+        // Override to be called at end of translation unit
+        void onEndOfTranslationUnit();
+
 	class SourceRangeForStringLiterals
 	{
 	public:
+	  /* Default constructor */ 
 	  SourceRangeForStringLiterals() {};
+	  /* Explicit constructor */ 
 	  SourceRangeForStringLiterals(SourceRange urange, SourceRange mrange, StringRef name)
 	    : m_usage_range(urange),
 	      m_macro_range(mrange),
 	      m_macro_name(name) {};
+	  /* Instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};	  
+	  /* Const instance copy constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const& to_copy)
 	  : m_usage_range(to_copy.m_usage_range),
 	    m_macro_range(to_copy.m_macro_range),
 	    m_macro_name(to_copy.m_macro_name) {};
+	  /* Instance pointer constructor */ 
 	  SourceRangeForStringLiterals(SourceRangeForStringLiterals *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
-	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const*to_copy)
+	  /* Const instance pointer constructor */ 
+	  SourceRangeForStringLiterals(SourceRangeForStringLiterals const *to_copy)
 	  : m_usage_range(to_copy->m_usage_range),
 	    m_macro_range(to_copy->m_macro_range),
 	    m_macro_name(to_copy->m_macro_name) {};
+	  /* Const instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(const SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
@@ -61,6 +86,7 @@ namespace clang
 	    m_macro_name= to_copy.m_macro_name;
 	    return *this;
 	  }
+	  /* Instance assignment operator */
 	  SourceRangeForStringLiterals& operator =(SourceRangeForStringLiterals & to_copy)
 	  {
 	    m_usage_range = to_copy.m_usage_range;
@@ -73,6 +99,10 @@ namespace clang
 	  SourceRange m_macro_range;
 	  StringRef m_macro_name;
 	};
+
+	/**
+	 * SourceRangeBefore
+	 */
 	class SourceRangeBefore
 	{
 	public:
@@ -86,18 +116,6 @@ namespace clang
 	};
 	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
-	// Constructor
-	ExecSQLLOBCloseToFunctionCall(StringRef, ClangTidyContext *);
-
-	// Store check Options
-	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-	// Register matrchers
-	void registerMatchers(ast_matchers::MatchFinder *) override;
-	// Register our PreProcessor callback 
-	void registerPPCallbacks(CompilerInstance &Compiler) override;
-	// Check a matched node
-	void check(const ast_matchers::MatchFinder::MatchResult &) override;
-
       protected:
 	/*
 	 * sprintf finder collector in case of a prepare request
@@ -276,12 +294,6 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 	  };
 
-        // Override to be called at start of translation unit
-        void onStartOfTranslationUnit();
-
-        // Override to be called at end of translation unit
-        void onEndOfTranslationUnit();
-
 	// Emit diagnostic and eventually fix it
         std::string emitDiagAndFix(const SourceLocation&,
                                    const SourceLocation&,
@@ -308,9 +320,6 @@ namespace clang
 		       enum ExecSQLLOBCloseToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
-        // Replace the EXEC SQL statement by the function call in the .pc file
-        void replaceExecSQLinPC(void);        
-
 	// Json for request grouping
 	nlohmann::json request_groups;
 	// Group structure created from json and used for
@@ -326,24 +335,18 @@ namespace clang
 	const bool generate_req_sources;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
-	// Request header template (default: "./pagesjaunes.h.tmpl")
+	// Request header template (default: "./pagesjaunes_lob_close.h.tmpl")
 	const std::string generation_header_template;
-	// Request source template (default: "./pagesjaunes.pc.tmpl")
-	const std::string generation_source_template;
-	// Request header template for prepare requests (default: "./pagesjaunes_prepare.h.tmpl")
-	const std::string generation_prepare_header_template;
-	// Request source template for prepare requests (default: "./pagesjaunes_prepare.pc.tmpl")
-	const std::string generation_prepare_source_template;
-	// Request header template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.h.tmpl")
-	const std::string generation_prepare_fmt_header_template;
-	// Request source template for prepare fmt requests (default: "./pagesjaunes_prepare_fmt.pc.tmpl")
-	const std::string generation_prepare_fmt_source_template;
+	// Request source template (default: "./pagesjaunes_lob_close.pc.tmpl")
+	const std::string generation_source_template;        
 	// Request grouping
 	const std::string generation_request_groups;
         // boolean for reporting modifications in original .pc
         const bool generation_do_report_modification_in_pc;
         // Directory of the .pc file in which to report modifications
         const std::string generation_report_modification_in_dir;
+        // Keep commented out EXEC SQL statement
+        const bool generation_do_keep_commented_out_exec_sql;
 
         // Map containing comments and code to replace
         map_comment_map_replacement_values replacement_per_comment;

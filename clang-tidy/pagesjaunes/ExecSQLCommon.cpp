@@ -24,6 +24,10 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
 
+// These are usefull only for unitary tests
+//#define ACTIVATE_TRACES 
+//#define ACTIVATE_RESULT_TRACES 
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -35,6 +39,169 @@ namespace clang
   {
     namespace pagesjaunes
     {
+
+      /**
+       * decodeHostVars
+       *
+       * This function decode an input string of host variables (and indicators). It
+       * parse the string and return a data structure made of maps containing host
+       * variables. 
+       * It supports pointers and struct dereferencing and returns values of record 
+       * or struct variables, members, indicators.
+       * It trims record and member values.
+       * The first level of map contains the number of the host variable as key and a map
+       * for the host variable description.
+       *
+       *  #1 -> map host var #1
+       *  #2 -> map host var #2
+       *  #3 -> map host var #3
+       *  ...
+       *  #n -> map host var #n
+       *
+       * Each host var map contains some string keys for each variable component.
+       * They are:
+       *  - "full": the full match for this host variable (contains spaces and is the exact value matched)
+       *  - "hostvar": the complete host var referencing expr (spaces were trimmed)
+       *  - "hostrecord": the value of the host variable record/struct variable value.
+       *  - "hostmember": the value of the record/struct member for this host variable expr.
+       *  - "deref": Dereferencing operator for this host variable. Empty if not a dereferencing expr.  
+       * 
+       * For indicators the same field/keys are available with an 'i' appended for 'indicators'.
+       * Unitary tests are availables in test/decode_host_vars.cpp
+       * For example: the expr ':var1:Ivar1, :var2:Ivar2'
+       * returns the following maps
+       *
+       * var #1                          var #2
+       *     full = ':var1'                 full = ':var2'
+       *     fulli = ':Ivar1, '             fulli = ':Ivar2'      
+       *     hostvar = 'var1'               hostvar = 'var2'         
+       *     hostvari = 'Ivar1'             hostvari = 'Ivar2'          
+       *     hostrecord = 'var1'            hostrecord = 'var2'            
+       *     hostrecordi = 'Ivar1'          hostrecordi = 'Ivar2'             
+       *     hostmember = 'var1'            hostmember = 'var2'         
+       *     hostmemberi = 'Ivar1'          hostmemberi = 'Ivar2'              
+       *     deref = ''                     deref = ''      
+       *     derefi = ''                    derefi = ''         
+       *                             
+       * @param[in]  hostVarList the host vars expr to parse/decode
+       *
+       * @return a map containing the host parsed variables expr
+       */
+      map_host_vars 
+      decodeHostVars(const std::string &hostVarList)
+      {
+        map_host_vars retmap;
+        StringRef hostVars(hostVarList);
+        Regex hostVarsRe(PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE);
+        SmallVector<StringRef, 8> matches;
+
+        int n = 0;
+        bool indicator = false;
+        std::map<std::string, std::string> var;
+        while (hostVarsRe.match(hostVars, &matches))
+          {
+#ifdef ACTIVATE_TRACES
+            std::cout << "N matches = " << matches.size() << "\n";
+            for (unsigned int ni = 0; ni < matches.size(); ni++)
+              std::cout << "matches[" << ni << "] = " << matches[ni].str() << "\n";            
+#endif // !ACTIVATE_TRACES
+            if (! indicator)
+              {
+                size_t derefpos;
+                var["full"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_FULLMATCH];
+                var["hostvar"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_HOSTVAR];
+                var["hostmember"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_HOSTMEMBER];
+                if ((derefpos = var["hostvar"].find("->")) != std::string::npos)
+                  var["deref"] = "->";
+                else if ((derefpos = var["hostvar"].find(".")) != std::string::npos)
+                  var["deref"] = ".";
+                if (!var["deref"].empty())
+                  var["hostrecord"] = var["hostvar"].substr(0, derefpos);
+                else
+                  var["hostrecord"] = var["hostmember"];
+                Regex trimIdentifierRe(PAGESJAUNES_REGEX_TRIM_IDENTIFIER_RE);
+                SmallVector<StringRef, 8> idmatches;
+                if (trimIdentifierRe.match(var["hostrecord"], &idmatches))
+                  var["hostrecord"] = idmatches[PAGESJAUNES_REGEX_TRIM_IDENTIFIER_RE_IDENTIFIER];
+              }
+            else
+              {
+                size_t derefipos;
+                var["fulli"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_FULLMATCH];
+                var["hostvari"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_HOSTVAR];
+                var["hostmemberi"] = matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_HOSTMEMBER];
+                if ((derefipos = var["hostvari"].find("->")) != std::string::npos)
+                  var["derefi"] = "->";
+                else if ((derefipos = var["hostvari"].find(".")) != std::string::npos)
+                  var["derefi"] = ".";
+#ifdef ACTIVATE_TRACES
+                std::cout << "compare hosti/memberi = " << var["hostmemberi"].compare(var["hostvari"]) << "\n";
+                std::cout << "derefi not empty = " << (!var["derefi"].empty() ? "yes" : "no") << "\n";
+#endif // !ACTIVATE_TRACES
+                if (!var["derefi"].empty())
+                  var["hostrecordi"] = var["hostvari"].substr(0, derefipos);
+                else
+                  var["hostrecordi"] = var["hostmemberi"];
+                Regex trimIdentifierRe(PAGESJAUNES_REGEX_TRIM_IDENTIFIER_RE);
+                SmallVector<StringRef, 8> idmatches;
+                if (trimIdentifierRe.match(var["hostrecordi"], &idmatches))
+                  var["hostrecordi"] = idmatches[PAGESJAUNES_REGEX_TRIM_IDENTIFIER_RE_IDENTIFIER];
+              }
+
+#ifdef ACTIVATE_RESULT_TRACES
+            std::cout << "match #" << n << " " << (indicator ? "HostVarIndicator" : "HostVar") << "\n";
+            std::cout << "full : '" << var["full"] << "'\n";
+            std::cout << "var : '" << var["hostvar"] << "'\n";
+            std::cout << "member : '" << var["hostmember"] << "'\n";
+            std::cout << "record : '" << var["hostrecord"] << "'\n";
+            std::cout << "deref : '" << var["deref"] << "'\n";
+            std::cout << "fullI : '" << var["fulli"] << "'\n";
+            std::cout << "varI : '" << var["hostvari"] << "'\n";
+            std::cout << "memberI : '" << var["hostmemberi"] << "'\n";
+            std::cout << "recordI : '" << var["hostrecordi"] << "'\n";
+            std::cout << "derefI : '" << var["derefi"] << "'\n";
+            std::cout << "varindic comma : '" << matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_VARINDIC].str() << "'\n";
+#endif // !ACTIVATE_TRACES
+            if (matches[PAGESJAUNES_REGEX_HOSTVAR_DECODE_RE_VARINDIC].empty())
+              {
+                indicator = true;
+              }
+            else
+              {
+                retmap.emplace(++n, var);
+                var.clear();
+                indicator = false;
+              }
+            size_t startpos = hostVars.find(matches[0]);
+            size_t poslength = matches[0].size();
+            hostVars = hostVars.substr(startpos + poslength);
+          }
+        if (var.size() > 0)
+          retmap.emplace(++n, var);
+
+#ifdef ACTIVATE_TRACES
+        std::cout << "Total vars = " << retmap.size() << "\n";
+        for (auto it = retmap.begin(); it != retmap.end(); it++)
+          {
+            int n = it->first;
+            auto v = it->second;
+            std::cout << "var #" << n << "\n";
+            std::cout << "    full = '" << v["full"] << "'\n";
+            std::cout << "    fulli = '" << v["fulli"] << "'\n";
+            std::cout << "    hostvar = '" << v["hostvar"] << "'\n";
+            std::cout << "    hostvari = '" << v["hostvari"] << "'\n";
+            std::cout << "    hostrecord = '" << v["hostrecord"] << "'\n";
+            std::cout << "    hostrecordi = '" << v["hostrecordi"] << "'\n";
+            std::cout << "    hostmember = '" << v["hostmember"] << "'\n";
+            std::cout << "    hostmemberi = '" << v["hostmemberi"] << "'\n";
+            std::cout << "    deref = '" << v["deref"] << "'\n";
+            std::cout << "    derefi = '" << v["derefi"] << "'\n";
+            
+          }
+#endif // !ACTIVATE_TRACES
+        
+        return retmap;
+      }
 
       /**
        * onStartOfTranslationUnit
@@ -65,7 +232,8 @@ namespace clang
        */
       void
       onEndOfTranslationUnit(map_comment_map_replacement_values &replacement_per_comment,
-                             const std::string &generation_report_modification_in_dir)
+                             const std::string &generation_report_modification_in_dir,
+                             bool generation_do_keep_commented_out_exec_sql)
       {
         // Get data from processed requests
         for (auto it = replacement_per_comment.begin(); it != replacement_per_comment.end(); ++it)
@@ -204,8 +372,19 @@ namespace clang
                         
                         if (allocReqRe.match(*Buffer, &allocReqMatches))
                           {
-                            StringRef RpltCode(rpltcode);
-                            NewBuffer = allocReqRe.sub(RpltCode, *Buffer);
+                            if (generation_do_keep_commented_out_exec_sql)
+                              {
+                                std::string comment = allocReqMatches[1];
+                                comment.append("\n");
+                                comment.append(rpltcode);
+                                StringRef RpltCode(comment);
+                                NewBuffer = allocReqRe.sub(RpltCode, *Buffer);                                
+                              }
+                            else
+                              {
+                                StringRef RpltCode(rpltcode);
+                                NewBuffer = allocReqRe.sub(RpltCode, *Buffer);
+                              }
                           }
                         else
                           {
@@ -286,14 +465,24 @@ namespace clang
                         std::string *newline = nullptr;
                         if (startpos != StringRef::npos)
                           {
-                            newline = new std::string(indent.str());
-                            newline->append(rpltcode);
-                            if (endpos != StringRef::npos)
-                              newline->append(lastline.substr(endpos+1, StringRef::npos));
-                            linesbuf[pcStartLineNum] = std::move(StringRef(newline->c_str()));
-                            if (pcEndLineNum > pcStartLineNum)
-                              for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
-                                linesbuf[n] = std::move(StringRef(indent));
+                            if (generation_do_keep_commented_out_exec_sql)
+                              {
+                                std::string newline = linesbuf[pcEndLineNum].str();
+                                newline.append("\n");
+                                newline.append(rpltcode);
+                                linesbuf[pcEndLineNum] = newline;
+                              }
+                            else
+                              {
+                                newline = new std::string(indent.str());
+                                newline->append(rpltcode);
+                                if (endpos != StringRef::npos)
+                                  newline->append(lastline.substr(endpos+1, StringRef::npos));
+                                linesbuf[pcStartLineNum] = std::move(StringRef(newline->c_str()));
+                                if (pcEndLineNum > pcStartLineNum)
+                                  for (unsigned int n = pcStartLineNum+1; n <= pcEndLineNum; n++)
+                                    linesbuf[n] = std::move(StringRef(indent));
+                              }
                           }
 
                         else
