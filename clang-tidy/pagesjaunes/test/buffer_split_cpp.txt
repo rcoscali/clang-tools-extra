@@ -1,0 +1,1516 @@
+/*
+ ----------------------------------Présentation---------------------------------
+
+ Pièce :  GHHGererVersionIeinsc.pc
+
+ But : Gestion (lecture et mise a jour) de la version du referentiel des
+ inscriptions.
+
+ Description :
+
+ Dynamique :
+
+
+ ------------------------------------Logique------------------------------------
+
+ Liste des fonctions :
+
+ ghhPrepLireVersionIeinsc
+ ghhExecLireVersionIeinsc
+ GHHLireVersionIeinsc
+ ghhPrepModiVersionIeinsc
+ ghhExecModiVersionIeinsc
+ GHHModiVersionIeinsc
+
+ --------------------------------Fin de la logique------------------------------
+ -----------------------------------Historique----------------------------------
+
+ $Log:   /SARDANE/arch/CG2G/GH_Coherence/src/GHHGererVersionIeinsc.pcv  $
+
+ Rev 3.8   13 Feb 2009 18:28:18   arch
+ cg2g : Min version defini en STRING
+
+ Rev 3.7   02 Feb 2009 09:24:16   arch
+ cg2g : Selection sur version precedente
+
+ Rev 3.6   26 Jun 2008 14:11:42   arch
+ cg2g : Version Dest sans date
+
+ Rev 3.5   02 Apr 2008 11:18:04   arch
+ cg2g : Increment version si sous-version vaut 99
+
+ Rev 3.4   18 Jan 2008 16:02:44   arch
+ cg2g : Département national des résidentiels et destinataires
+
+ Rev 3.3   25 May 2007 11:37:14   arch
+ cg2g : Version externe fournisseur pour CD
+
+ Rev 3.2   23 May 2007 15:34:40   arch
+ cg2g : Version externe fournisseur pour CD
+
+ Rev 3.1   05 Apr 2007 09:32:02   arch
+ cg2g : Gestion version destinataire CD2 et CRE
+
+ Rev 2.0   01 Dec 1997 13:54:52   pvcs
+ No change.
+
+ Rev 1.3   05 May 1997 19:05:12   arch
+ cg2g bd : (GHHMajHistoDept)
+
+ Rev 1.2   24 Mar 1997 13:18:50   arch
+ cg2g bd : (GHHCoherence) Livraison initiale étape D
+
+ Rev 1.1   24 Jan 1997 14:37:36   arch
+ cg2g bd : (GIVGenererMvts) Ajout compteur sur la durée du traitement
+
+ Rev 1.0   31 Dec 1996 11:28:26   arch
+ cg2g bd : (GHHCoherence) Livraison initiale etape c
+
+ -------------------------------------------------------------------------------
+ */
+
+/*-------------------------------Identification-------------------------------*/
+/**                           Sardane EasyDoc 02.1                           **/
+#ifndef LINT
+# define __WATINCLUDE__ "GHHGererVersionIeinsc.pc"
+# ifdef __TIMESTAMP__
+#  define WhatStampGHHGererVersionIeinsc_pc "@(#)SARDANE $Revision:   3.8  $	GHHGererVersionIeinsc.pc	" "(" __TIMESTAMP__ "-" __DATE__ " " __TIME__ ")"
+# endif  /* __TIMESTAMP__ */
+static volatile const char* WhatIdentGHHGererVersionIeinsc_pc(void)
+{
+  volatile const char* WhatGHHGererVersionIeinsc_pc = WhatStampGHHGererVersionIeinsc_pc;
+  return (WhatGHHGererVersionIeinsc_pc);
+}
+#endif  /* LINT */
+/*---------------------------Fin de l'identification--------------------------*/
+
+/*----------------------------------Includes----------------------------------*/
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+EXEC SQL BEGIN DECLARE SECTION;
+    EXEC SQL include "GIVTypes.h";
+EXEC SQL END DECLARE SECTION;
+
+#include "GWTTrace.h"
+#include "GXWDonnees.h"
+#include "GYBconstantes.h"
+#include "GYBrParam_erreurT.h"
+#include "GYBinterface_SGBDR.h"
+#include "GHHrDataAuthentT.h"
+#include "GHHrStructFichierT.h"
+#include "GHHrStructAuthentT.h"
+#include "GHHCoherence.h"
+#include "enumGYB.h"
+#include "enumGWZ.h"
+
+EXEC SQL BEGIN DECLARE SECTION;
+    EXEC SQL include "GYBgestion_pro_c.h";
+EXEC SQL END DECLARE SECTION;
+
+#define SQLCA_STORAGE_CLASS extern
+EXEC SQL include sqlca;
+#define ORACA_STORAGE_CLASS extern
+EXEC SQL include oraca;
+
+/*-----------------------------Constantes internes----------------------------*/
+/* GHH_RQ_LIRE_VERS_IEINSC : texte de la requete de lecture version Ieinsc   */
+/* GHH_LG_LIRE_VERS_IEINSC : longueur du texte de la requete                 */
+
+#define GHH_RQ_LIRE_VERS_IEINSC \
+"select prenom \
+   from GYTtabIeinsc_%s \
+  where numnat = :numnat \
+    and numlo  = :numlo  \
+    and numls  = :numls"
+
+#define GHH_LG_LIRE_VERS_IEINSC (sizeof (GHH_RQ_LIRE_VERS_IEINSC)+10)
+
+#define GHH_RQ_MODI_VERS_IEINSC \
+"update GYTtabIeinsc_%s \
+    set prenom = :prenom \
+  where numnat = :numnat \
+    and numlo  = :numlo \
+    and numls  = :numls"
+
+#define GHH_LG_MODI_VERS_IEINSC (sizeof (GHH_RQ_MODI_VERS_IEINSC)+10)
+
+#define GHH_LGDATE 32
+
+#define GHH_RQ_LIRE_VERS_TOUS_DEST \
+"select substr(prenom,instr(prenom,'.',1,1)+1,(instr(prenom,'_',1,2)-instr(prenom,'.',1,1)-1)) from GYTtabIeinsc_%s \
+where numnat = '0000000000' and (numlo = 'CD2' or numlo = 'EPJ') and numls != '0000' \
+ order by substr(prenom,instr(prenom,'.',1,1)+1,(instr(prenom,'_',1,2)-instr(prenom,'.',1,1)-1))"
+
+/*-------------------------------Types internes-------------------------------*/
+
+/*------------------------------Données exportées-----------------------------*/
+
+/*------------------------------Données internes------------------------------*/
+/* ghhcFlagLireVersionIeinsc : drapeau d'etat requete de lecture des versions */
+/* ghhcFlagModiVersionIeinsc : drapeau d'etat requete de modification         */
+/* ghhtcDepartLireVersionIeinsc : sauvegarde departement en lecture           */
+/* ghhtcDepartModiVersionIeinsc : sauvegarde departement en modification      */
+static int1 ghhcFlagLireVersionIeinsc = (int1)GIV::GWZKo;
+static int1 ghhcFlagModiVersionIeinsc = (int1)GIV::GWZKo;
+static char ghhtcDepartLireVersionIeinsc[] = GHHDepartInit;
+static char ghhtcDepartModiVersionIeinsc[] = GHHDepartInit;
+
+/*-----------------------------Fonctions internes-----------------------------*/
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhPrepLireVersionIeinsc
+ *
+ * But :  Preparation de la requete de lecture de la table des inscriptions pour
+ *        en extraire celle contenant les donnees d'identification
+ *
+ * Description : Parsing de la requete (PREPARE) et declaration du curseur (car
+ *               requete de type SELECT)
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Jul/10/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+static int4 ghhPrepLireVersionIeinsc(char* pcDepart)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    char acRequete[GHH_LG_LIRE_VERS_IEINSC] = "";
+    EXEC SQL
+    begin declare
+    section;
+    char* pcOraBuff;
+    EXEC SQL
+    end declare
+    section;
+    /* Initialisation des variables locales */
+    (void)memset((void*) & (acRequete[0]), 0x00, sizeof(acRequete));
+    (void)memset((void*)rErreurSQL.acDonnees_retour, 0x00, sizeof(rErreurSQL.acDonnees_retour));
+    (void)strcpy(rErreurSQL.acOrdre_sql, "prepare ghhrqtLireVersionIeinsc");
+    GWTTrace(GWT_NIV_FONCT, ("Preparation ghhrqtLireVersionIeinsc [DEPT=%s] ...\n", pcDepart));
+    /* Construction du texte de la requete */
+    (void)sprintf(&acRequete[0],
+                  GHH_RQ_LIRE_VERS_IEINSC, pcDepart);
+    /* Valorisation des pointeurs d'interface ORACLE */
+    pcOraBuff = acRequete;
+    GWTTrace(GWT_NIV_FONCT, ("req PREPARE SQL : %s]\n", acRequete));
+    /* Preparation SQL de la requete */
+    EXEC SQL
+    prepare ghhrqtLireVersionIeinsc
+    from: pcOraBuff;
+    /* Traitement des erreurs SQL apres preparation */
+    iIntRet = GYBErreur(&rErreurSQL);
+
+    if ((int4)GIV::GYBok != iIntRet)
+    {
+        /* Erreur de preparation SQL de la requete : abandon */
+        GWTTrace(GWT_NIV_GRAVE, ("Erreur PREPARE SQL : [CMD=%s CR=%d ERR=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+    else
+    {
+        /* Preparation requete correcte : declarer le curseur */
+        EXEC SQL
+        declare ghhcrsLireVersionIeinsc
+        cursor
+        for ghhrqtLireVersionIeinsc;
+        /* Valider drapeau de preparation */
+        ghhcFlagLireVersionIeinsc = (int1)GIV::GWZOk;
+        /* Sauvegarder department associe a la requete */
+        (void)memset((void*)ghhtcDepartLireVersionIeinsc, 0x00, sizeof(ghhtcDepartLireVersionIeinsc));
+        (void)strcpy(ghhtcDepartLireVersionIeinsc, pcDepart);
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhPrepLireVersionIeinsc
+ *
+ * But :  Preparation de la requete de lecture de la table des inscriptions pour
+ *        en extraire celle contenant les donnees d'identification
+ *
+ * Description : Parsing de la requete (PREPARE) et declaration du curseur (car
+ *               requete de type SELECT)
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Jul/10/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+static int4 ghhPrepLireVersionTousDest(char* pcDepart)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    char acRequete[1000] = "";
+    EXEC SQL
+    begin declare
+    section;
+    char* pcOraBuff;
+    EXEC SQL
+    end declare
+    section;
+    /* Initialisation des variables locales */
+    (void)memset((void*) & (acRequete[0]), 0x00, sizeof(acRequete));
+    (void)memset((void*)rErreurSQL.acDonnees_retour, 0x00, sizeof(rErreurSQL.acDonnees_retour));
+    (void)strcpy(rErreurSQL.acOrdre_sql, "prepare ghhrqtLireVersionTousDest");
+    GWTTrace(GWT_NIV_FONCT, ("Preparation ghhrqtLireVersionTousDest [DEPT=%s] ...\n", pcDepart));
+    /* Construction du texte de la requete */
+    (void)sprintf(&acRequete[0],
+                  GHH_RQ_LIRE_VERS_TOUS_DEST, pcDepart);
+    GWTTrace(GWT_NIV_FONCT, ("req Tous Dest : %s]\n", acRequete));
+    /* Valorisation des pointeurs d'interface ORACLE */
+    pcOraBuff = acRequete;
+    /* Preparation SQL de la requete */
+    EXEC SQL
+    prepare ghhrqtLireVersionTousDest
+    from: pcOraBuff;
+    /* Traitement des erreurs SQL apres preparation */
+    iIntRet = GYBErreur(&rErreurSQL);
+
+    if ((int4)GIV::GYBok != iIntRet)
+    {
+        /* Erreur de preparation SQL de la requete : abandon */
+        GWTTrace(GWT_NIV_GRAVE, ("Erreur PREPARE SQL : [CMD=%s CR=%d ERR=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+    else
+    {
+        /* Preparation requete correcte : declarer le curseur */
+        (void)strcpy(rErreurSQL.acOrdre_sql, "declare ghhcrsLireVersionTousDest");
+        EXEC SQL
+        declare ghhcrsLireVersionTousDest
+        cursor
+        for ghhrqtLireVersionTousDest;
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur de preparation SQL de la requete : abandon */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur DECLARE SQL : [CMD=%s CR=%d ERR=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhExecLireVersionIeinsc
+ *
+ * But :  Execution de la requete de lecture de la table des inscriptions pour
+ *        en extraire celle contenant les donnees d'identification
+ *
+ * Description : Ouverture (OPEN), activation (FETCH) puis fermeture (CLOSE) du
+ *               curseur associe a la requete
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1    : erreur de traitement
+ *                        >= 0 : traitement correct; nombre de lectures
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Jul/10/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+static int4 ghhExecLireVersionIeinsc(char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, char* pcVersExtFour, char* pcNomDest)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    int1 cFlag = (int1)GIV::GWZOk; /* Drapeau de boucle */
+    int4 iCnt = 0; /* Compteur de lecture d'inscriptions */
+    char tcWork[GXWLgIdDonnees] = "";
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    EXEC SQL
+    begin declare
+    section;
+    char* pcOraNumnat;
+    char* pcOraNumlo;
+    char* pcOraNumls;
+    char tcOraPrenom[GYBIeinscLgPrenom + 1];
+    int2 sOraIndicI;
+    EXEC SQL
+    end declare
+    section;
+    char tcPrenom[GYBIeinscLgPrenom + 1];
+    /* Initialisation des variables locales */
+    (void)memset((void*)&rErreurSQL, 0x00, sizeof(rErreurSQL));
+    (void)memset((void*)tcOraPrenom, 0x00, sizeof(tcOraPrenom));
+    (void)memset((void*)tcWork, 0x00, sizeof(tcWork));
+    /* Valorisation pointeurs ORACLE pour lecture version externe */
+    pcOraNumnat = GHHacNumnatCohe;
+    pcOraNumlo = GHHacNumloCohe;
+    pcOraNumls = GHHacNumlsCohe;
+    sOraIndicI = (int2) - 1;
+
+    /* Boucle de lecture des deux inscriptions de gestion de version */
+    while ((int1)GIV::GWZOk == cFlag)
+    {
+        /* Ouverture du curseur de recherche inscription */
+        (void)strcpy(rErreurSQL.acOrdre_sql, "open ghhcrsLireVersionIeinsc");
+        /* EXEC SQL
+        open ghhcrsLireVersionIeinsc
+        using :pcOraNumnat,
+        :pcOraNumlo,
+        :pcOraNumls; */
+        openGhhcrsLireVersionIeinsc(pcOraNumnat, pcOraNumlo, pcOraNumls);
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur ouverture curseur Ieinsc */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Sortie de boucle et remontee code erreur */
+            cFlag = (int1)GIV::GWZKo;
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Ouverture curseur correcte : exploitation par FETCH */
+            (void)strcpy(rErreurSQL.acOrdre_sql, "fetch ghhcrsLireVersionIeinsc");
+            EXEC SQL
+            fetch ghhcrsLireVersionIeinsc
+            into: tcOraPrenom: sOraIndicI;
+            iIntRet = GYBErreur(&rErreurSQL);
+
+            switch (iIntRet)
+            {
+            case (int4)GIV::GYBok:
+            {
+                /* Inscription de version lue : cas normal */
+                GWTTrace(GWT_NIV_FONCT, ("Lecture inscription de version ...\n"));
+
+                if ((int2) - 1 != sOraIndicI)
+                {
+                    /* Indicatrice valide : on a effectivement lu quelquechose */
+                    iCnt++;
+                    GWTTrace(GWT_NIV_FONCT, ("Chaine de version : [%s]\n", tcOraPrenom));
+
+                    if ((int4)GHH_VERS_EXTERNE == iCnt)
+                    {
+                        /* Traitement pour la version externe */
+                        iIntRet = GHHExtraireVersion(tcOraPrenom, (int4)GHH_VERS_EXTERNE, (int4)0, pcVersExte, (char*)NULL);
+                    }
+                    else
+                    {
+                        /* Traitement pour la version fournisseur */
+                        (void)strcpy(tcPrenom, tcOraPrenom);
+                        iIntRet = GHHExtraireVersion(tcOraPrenom, (int4)GHH_VERS_INTERNE, (int4)strlen(pcNomFour), pcVersFour, tcWork);
+                        iIntRet = GHHExtraireVersion(tcPrenom, (int4)GHH_VERS_EXTERNE, (int4)0, pcVersExtFour, (char*)NULL);
+                    }
+
+                    if ((int4)GIV::GWZOk != iIntRet)
+                    {
+                        /* Erreur d'exploitation de la chaine de version */
+                        GWTTrace(GWT_NIV_FONCT, ("Erreur GHHExtraireVersion ...\n"));
+                        /* Sortir de la boucle; remonter un code erreur */
+                        cFlag = (int1)GIV::GWZKo;
+                        iCodRet = (int4)GIV::GWZKo;
+                    }
+                    else
+                    {
+                        /* Chaine de version correcte : increment compteur lectures */
+                        iCodRet++;
+                    }
+                }
+                else
+                {
+                    /* Inidcatrice non valide : lecture mais pas de donnees */
+                    /* Sortie de la boucle */
+                    cFlag = (int1)GIV::GWZKo;
+                }
+
+                break;
+            }
+
+            case (int4)GIV::GYBnodata:
+            {
+                /* Aucune inscription de version lue : ??? */
+                GWTTrace(GWT_NIV_BIZAR, ("Pas d'inscription de version : [D=%s F=%s]\n", ghhtcDepartLireVersionIeinsc, pcOraNumlo));
+                /* Sortie de la boucle */
+                cFlag = (int1)GIV::GWZKo;
+                break;
+            }
+
+            default:
+            {
+                /* Erreur SQL sur FETCH */
+                GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+                /* Sortie de la boucle et remontee code erreur */
+                cFlag = (int1)GIV::GWZKo;
+                iCodRet = (int4)GIV::GWZKo;
+                break;
+            }
+            }
+        }
+
+        /* Fermeture du curseur de lecture */
+        (void)strcpy(rErreurSQL.acOrdre_sql, "close ghhcrsLireVersionIeinsc");
+        EXEC SQL
+        close ghhcrsLireVersionIeinsc;
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur fermeture curseur SQL */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Sortie de la boucle et remontee code erreur */
+            cFlag = (int1)GIV::GWZKo;
+            iCodRet = (int4)GIV::GWZKo;
+        }
+
+        /* Si on peut continuer le traitement */
+        if ((int1)GIV::GWZOk == cFlag)
+        {
+            if ((int4)GHH_VERS_INTERNE > iCnt)
+            {
+                /* Modifier les variables ORACLE pour acces seconde inscription */
+                pcOraNumlo = pcNomFour;
+
+                if (0 != strlen(pcNomDest))
+                {
+                    /* ls = destinataire */
+                    pcOraNumls = pcNomDest;
+                }
+
+                /* Reinitialiser l'indicatrice de lecture */
+                sOraIndicI = (int2) - 1;
+            }
+            else
+            {
+                /* Les deux inscription sont ete lues : sortir de la boucle */
+                cFlag = (int1)GIV::GWZKo;
+
+                /* Controler presence de trace de reprise */
+                if ((size_t)0 < strlen(tcWork))
+                {
+                    /* Lecture d'un numero de mouvement pour reprise */
+                    (void)strcpy(pcNumMvt, tcWork);
+                    /* Neutraliser version externe alors non significative */
+                    /* (void)memset ((void *)pcVersExte,
+                     0x00,
+                     strlen (pcVersExte)); */
+                }
+                else
+                {
+                    /* Pas de trace de reprise : invalider pcNumMvt */
+                    (void)memset((void*)pcNumMvt, 0x00, strlen(pcNumMvt));
+                }
+            }
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHLireVersionIeinscDest
+ *
+ * But :  par destinataire, fonction API de lecture des versions du referentiel IEINSC pour un
+ *        departement et un forunisseur
+ *
+ * Description : controle de preparation de la requete puis execution de celle
+ *               ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHLireVersionIeinscDest(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, char* pcNomDest)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    int4 iFlag = (int4)0;
+    char pcVersExtFour[GXWLgIdDonnees] = "";
+    GWTTrace(GWT_NIV_FONCT, ("Demande de lecture versions referentiel IEINSC [DEPT=%s] ...\n", pcDepart));
+
+    /* Preparation des requetes de lecture des versions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        /* Controle de changement ou non de departement entre deux appels */
+        iFlag = strcmp(ghhtcDepartLireVersionIeinsc, pcDepart);
+
+        if ((int4)0 != iFlag)
+        {
+            /* Changement de departement => requete a preparer */
+            GWTTrace(GWT_NIV_FONCT, ("Changement de departement => requete a preparer ...\n"));
+            ghhcFlagLireVersionIeinsc = (int1)GIV::GWZKo;
+        }
+
+        if ((int1)GIV::GWZKo == ghhcFlagLireVersionIeinsc)
+        {
+            /* Appel fonction de preparation de la requete */
+            iIntRet = ghhPrepLireVersionIeinsc(pcDepart);
+
+            if ((int4)GIV::GWZOk != iIntRet)
+            {
+                /* Erreur preparation requete de lecture de la version IEINSC */
+                GWTTrace(GWT_NIV_FONCT, ("Erreur ghhPrepLireVersionIeinsc ...\n"));
+                /* Remonter un code erreur */
+                iCodRet = (int4)GIV::GWZKo;
+            }
+        }
+    }
+
+    if ((int4)GIV::GWZOk == iIntRet)
+    {
+        /* Lecture de la version du referentiel des inscriptions */
+        iIntRet = ghhExecLireVersionIeinsc(pcNomFour, pcVersFour, pcVersExte, pcNumMvt, pcVersExtFour, pcNomDest);
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            /* Echec de lecture des versions Ieinsc */
+            GWTTrace(GWT_NIV_FONCT, ("Anomalie sur ghhExecLireVersionIeinsc ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            if ((0 == strcmp(pcNomFour, GXWInterfaceCD2)) || (0 == strcmp(pcNomFour, GXWInterfaceEPJ)))
+                (void)strcpy(pcVersExte, pcVersExtFour);
+
+            /* Lecture des versions correcte */
+            iCodRet = iIntRet;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHLireVersionIeinsc
+ *
+ * But :  fonction API de lecture des versions du referentiel IEINSC pour un
+ *        departement et un forunisseur
+ *
+ * Description : controle de preparation de la requete puis execution de celle
+ *               ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHLireVersionIeinsc(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    iCodRet = GHHLireVersionIeinscDest(pcDepart, pcNomFour, pcVersFour, pcVersExte, pcNumMvt, "");
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHLireVersionIeinsc
+ *
+ * But :  fonction API de lecture des versions du referentiel IEINSC pour un
+ *        departement et un forunisseur
+ *
+ * Description : controle de preparation de la requete puis execution de celle
+ *               ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHModiVersionIeinsc(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    iCodRet = GHHModiVersionIeinscDest(pcDepart, pcNomFour, pcVersFour, pcVersExte, pcNumMvt, "");
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHLireNewVersDest
+ *
+ * But :  fonction API de lecture des versions du referentiel IEINSC pour un
+ *        departement et suivante pour un destinataire
+ *
+ * Description : controle de preparation de la requete puis execution de celle
+ *               ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Mar/21/2007  (mb)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHLireNewVersDest(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, int4 iInitVers)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    int4 iFlag = (int4)0;
+    int4 iNumVers = 0;
+    int4 iNumVersFour = 0;
+    int4 iNumVersExte = 0;
+    char* pcVersion = NULL;
+    char pcVersExtFour[GXWLgIdDonnees] = "";
+    char tcDateAuth[GHH_LGDATE] = "";
+    GWTTrace(GWT_NIV_FONCT, ("Demande de lecture versions referentiel IEINSC [DEPT=%s] ...\n", pcDepart));
+
+    /* Preparation des requetes de lecture des versions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        /* Appel fonction de preparation de la requete */
+        iIntRet = ghhPrepLireVersionIeinsc(pcDepart);
+
+        if ((int4)GIV::GWZOk != iIntRet)
+        {
+            /* Erreur preparation requete de lecture de la version IEINSC */
+            GWTTrace(GWT_NIV_FONCT, ("Erreur ghhPrepLireVersionIeinsc ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    if ((int4)GIV::GWZOk == iIntRet)
+    {
+        /* Lecture de la version du referentiel des inscriptions */
+        iIntRet = ghhExecLireVersionIeinsc(pcNomFour, pcVersFour, pcVersExte, pcNumMvt, pcVersExtFour, "");
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            /* Echec de lecture des versions Ieinsc */
+            GWTTrace(GWT_NIV_FONCT, ("Anomalie sur ghhExecLireVersionIeinsc ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Lecture des versions correcte */
+            iCodRet = (int4)GIV::GWZOk;
+        }
+    }
+
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        if ((size_t)0 != strlen(pcVersFour))
+        {
+            pcVersion = strchr(pcVersFour, (char)'.');
+
+            if (NULL == pcVersion)
+                iNumVersFour = 0;
+            else
+            {
+                pcVersion++;
+                iNumVersFour = atoi(pcVersion);
+            }
+        }
+
+        if ((size_t)0 != strlen(pcVersExte))
+        {
+            pcVersion = strchr(pcVersExte, (char)'.');
+
+            if (NULL == pcVersion)
+                iNumVersExte = 0;
+            else
+            {
+                pcVersion++;
+                iNumVersExte = atoi(pcVersion);
+            }
+        }
+
+        if ((iNumVersFour != iNumVersExte) && ((iNumVersFour / (int4)100) != iNumVersExte))
+        {
+            iNumVers = iInitVers;
+            (void)memcpy(pcVersFour, pcVersExte, strlen(pcVersExte));
+        }
+        else
+        {
+            if (iNumVersFour == iNumVersExte)
+                iNumVers = iInitVers;
+            else
+            {
+                iNumVers = iNumVersFour % (int4)100;
+                iNumVers++;
+
+                if ((int4)99 < iNumVers)
+                {
+                    iNumVers = iInitVers;
+                    iNumVersExte++;
+                    /* On incrémente la version externe de 1 */
+                    iIntRet = GHHNewVersExte(pcVersExte, 1);
+
+                    if ((int4)GIV::GWZKo == iIntRet)
+                    {
+                        /* Erreur elaboration chaine de version */
+                        GWTTrace(GWT_NIV_GRAVE, ("Erreur GHHNewVersExte ...\n"));
+                        /* Remonter un code erreur */
+                        iCodRet = (int4)GIV::GWZKo;
+                        return (iCodRet);
+                    }
+                }
+            }
+        }
+
+        /* Lecture date courante */
+        iIntRet = GHHDateAuth(tcDateAuth);
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            /* Erreur lecture date */
+            GWTTrace(GWT_NIV_FONCT, ("Erreur GHHLireDate ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Couper la chaine de date avant HHMMSS */
+            tcDateAuth[8] = 0x00;
+            /* Construction de la chaine de version */
+            (void)sprintf(&pcVersFour[0], "%s.%06d%02d", tcDateAuth, iNumVersExte, iNumVers);
+            GWTTrace(GWT_NIV_FONCT, ("Nouvelle version externe : [STR=%s]\n", pcVersFour));
+        }
+    }
+
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        iIntRet = ghhModiVersionIeinsc(pcDepart, pcNomFour, pcVersFour, pcVersExte, (char*)NULL, pcVersExtFour, "");
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur de mise a jour donnees authentification sur Ieinsc ...\n"));
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhPrepModiVersionIeinsc
+ *
+ * But :  Preparation de la requete de mise a jour de la version du referentiel
+ *        des inscriptions pour un departement
+ *
+ * Description : Parsing de la requete (PREPARE) et declaration du curseur (car
+ *               requete de type SELECT)
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : pcDepart : departement associe a la requete
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+static int4 ghhPrepModiVersionIeinsc(char* pcDepart)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    char acRequete[GHH_LG_MODI_VERS_IEINSC] = "";
+    EXEC SQL
+    begin declare
+    section;
+    char* pcOraBuff;
+    EXEC SQL
+    end declare
+    section;
+    /* Initialisation des variables locales */
+    (void)memset((void*) & (acRequete[0]), 0x00, sizeof(acRequete));
+    (void)memset((void*)rErreurSQL.acDonnees_retour, 0x00, sizeof(rErreurSQL.acDonnees_retour));
+    (void)strcpy(rErreurSQL.acOrdre_sql, "prepare ghhrqtModiVersionIeinsc");
+    GWTTrace(GWT_NIV_FONCT, ("Preparation ghhrqtModiVersionIeinsc [DEPT=%s] ...\n", pcDepart));
+    /* Construction du texte de la requete */
+    (void)sprintf(&acRequete[0],
+                  GHH_RQ_MODI_VERS_IEINSC, pcDepart);
+    /* Valorisation des pointeurs d'interface ORACLE */
+    pcOraBuff = acRequete;
+    GWTTrace(GWT_NIV_FONCT, ("req PREPARE SQL : %s]\n", acRequete));
+    /* Preparation SQL de la requete */
+    EXEC SQL
+    prepare ghhrqtModiVersionIeinsc
+    from: pcOraBuff;
+    /* Traitement des erreurs SQL apres preparation */
+    iIntRet = GYBErreur(&rErreurSQL);
+
+    if ((int4)GIV::GYBok != iIntRet)
+    {
+        /* Erreur de preparation SQL de la requete : abandon */
+        GWTTrace(GWT_NIV_GRAVE, ("Erreur PREPARE SQL : [CMD=%s CR=%d ERR=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+    else
+    {
+        /* Preparation requete correcte : valider les drapeaux */
+        ghhcFlagModiVersionIeinsc = (int1)GIV::GWZOk;
+        /* Sauvegarder department associe a la requete */
+        (void)memset((void*)ghhtcDepartModiVersionIeinsc, 0x00, sizeof(ghhtcDepartModiVersionIeinsc));
+        (void)strcpy(ghhtcDepartModiVersionIeinsc, pcDepart);
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhExecModiVersionIeinsc
+ *
+ * But :  Mise a jour de la version du referentiel des inscriptions pour un
+ *        fournisseur
+ *
+ * Description : Calcul des nouvelles chaines de version et modification des
+ *               inscriptions correspondantes
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+static int4 ghhExecModiVersionIeinsc(char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, char* pcVersExtFour, char* pcNomDest)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    char tcDateAuth[GHH_LGDATE] = "";
+    EXEC SQL
+    begin declare
+    section;
+    char tcOraPrenom[GYBIeinscLgPrenom + 1];
+    char* pcOraNumnat;
+    char* pcOraNumlo;
+    char* pcOraNumls;
+    EXEC SQL
+    end declare
+    section;
+    /* Initialisation des variables internes */
+    (void)memset((void*)tcOraPrenom, 0x00, sizeof(tcOraPrenom));
+    (void)memset((void*)tcDateAuth, 0x00, sizeof(tcDateAuth));
+    (void)memset((void*)rErreurSQL.acDonnees_retour, 0x00, sizeof(rErreurSQL.acDonnees_retour));
+    (void)strcpy(rErreurSQL.acOrdre_sql, "execute ghhrqtModiVersionIeinsc");
+    /* Valorisation des pointeurs d'interface ORACLE */
+    pcOraNumnat = GHHacNumnatCohe;
+    pcOraNumlo = GHHacNumloCohe;
+    pcOraNumls = GHHacNumlsCohe;
+    /* Lecture et formatage de la date courante */
+    iIntRet = GHHDateAuth(tcDateAuth);
+
+    if ((int4)GIV::GWZOk != iIntRet)
+    {
+        /* Erreur de lecture ou formatage date courante : sortie */
+        GWTTrace(GWT_NIV_BIZAR, ("Erreur GHHDateAuth ...\n"));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+
+    /* Traitement de la version externe (si renseignee) */
+    if (((int1)GIV::GWZOk == iCodRet) && (0 == strlen(pcNomDest)))
+    {
+        if ((char*)NULL != pcVersExte)
+        {
+            if ((size_t)0 < strlen(pcVersExte))
+            {
+                GWTTrace(GWT_NIV_FONCT, ("Mise a jour version externe : [VERS=%s,%s,%s]\n", pcOraNumlo, pcOraNumls, pcVersExte));
+                /* Construction chaine de version (champs fournisseurs non renseignes) */
+                (void)sprintf(tcOraPrenom,
+                              GHHFormatVersionInsc, pcVersExte, "", "", tcDateAuth);
+                /* Modification de l'inscription de gestion de la version externe */
+                EXEC SQL
+                execute ghhrqtModiVersionIeinsc
+                using :tcOraPrenom,
+                :pcOraNumnat,
+                :pcOraNumlo,
+                :pcOraNumls;
+                iIntRet = GYBErreur(&rErreurSQL);
+
+                if ((int4)GIV::GYBok != iIntRet)
+                {
+                    /* Erreur mise a jour inscription de coherence */
+                    GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+                    /* Remontee code erreur */
+                    iCodRet = (int4)GIV::GWZKo;
+                }
+                else
+                {
+                    /* Mise a jour correcte : compter traitement */
+                    iCodRet++;
+                }
+            }
+            else
+            {
+                /* Version externe non nulle mais non precisee => pas de mise a jour */
+                GWTTrace(GWT_NIV_FONCT, ("Pas de changement de version externe ...\n"));
+            }
+        }
+    }
+
+    /* Traitement de la version specifique fournisseur */
+    if ((int1)GIV::GWZKo != iCodRet)
+    {
+        GWTTrace(GWT_NIV_FONCT, ("Mise a jour version pour fournisseur ...\n"));
+        (void)memset((void*)tcOraPrenom, 0x00, sizeof(tcOraPrenom));
+
+        if ((char*)NULL == pcVersExte)
+        {
+            if (((char*)NULL != pcNumMvt) && (0 != strlen(pcNumMvt)))
+            {
+                /* suppression heure */
+                tcDateAuth[8] = '\0';
+            }
+
+            /* Pas de version externe => memoriser un contexte de reprise */
+            (void)sprintf(tcOraPrenom,
+                          GHHFormatVersRepInsc, pcNomFour, pcVersFour, pcNumMvt, tcDateAuth);
+        }
+        else
+        {
+            /* Version externe renseigne => pas de reprise (controle en API) */
+            if ((char*)NULL == pcVersExtFour)
+            {
+                if (0 != strlen(pcNomDest))
+                    tcDateAuth[8] = '\0';
+
+                (void)sprintf(tcOraPrenom,
+                              GHHFormatVersionInsc, pcVersExte, pcNomFour, pcVersFour, tcDateAuth);
+            }
+            else
+            {
+                /* suppression heure */
+                tcDateAuth[8] = '\0';
+                (void)sprintf(tcOraPrenom,
+                              GHHFormatVersionInsc, pcVersExtFour, pcNomFour, pcVersFour, tcDateAuth);
+            }
+        }
+
+        GWTTrace(GWT_NIV_FONCT, ("Mise a jour version fournisseur : [VERS=%s,%s,%s]\n", pcNomFour, pcNomDest, tcOraPrenom));
+        /* Mise a jour des pointeurs d'interface ORACLE : pour fournisseur */
+        pcOraNumlo = pcNomFour;
+
+        if (0 != strlen(pcNomDest))
+        {
+            /* ls = destinataire */
+            pcOraNumls = pcNomDest;
+        }
+
+        /* Modification de l'inscription de gestion de la version externe */
+        EXEC SQL
+        execute ghhrqtModiVersionIeinsc
+        using :tcOraPrenom,
+        :pcOraNumnat,
+        :pcOraNumlo,
+        :pcOraNumls;
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur mise a jour inscription de coherence */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Remontee code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Mise a jour correcte : compter traitement */
+            iCodRet++;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : ghhModiVersionIeinsc
+ *
+ * But :  API de mise a jour des versions pour une table du referentiel IEINSC
+ *
+ * Description : Controle des arguments d'appel (marquage d'une reprise ou non)
+ *               puis preparation de la requete si necessaire et execution de
+ *               celle-ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1    : erreur de traitement
+ *                        >= 0 : traitement correct; nombre de versions lues
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 ghhModiVersionIeinsc(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, char* pcVersExtFour, char* pcNomDest)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    int4 iFlag = (int4)0; /* Drapeau de comparaison */
+    GWTTrace(GWT_NIV_FONCT, ("Demande mise a jour versions referentiel IEINSC [DEPT=%s] ...\n", pcDepart));
+
+    /* Controle des arguments recus */
+    if (((char*)NULL == pcNumMvt) && ((char*)NULL == pcVersExte))
+    {
+        /* Au moins l'un des deux arguments pcNumMvt ou pcVersExte doit etre renseigne */
+        GWTTrace(GWT_NIV_BIZAR, ("Erreur : pcNumMvt ou pcVersExte doit etre valide ...\n"));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+    else
+    {
+        if (((char*)NULL != pcNumMvt) && ((char*)NULL != pcVersExte))
+        {
+            /* Mais un seul des deux arguments pcNumMvt ou pcVersExte doit etre renseigne */
+            GWTTrace(GWT_NIV_BIZAR, ("Erreur : pcNumMvt ou pcVersExte doit etre valide ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    /* Preparation des requetes de lecture des versions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        /* Controle de changement ou non de departement entre deux appels */
+        /*    iFlag = strcmp (ghhtcDepartModiVersionIeinsc,
+         pcDepart);
+         if ((int4)0 != iFlag)
+         { */
+        /* Changement de departement => requete a preparer */
+        GWTTrace(GWT_NIV_FONCT, ("Changement de departement => requete a preparer ...\n"));
+        ghhcFlagModiVersionIeinsc = (int1)GIV::GWZKo;
+        /*      } */
+
+        if ((int1)GIV::GWZKo == ghhcFlagModiVersionIeinsc)
+        {
+            /* Appel fonction de preparation de la requete */
+            iIntRet = ghhPrepModiVersionIeinsc(pcDepart);
+
+            if ((int4)GIV::GWZOk != iIntRet)
+            {
+                /* Erreur preparation requete de modification de la version IEINSC */
+                GWTTrace(GWT_NIV_FONCT, ("Erreur ghhPrepModiVersionIeinsc ...\n"));
+                /* Remonter un code erreur */
+                iCodRet = (int4)GIV::GWZKo;
+            }
+        }
+    }
+
+    /* Modification de la version du referentiel des inscriptions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        iIntRet = ghhExecModiVersionIeinsc(pcNomFour, pcVersFour, pcVersExte, pcNumMvt, pcVersExtFour, pcNomDest);
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            /* Echec de mise a jour des versions Ieinsc */
+            GWTTrace(GWT_NIV_FONCT, ("Anomalie sur ghhExecModiVersionIeinsc ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Sinon : mise a jour des versions correctes : remonter nombre */
+            iCodRet = iIntRet;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHModiVersionIeinsc
+ *
+ * But :  API de mise a jour des versions pour une table du referentiel IEINSC
+ *
+ * Description : Controle des arguments d'appel (marquage d'une reprise ou non)
+ *               puis preparation de la requete si necessaire et execution de
+ *               celle-ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1    : erreur de traitement
+ *                        >= 0 : traitement correct; nombre de versions lues
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHModiVersionIeinscDest(char* pcDepart, char* pcNomFour, char* pcVersFour, char* pcVersExte, char* pcNumMvt, char* pcNomDest)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    int4 iFlag = (int4)0; /* Drapeau de comparaison */
+    char* pcVersion;
+    size_t iLgVersFour = 0;
+    size_t iLgVersExte = 0;
+    GWTTrace(GWT_NIV_FONCT, ("Demande mise a jour versions referentiel IEINSC [DEPT=%s] ...\n", pcDepart));
+
+    /* Controle des arguments recus */
+    if (((char*)NULL == pcNumMvt) && ((char*)NULL == pcVersExte))
+    {
+        /* Au moins l'un des deux arguments pcNumMvt ou pcVersExte doit etre renseigne */
+        GWTTrace(GWT_NIV_BIZAR, ("Erreur : pcNumMvt ou pcVersExte doit etre valide ...\n"));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+    else
+    {
+        if (((char*)NULL != pcNumMvt) && ((char*)NULL != pcVersExte))
+        {
+            /* Mais un seul des deux arguments pcNumMvt ou pcVersExte doit etre renseigne */
+            GWTTrace(GWT_NIV_BIZAR, ("Erreur : pcNumMvt ou pcVersExte doit etre valide ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    /* Preparation des requetes de lecture des versions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        /* Controle de changement ou non de departement entre deux appels */
+        /*    iFlag = strcmp (ghhtcDepartModiVersionIeinsc,
+         pcDepart);
+         if ((int4)0 != iFlag)
+         { */
+        /* Changement de departement => requete a preparer */
+        GWTTrace(GWT_NIV_FONCT, ("Changement de departement => requete a preparer ...\n"));
+        ghhcFlagModiVersionIeinsc = (int1)GIV::GWZKo;
+        /*      } */
+
+        if ((int1)GIV::GWZKo == ghhcFlagModiVersionIeinsc)
+        {
+            /* Appel fonction de preparation de la requete */
+            iIntRet = ghhPrepModiVersionIeinsc(pcDepart);
+
+            if ((int4)GIV::GWZOk != iIntRet)
+            {
+                /* Erreur preparation requete de modification de la version IEINSC */
+                GWTTrace(GWT_NIV_FONCT, ("Erreur ghhPrepModiVersionIeinsc ...\n"));
+                /* Remonter un code erreur */
+                iCodRet = (int4)GIV::GWZKo;
+            }
+        }
+    }
+
+    /* Modification de la version du referentiel des inscriptions */
+    if ((int4)GIV::GWZOk == iCodRet)
+    {
+        if ((char*)NULL != pcVersFour)  /* HAL, 16/10/2008 : ajout des "iLg" pour éviter un plantage sous Linux */
+            iLgVersFour = strlen(pcVersFour);
+
+        if ((char*)NULL != pcVersExte)
+            iLgVersExte = strlen(pcVersExte);
+
+        if ((iLgVersFour != iLgVersExte) && ((0 == strcmp(pcNomFour, GXWInterfaceCD2)) || (0 == strcmp(pcNomFour, GXWInterfaceEPJ))))
+            iIntRet = ghhModiVersionIeinsc(pcDepart, pcNomFour, pcVersFour, pcVersExte, pcNumMvt, pcVersFour, pcNomDest);
+        else
+            iIntRet = ghhModiVersionIeinsc(pcDepart, pcNomFour, pcVersFour, pcVersExte, pcNumMvt, (char*)NULL, pcNomDest);
+
+        if ((int4)GIV::GWZKo == iIntRet)
+        {
+            /* Echec de mise a jour des versions Ieinsc */
+            GWTTrace(GWT_NIV_FONCT, ("Anomalie sur ghhExecModiVersionIeinsc ...\n"));
+            /* Remonter un code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Sinon : mise a jour des versions correctes : remonter nombre */
+            iCodRet = iIntRet;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+/*----------------------------------Fonction----------------------------------*
+ * Fonction : GHHLireVersionTousDest
+ *
+ * But :  test tous destinataire si version en cours; fonction API de lecture des versions du referentiel IEINSC pour un
+ *        departement et un forunisseur
+ *
+ * Description : controle de preparation de la requete puis execution de celle
+ *               ci
+ *
+ * Portabilité : sûrement portable
+ *
+ * Interface :
+ *
+ *  Paramètres : (aucun)
+ *
+ *  Valeurs retournées : -1 : erreur de traitement
+ *                        0 : traitement correct
+ *
+ *  Erreurs :
+ *
+ *---------------------------------Historique----------------------------------
+ *
+ * Création :   Nov/28/1996  (ame)
+ *
+ * Modification (MMM/JJ/AAAA - xx) :
+ *
+ *---------------------------Fin de l'en-tête fonction------------------------*/
+
+int4 GHHLireVersionTousDest(char* pcDepart, char* pcNomDest, char* pcVersFour, int4* iCpt, char* pcVersMin)
+
+{
+    int4 iCodRet = (int4)GIV::GWZOk; /* Code retour de la fonction */
+    int4 iIntRet = (int4)GIV::GWZOk; /* Code retour interne */
+    GYBrParam_erreurT rErreurSQL; /* Traitement des erreurs SQL */
+    EXEC SQL
+    begin declare
+    section;
+    char tcOraPrenom[GYBIeinscLgPrenom + 1];
+    int2 sOraIndicI;
+    char* pcOraDest;
+    char* pcOraVers;
+    char* pcOraMin;
+    int4 iOraCount;
+    EXEC SQL
+    VAR tcOraPrenom
+    IS STRING;
+    EXEC SQL
+    end declare
+    section;
+    GWTTrace(GWT_NIV_FONCT, ("Demande de lecture versions referentiel IEINSC pour tous dest [DEPT=%s] ...\n", pcDepart));
+    /* Appel fonction de preparation de la requete */
+    iIntRet = ghhPrepLireVersionTousDest(pcDepart);
+
+    if ((int4)GIV::GWZOk != iIntRet)
+    {
+        /* Erreur preparation requete de lecture de la version IEINSC */
+        GWTTrace(GWT_NIV_FONCT, ("Erreur ghhPrepLireVersionTousDest ...\n"));
+        /* Remonter un code erreur */
+        iCodRet = (int4)GIV::GWZKo;
+    }
+
+    if ((int4)GIV::GWZOk == iIntRet)
+    {
+        /* Ouverture du curseur de recherche inscription */
+        (void)strcpy(rErreurSQL.acOrdre_sql, "open ghhcrsLireVersionTousDest");
+        pcOraDest = pcNomDest;
+        pcOraVers = pcVersFour;
+        pcOraMin = pcVersMin;
+        EXEC SQL
+        open ghhcrsLireVersionTousDest;
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur ouverture curseur Ieinsc */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Sortie de boucle et remontee code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+        else
+        {
+            /* Ouverture curseur correcte : exploitation par FETCH */
+            (void)strcpy(rErreurSQL.acOrdre_sql, "fetch ghhcrsLireVersionTousDest");
+            EXEC SQL
+            fetch ghhcrsLireVersionTousDest
+            into: tcOraPrenom: sOraIndicI;
+            iIntRet = GYBErreur(&rErreurSQL);
+
+            switch (iIntRet)
+            {
+            case (int4)GIV::GYBok:
+            {
+                *iCpt = 1;
+                GWTTrace(GWT_NIV_FONCT, ("nombre dest : %d, versions : <%s>, <%s>\n", *iCpt, pcVersFour, tcOraPrenom));
+                (void)strcpy(pcVersMin, tcOraPrenom);
+                break;
+            }
+
+            case (int4)GIV::GYBnodata:
+            {
+                /* Aucune inscription de version lue : ??? */
+                *iCpt = (int4)0;
+                GWTTrace(GWT_NIV_FONCT, ("nombre dest : %d, version : %s\n", *iCpt, pcVersFour));
+                break;
+            }
+
+            default:
+            {
+                /* Erreur SQL sur FETCH */
+                *iCpt = (int4)0;
+                GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+                iCodRet = (int4)GIV::GWZKo;
+                break;
+            }
+            }
+        }
+
+        /* Fermeture du curseur de lecture */
+        (void)strcpy(rErreurSQL.acOrdre_sql, "close ghhcrsLireVersionTousDest");
+        EXEC SQL
+        close ghhcrsLireVersionTousDest;
+        iIntRet = GYBErreur(&rErreurSQL);
+
+        if ((int4)GIV::GYBok != iIntRet)
+        {
+            /* Erreur fermeture curseur SQL */
+            GWTTrace(GWT_NIV_GRAVE, ("Erreur SQL : [CMD=%s CR=%d TXT=%s]\n", rErreurSQL.acOrdre_sql, iIntRet, rErreurSQL.acDonnees_retour));
+            /* Sortie de la boucle et remontee code erreur */
+            iCodRet = (int4)GIV::GWZKo;
+        }
+    }
+
+    /* Sortie de la fonction */
+    return (iCodRet);
+}
+
+}áÏ

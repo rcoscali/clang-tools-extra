@@ -534,6 +534,7 @@ namespace clang {
           Action(ClangTidyASTConsumerFactory *Factory) : Factory(Factory) {}
           std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
                                                          StringRef File) override {
+            llvm::outs() << "std::unique_ptr<ASTConsumer> Action::CreateASTConsumer(CompilerInstance &Compiler, StringRef File): File = '" << File.str() << "'\n";
             return Factory->CreateASTConsumer(Compiler, File);
           }
 

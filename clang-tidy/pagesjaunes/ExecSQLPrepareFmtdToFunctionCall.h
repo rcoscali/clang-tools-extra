@@ -52,6 +52,10 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 	    // Error kind for header generation failure (already exists)
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+	    // Error kind for source generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+	    // Error kind for header generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
 	  };
 
 	// AST Context instance
@@ -136,6 +140,12 @@ namespace clang
 	  }
 	};
 	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
+	
+      private:
+
+	source_range_set_t m_macrosStringLiterals;
+
+      public:
 	
 	// Constructor
 	ExecSQLPrepareFmtdToFunctionCall(StringRef, ClangTidyContext *);
@@ -261,7 +271,41 @@ namespace clang
 
       private:
 
-	source_range_set_t m_macrosStringLiterals;
+	/**
+	 * VarDeclMatcher
+	 *
+	 */
+	class VarDeclMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit VarDeclMatcher(ExecSQLPrepareFmtdToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
+	    record->linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_var_decl_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLPrepareFmtdToFunctionCall instance
+	  ExecSQLPrepareFmtdToFunctionCall *m_parent;
+	};
+	
+      protected:
+
+	// Collector for possible sprintf calls. struct VarDeclMatchRecord defined in ExecSQLCommon.h
+	std::vector<struct clang::tidy::pagesjaunes::VarDeclMatchRecord *> m_req_var_decl_collector;
+
+      private:
 	
         // Override to be called at start of translation unit
         void onStartOfTranslationUnit();
@@ -290,8 +334,49 @@ namespace clang
 					  std::string&, std::string&,
 					  SourceRangeForStringLiterals**);
 
+        // Format a string for dumping a params definition
+        std::string
+        createParamsDef(const std::string&,
+                        const std::string&,
+                        const std::string&,
+                        const std::string&);
+
+        // Format a string for dumping a params/host vars declare section
+        std::string
+        createParamsDeclareSection(const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsDecl(const std::string&,
+                         const std::string&,
+                         const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsCall(const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createHostVarList(const std::string&, bool);
+
+        // Find a symbol definition in a function, with type, line number etc
+	const VarDecl *findSymbolInFunction(std::string&,
+					    const FunctionDecl *);
+
+        // Find a declaration for a named symbol in a function
+        string2_map findDeclInFunction(const FunctionDecl *,
+                                       const std::string&);
+        
+        string2_map findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *,
+                                                         const std::string&,
+                                                         const std::string&);
+	  
         // Replace the EXEC SQL statement by the function call in the .pc file
-        void replaceExecSQLinPC(void);        
+        map_host_vars decodeHostVars(const std::string &);
 
 	// Json for request grouping
 	nlohmann::json request_groups;
@@ -306,6 +391,8 @@ namespace clang
 	const bool generate_req_headers;
 	// Generate sources option (default: false)
 	const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
 	// Request header template (default: "./pagesjaunes_prepare_fmt.h.tmpl")

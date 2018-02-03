@@ -40,14 +40,14 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH,
 	    // Error kind for source generation failure
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
-	    // Error kind for header generation failure
-	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
 	    // Error kind for source generation failure (already exists)
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
-	    // Error kind for header generation failure (already exists)
-	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 	    // Error kind for source generation failure (dir creation)
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+	    // Error kind for header generation failure
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+	    // Error kind for header generation failure
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 	    // Error kind for header generation failure (dir creation)
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
 	    // Error kind for unsupported string literal charset
@@ -141,6 +141,12 @@ namespace clang
 	};
 	using source_range_set_t = std::multiset<SourceRangeForStringLiterals, SourceRangeBefore>;
 	
+      private:
+
+	source_range_set_t m_macrosStringLiterals;
+
+      public:
+	
 	// Constructor
 	ExecSQLPrepareToFunctionCall(StringRef, ClangTidyContext *);
 
@@ -232,7 +238,11 @@ namespace clang
 	{
 	  const BinaryOperator *binop;
 	  const DeclRefExpr *lhs;
+	  const VarDecl *lhsVar;
+	  unsigned lhsVar_linenum;
 	  const DeclRefExpr *rhs;
+	  const VarDecl *rhsVar;
+	  unsigned rhsVar_linenum;
 	  unsigned binop_linenum;
 	};
 
@@ -241,13 +251,88 @@ namespace clang
 	
       private:
 
-	source_range_set_t m_macrosStringLiterals;
+	/**
+	 * FindAssignMatcher
+	 *
+	 */
+	class FindAssignMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit FindAssignMatcher(ExecSQLPrepareToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct AssignmentRecord *record = new(struct AssignmentRecord);
+	    record->lhs = result.Nodes.getNodeAs<DeclRefExpr>("lhs");
+	    record->lhsVar = result.Nodes.getNodeAs<VarDecl>("lhsVar");
+	    record->lhsVar_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->lhsVar->getLocStart()));
+	    record->rhs = result.Nodes.getNodeAs<DeclRefExpr>("rhs");
+	    record->rhsVar = result.Nodes.getNodeAs<VarDecl>("rhsVar");
+	    record->rhsVar_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->rhsVar->getLocStart()));
+	    record->binop = result.Nodes.getNodeAs<BinaryOperator>("binop");
+	    record->binop_linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->binop->getLocStart()));
+	    m_parent->m_req_assign_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLPrepareToFunctionCall instance
+	  ExecSQLPrepareToFunctionCall *m_parent;
+	};
+
+      private:
+
+	/**
+	 * VarDeclMatcher
+	 *
+	 */
+	class VarDeclMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit VarDeclMatcher(ExecSQLPrepareToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
+	    record->linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_var_decl_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLPrepareToFunctionCall instance
+	  ExecSQLPrepareToFunctionCall *m_parent;
+	};
+	
+      protected:
+
+	// Collector for possible sprintf calls. struct VarDeclMatchRecord defined in ExecSQLCommon.h
+	std::vector<struct clang::tidy::pagesjaunes::VarDeclMatchRecord *> m_req_var_decl_collector;
+
+      private:
 	
         // Override to be called at start of translation unit
-        void onStartOfTranslationUnit();
+        virtual void onStartOfTranslationUnit();
 
         // Override to be called at end of translation unit
-        void onEndOfTranslationUnit();
+        virtual void onEndOfTranslationUnit();
 
 	// Process a template file with values in map
 	bool processTemplate(const std::string&,
@@ -269,7 +354,51 @@ namespace clang
 					     unsigned,
 					     std::string&, std::string&,
 					     SourceRangeForStringLiterals **);
-	
+
+        // Format a string for dumping a params definition
+        std::string
+        createParamsDef(const std::string&,
+                        const std::string&,
+                        const std::string&,
+                        const std::string&);
+
+        // Format a string for dumping a params/host vars declare section
+        std::string
+        createParamsDeclareSection(const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsDecl(const std::string&,
+                         const std::string&,
+                         const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsCall(const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createHostVarList(const std::string&, bool);
+
+        // Find a symbol definition in a function, with type, line number etc
+	const VarDecl *findSymbolInFunction(std::string&,
+					    const FunctionDecl *);
+
+        // Find a declaration for a named symbol in a function
+        string2_map findDeclInFunction(const FunctionDecl *,
+                                       const std::string&);
+        
+        string2_map findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *,
+                                                         const std::string&,
+                                                         const std::string&);
+	  
+        // Replace the EXEC SQL statement by the function call in the .pc file
+        map_host_vars decodeHostVars(const std::string &);
+
 	// Json for request grouping
 	nlohmann::json request_groups;
 	// Group structure created from json and used for
@@ -283,6 +412,8 @@ namespace clang
 	const bool generate_req_headers;
 	// Generate sources option (default: false)
 	const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
 	// Request header template (default: "./pagesjaunes_prepare.h.tmpl")

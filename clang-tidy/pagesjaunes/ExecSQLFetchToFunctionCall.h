@@ -144,12 +144,6 @@ namespace clang
         // Constructor
         ExecSQLFetchToFunctionCall(StringRef, ClangTidyContext *);
 
-        // Override to be called at start of translation unit
-        void onStartOfTranslationUnit();
-
-        // Override to be called at end of translation unit
-        void onEndOfTranslationUnit();
-
         // Store check Options
         void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
         // Register matrchers
@@ -162,6 +156,7 @@ namespace clang
         // Emit diagnostic and eventually fix it
         std::string emitDiagAndFix(const SourceLocation&,
                                    const SourceLocation&,
+                                   const std::string&,
                                    const std::string&);
 
         // Emit error
@@ -171,88 +166,115 @@ namespace clang
                        const std::string* msgptr = nullptr);
 
       protected:
-        /*
-         * sprintf finder collector in case of a prepare request
-         * Literal must be directly copied in the :reqName var
-         */
-        struct VarDeclMatchRecord
-        {
-          ASTContext *astCtxt;
-          const VarDecl *varDecl;
-          unsigned linenum;
-          char dummy1[16];
-          char dummy2[16];
-        };
 
-        // Collector for possible sprintf calls
-        std::vector<struct VarDeclMatchRecord *> m_req_var_decl_collector;
-        
+	// Collector for possible sprintf calls. struct VarDeclMatchRecord defined in ExecSQLCommon.h
+	std::vector<struct clang::tidy::pagesjaunes::VarDeclMatchRecord *> m_req_var_decl_collector;
+	
       private:
 
-        /**
-         * VarDeclMatcher
-         *
-         */
-        class VarDeclMatcher : public MatchFinder::MatchCallback
-        {
-        public:
-          /// Explicit constructor taking the parent instance as param
-          explicit VarDeclMatcher(ExecSQLFetchToFunctionCall *parent)
-            : m_parent(parent)
-          {}
+	/**
+	 * VarDeclMatcher
+	 *
+	 */
+	class VarDeclMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit VarDeclMatcher(ExecSQLFetchToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
 
-          /// The run method adding all calls in the collection vector
-          virtual void
-          run(const MatchFinder::MatchResult &result)
-          {
-            struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
-            record->astCtxt = result.Context;
-            record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
-            record->linenum =
-              result.Context->getSourceManager()
-              .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
-            m_parent->m_req_var_decl_collector.push_back(record);
-          }
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
+	    record->linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_var_decl_collector.push_back(record);
+	  }
 
-        private:
-          // Parent ExecSQLFetchToFunctionCall instance
-          ExecSQLFetchToFunctionCall *m_parent;
-        };
-        
+	private:
+	  // Parent ExecSQLFetchToFunctionCall instance
+	  ExecSQLFetchToFunctionCall *m_parent;
+	};
+	
       private:
 
-        source_range_set_t m_macrosStringLiterals;
-        
-        // Process a template file with values in map
-        bool processTemplate(const std::string&,
-                             const std::string&,
-                             string2_map&,
-                             ushort_string_map&);
-        
-        // Generate source file for request
-        void doRequestSourceGeneration(DiagnosticsEngine&,
-                                       const std::string&,
-                                       string2_map&,
-                                       ushort_string_map&);
+	source_range_set_t m_macrosStringLiterals;
+	
+        // Override to be called at start of translation unit
+        virtual void onStartOfTranslationUnit();
 
-        // Generate header file for request
-        void doRequestHeaderGeneration(DiagnosticsEngine&,
-                                       const std::string&,
-                                       string2_map&,
-                                       ushort_string_map&);
+        // Override to be called at end of translation unit
+        virtual void onEndOfTranslationUnit();
+
+	// Process a template file with values in map
+	bool processTemplate(const std::string&,
+			     const std::string&,
+			     string2_map&);
+	
+	// Generate source file for request
+	void doRequestSourceGeneration(DiagnosticsEngine&,
+				       const std::string&,
+				       string2_map&);
+
+	// Generate header file for request
+	void doRequestHeaderGeneration(DiagnosticsEngine&,
+				       const std::string&,
+				       string2_map&);
+	
+	// Find a macro string literal defined at a line
+	bool findMacroStringLiteralDefAtLine(SourceManager &,
+					     unsigned,
+					     std::string&, std::string&,
+					     SourceRangeForStringLiterals **);
+
+        // Format a string for dumping a params definition
+        std::string
+        createParamsDef(const std::string&,
+                        const std::string&,
+                        const std::string&,
+                        const std::string&);
+
+        // Format a string for dumping a params/host vars declare section
+        std::string
+        createParamsDeclareSection(const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsDecl(const std::string&,
+                         const std::string&,
+                         const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsCall(const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createHostVarList(const std::string&, bool);
+
+        // Find a symbol definition in a function, with type, line number etc
+	const VarDecl *findSymbolInFunction(std::string&,
+					    const FunctionDecl *);
+
+        // Find a declaration for a named symbol in a function
+        string2_map findDeclInFunction(const FunctionDecl *,
+                                       const std::string&);
         
-        // Find a macro string literal defined at a line
-        bool findMacroStringLiteralDefAtLine(SourceManager &,
-                                             unsigned,
-                                             std::string&, std::string&,
-                                             SourceRangeForStringLiterals **);
-        
-        const VarDecl *findSymbolInFunction(ClangTool *,
-                                            std::string&,
-                                            const FunctionDecl *);
-          
+        string2_map findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *,
+                                                         const std::string&,
+                                                         const std::string&);
+	  
         // Replace the EXEC SQL statement by the function call in the .pc file
-        void replaceExecSQLinPC(void);        
+        map_host_vars decodeHostVars(const std::string &);
 
         // Json for request grouping
         nlohmann::json request_groups;
@@ -267,6 +289,8 @@ namespace clang
         const bool generate_req_headers;
         // Generate sources option (default: false)
         const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
         // Generation directory (default: "./")
         const std::string generation_directory;
         // Request header template (default: "./pagesjaunes_fetch.h.tmpl")

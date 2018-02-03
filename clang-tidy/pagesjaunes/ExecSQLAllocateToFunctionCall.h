@@ -274,6 +274,14 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 	    // Error kind for header generation failure (already exists)
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+	    // Error kind for source generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+	    // Error kind for header generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+            // Unsupported charset for strings
+            EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+            // Invalid group file
+            EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE
 	  };
 
         // Override to be called at start of translation unit

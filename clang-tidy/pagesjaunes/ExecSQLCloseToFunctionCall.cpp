@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 #include <set>
 #include <vector>
 #include <map>
@@ -27,6 +29,7 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
+using namespace std::chrono;
 using emplace_ret_t = std::pair<std::set<std::string>::iterator, bool>;
 
 namespace clang 
@@ -157,10 +160,13 @@ namespace clang
 	   */
 	  /// Generate requests header files (bool)
 	  generate_req_headers(Options.get("Generate-requests-headers",
-					   false)),
+					   0U)),
 	  /// Generate requests source files (bool)
 	  generate_req_sources(Options.get("Generate-requests-sources",
-					   false)),
+					   0U)),
+	  /// Generate requests source files (bool)
+	  generate_req_allow_overwrite(Options.get("Generate-requests-allow-overwrite",
+                                                   1U)),
 	  /// Generation directory (string)
 	  generation_directory(Options.get("Generation-directory",
 					   "./")),
@@ -176,17 +182,30 @@ namespace clang
 						"./request_groups.json")),
 	  /// Simplify request args list if possible
 	  generation_simplify_function_args(Options.get("Generation-simplify-function-args",
-							false)),
+							0U)),
           /// Conditionnaly report modification in .pc file if this is true
           generation_do_report_modification_in_pc(Options.get("Generation-do-report-modification-in-PC",
-                                                              false)),
+                                                              1U)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
                                                              "./")),
           /// Keep EXEC SQL comments
           generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
-                                                                false))
+                                                                0U))
       {
+        llvm::outs() << "ExecSQLCloseToFunctionCall::ExecSQLCloseToFunctionCall(StringRef Name, ClangTidyContext *Context):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_simplify_function_args = " << (generation_simplify_function_args?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+
 	req_groups.clear();
 	std::filebuf fb;
 	if (fb.open(generation_request_groups, std::ios::in))
@@ -246,9 +265,10 @@ namespace clang
       void
       ExecSQLCloseToFunctionCall::onEndOfTranslationUnit()
       {
-        clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
-                                                         generation_report_modification_in_dir,
-                                                         generation_do_keep_commented_out_exec_sql);
+        if (generation_do_report_modification_in_pc)
+          clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
+                                                           generation_report_modification_in_dir,
+                                                           generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -272,6 +292,7 @@ namespace clang
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
+	Options.store(Opts, "Generate-requests-allow-overwrite", generate_req_allow_overwrite);
 	Options.store(Opts, "Generation-directory", generation_directory);
 	Options.store(Opts, "Generation-header-template", generation_header_template);
 	Options.store(Opts, "Generation-source-template", generation_source_template);
@@ -280,6 +301,20 @@ namespace clang
         Options.store(Opts, "Generation-do-report-modification-in-PC", generation_do_report_modification_in_pc);
         Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);        
         Options.store(Opts, "Generation-keep-commented-out-exec-sql-in-PC", generation_do_keep_commented_out_exec_sql);        
+
+        llvm::outs() << "ExecSQLCloseToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_simplify_function_args = " << (generation_simplify_function_args?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+
       }
       
       /**
@@ -1022,6 +1057,7 @@ namespace clang
 	    std::string requestFunctionName;
 	    std::string requestCursorParamsDef = "void";
 	    std::string requestExecSql;
+	    std::string generationDateTime;
 
 	    std::string requestUsing;
 	    std::string requestArgs;
@@ -1074,6 +1110,9 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
                   }
 
+                auto now_time = system_clock::to_time_t(system_clock::now());
+                generationDateTime = std::ctime(&now_time);
+
 		// If headers generation was requested
 		if (generate_req_headers)
 		  {
@@ -1083,6 +1122,8 @@ namespace clang
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                    values_map["@GenerationDateTime@"] = generationDateTime;
+
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
 					      generation_header_template,
@@ -1099,6 +1140,8 @@ namespace clang
 		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@RequestExecSql@"] = requestExecSql;
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                    values_map["@GenerationDateTime@"] = generationDateTime;
+
 		    // And call it
 		    doRequestSourceGeneration(diagEngine,
 					      generation_source_template,

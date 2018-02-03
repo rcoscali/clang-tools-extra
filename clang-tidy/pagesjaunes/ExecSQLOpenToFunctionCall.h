@@ -156,6 +156,7 @@ namespace clang
 	// Emit diagnostic and eventually fix it
         std::string emitDiagAndFix(const SourceLocation&,
                                    const SourceLocation&,
+                                   const std::string&,
                                    const std::string&);
 
 	// Emit error
@@ -165,20 +166,9 @@ namespace clang
 		       const std::string* msgptr = nullptr);
 
       protected:
-	/*
-	 * sprintf finder collector in case of a prepare request
-	 * Literal must be directly copied in the :reqName var
-	 */
-	struct VarDeclMatchRecord
-	{
-	  const VarDecl *varDecl;
-	  unsigned linenum;
-	  char dummy1[16];
-	  char dummy2[16];
-	};
 
-	// Collector for possible sprintf calls
-	std::vector<struct VarDeclMatchRecord *> m_req_var_decl_collector;
+	// Collector for possible sprintf calls. struct VarDeclMatchRecord defined in ExecSQLCommon.h
+	std::vector<struct clang::tidy::pagesjaunes::VarDeclMatchRecord *> m_req_var_decl_collector;
 	
       private:
 
@@ -216,10 +206,10 @@ namespace clang
 	source_range_set_t m_macrosStringLiterals;
 	
         // Override to be called at start of translation unit
-        void onStartOfTranslationUnit();
+        virtual void onStartOfTranslationUnit();
 
         // Override to be called at end of translation unit
-        void onEndOfTranslationUnit();
+        virtual void onEndOfTranslationUnit();
 
 	// Process a template file with values in map
 	bool processTemplate(const std::string&,
@@ -241,10 +231,47 @@ namespace clang
 					     unsigned,
 					     std::string&, std::string&,
 					     SourceRangeForStringLiterals **);
-	
-	const VarDecl *findSymbolInFunction(ClangTool *,
-					    std::string&,
+
+        // Format a string for dumping a params definition
+        std::string
+        createParamsDef(const std::string&,
+                        const std::string&,
+                        const std::string&,
+                        const std::string&);
+
+        // Format a string for dumping a params/host vars declare section
+        std::string
+        createParamsDeclareSection(const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsDecl(const std::string&,
+                         const std::string&,
+                         const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsCall(const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createHostVarList(const std::string&, bool);
+
+        // Find a symbol definition in a function, with type, line number etc
+	const VarDecl *findSymbolInFunction(std::string&,
 					    const FunctionDecl *);
+
+        // Find a declaration for a named symbol in a function
+        string2_map findDeclInFunction(const FunctionDecl *,
+                                       const std::string&);
+        
+        string2_map findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *,
+                                                         const std::string&,
+                                                         const std::string&);
 	  
         // Replace the EXEC SQL statement by the function call in the .pc file
         map_host_vars decodeHostVars(const std::string &);
@@ -262,6 +289,8 @@ namespace clang
 	const bool generate_req_headers;
 	// Generate sources option (default: false)
 	const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
 	// Request header template (default: "./pagesjaunes_open.h.tmpl")

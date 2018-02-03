@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -260,8 +262,11 @@ namespace clang
       void 
       ExecSQLAllocateToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
-        /* Add a matcher for finding compound statements starting */
-        /* with a sqlstm variable declaration */
+        if (!getLangOpts().CPlusPlus)
+          return;
+        
+	/* Add a matcher for finding compound statements starting */
+	/* with a sqlstm variable declaration */
         Finder->addMatcher(varDecl(
             hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl().bind("function"))).bind("proCBlock")))),
             hasName("sqlstm"))
@@ -439,23 +444,41 @@ namespace clang
       {
         SourceLocation dummy;
         struct stat buffer;   
-        
-        // Compute output file pathname
-        std::string fileName = values_map["@RequestFunctionName@"];
-        fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
+
+	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
+	std::string fileName = values_map["@RequestFunctionName@"];
+
+        // Replace %B with original file basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+        dirName.append("/");
         fileName.insert(0, "/");
-        fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+        fileName.insert(0, dirName);
+	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
+
+        if (mkdret == -1 && errno != EEXIST)
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
-        // Process template for creating source file
-        else if (!processTemplate(tmpl, fileName, values_map))
-          emitError(diag_engine,
-                    dummy,
-                    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
-                    &fileName);
+	// Process template for creating source file
+	else if (!processTemplate(tmpl, fileName, values_map))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    &fileName);
       }
       
       /**
@@ -478,23 +501,41 @@ namespace clang
       { 
         SourceLocation dummy;
         struct stat buffer;   
-        
-        // Compute output file pathname
-        std::string fileName = values_map["@RequestFunctionName@"];
-        fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
+
+	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileName = values_map["@RequestFunctionName@"];
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
+
+        // Replace %B with original .pc file Basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+	dirName.append("/");
         fileName.insert(0, "/");
-        fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+        fileName.insert(0, dirName);
+	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
+
+        if (mkdret == -1 && errno != EEXIST)
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+		    &fileName);          
+        else if ((stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
-        // Process template for creating header file
-        else if (!processTemplate(tmpl, fileName, values_map))
-          emitError(diag_engine,
-                    dummy,
-                    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
-                    &fileName);
+	// Process template for creating header file
+	else if (!processTemplate(tmpl, fileName, values_map))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
+		    &fileName);
       }
         
 
@@ -588,19 +629,52 @@ namespace clang
             /** Cannot generate request source file (already exists) */
           case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
 	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
+	      getCustomDiagID(DiagnosticsEngine::Warning,
 			      "Source file '%0' already exists: will not overwrite !");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
-            /** Cannot generate request header file (already exists) */
+            /** Cannot generate request header file (no location) */
           case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
-	    diag_id = TidyContext->getASTContext()->getDiagnostics().
-	      getCustomDiagID(DiagnosticsEngine::Error,
-			      "Header file '%0' already exists: will not overwrite !");
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Header file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
-          }
+
+            /** Cannot generate request source file (create dir) */
+          case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (no location) */
+          case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Unsupported String Literal charset */
+          case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Token for weird charset string (%0) found!");
+            diag_engine.Report(diag_id).AddString(msg);
+           break;
+
+            /** Invalid groups file error */
+          case ExecSQLAllocateToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Cannot parse invalid groups file '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+            
+	  }
       }
       
       /**

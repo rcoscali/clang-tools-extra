@@ -1,0 +1,8 @@
+this is a test file
+that is not too big
+only a few lines
+of standard text
+le texte contient aussi
+quelques caractères accentués
+qui sont codés sur deux octets.
+

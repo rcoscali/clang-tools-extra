@@ -262,6 +262,8 @@ namespace clang
         const bool generate_req_headers;
         // Generate sources option (default: false)
         const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
         // Generation directory (default: "./")
         const std::string generation_directory;
         // Request header template (default: "./pagesjaunes_close.h.tmpl")

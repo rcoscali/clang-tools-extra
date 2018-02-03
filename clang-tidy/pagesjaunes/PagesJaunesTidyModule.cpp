@@ -81,7 +81,7 @@ namespace clang
            * Options are available in order to select processed headers
            * and indicated their location.
            */
-          Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$";
+          Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "EXEC[[:space:]]+SQL[[:space:]]+([Ii][Nn][Cc][Ll][Uu][Dd][Ee])[[:space:]]+\"([[:alnum:]]+)\"";
           Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
           Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
           Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
@@ -97,7 +97,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-allocate-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * For requests
@@ -110,7 +110,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-for-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Free requests
@@ -123,7 +123,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-free-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * LOB CLOSE requests
@@ -136,7 +136,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-close-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * LOB CREATE TEMPORARY requests
@@ -148,7 +148,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_create_temporary.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-do-report-modification-in-PC"] = "1";
-          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * LOB FREE TEMPORARY requests
@@ -161,7 +161,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * LOB OPEN requests
@@ -174,7 +174,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-open-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * LOB READ requests
@@ -187,7 +187,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-read-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Fetch requests
@@ -201,13 +201,14 @@ namespace clang
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-simplify-function-args"] = "0";
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-fetch-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Open requests
            */
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generate-requests-sources"] = "1";
+          Opts["pagesjaunes-exec-sql-open-to-function-call.Generate-requests-allow-overwrite"] = "1";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-directory"] = ".";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-header-template"] = "./pagesjaunes_open.h.tmpl";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-source-template"] = "./pagesjaunes_open.pc.tmpl";
@@ -215,13 +216,14 @@ namespace clang
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-simplify-function-args"] = "0";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-open-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Close requests
            */
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generate-requests-sources"] = "1";
+          Opts["pagesjaunes-exec-sql-close-to-function-call.Generate-requests-allow-overwrite"] = "1";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-directory"] = ".";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-header-template"] = "./pagesjaunes_close.h.tmpl";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-source-template"] = "./pagesjaunes_close.pc.tmpl";
@@ -229,7 +231,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-simplify-function-args"] = "0";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-close-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Prepare requests (sprintf from define with no params)
@@ -242,7 +244,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-prepare-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*
            * Sprintf formatted prepare requests (sprintf from define with params)
@@ -256,7 +258,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-simplify-function-args"] = "0";
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-do-report-modification-in-PC"] = "1";
           Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-report-modification-in-dir"] = "./";
-          Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-prepare-fmtd-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           return Options;
         }

@@ -74,6 +74,8 @@ add_test(
 add_executable(pagesjaunes_test
   test/test_main.cpp
   ExecSQLCommon.cpp
+  test/backup_file.cpp
+  test/buffer_split.cpp
   test/decode_host_vars.cpp
   test/open_regex_test.cpp
   test/open_request_test.cpp
@@ -82,8 +84,13 @@ add_executable(pagesjaunes_test
   test/free_regex_test.cpp
   test/declare_regex_test.cpp
   test/fetch_regex_test.cpp
+  test/fetch_decode_host_var.cpp
   test/fetch_tmpl_repeat_test.cpp
   test/fetch_tmpl_repeat_members_test.cpp
   test/fetch_tmpl_repeat_members2_test.cpp
   test/fetch_fileline_test.cpp)
-target_link_libraries(pagesjaunes_test "clangAST;clangASTMatchers;clangBasic;clangTidy;clangLex;clangTidyUtils;clangTooling;clangFrontend;LLVMSupport;gtestall;pthread")
+target_link_libraries(pagesjaunes_test
+  "clangTidy;clangTidyUtils;clangAST;clangASTMatchers;clangBasic;clangFormat;clangFrontend;clangLex;clangRewrite;clangSema;clangStaticAnalyzerCore;clangStaticAnalyzerFrontend;clangTooling;clangToolingCore;clangToolingASTDiff;clangToolingRefactor;LLVMSupport;gtestall;pthread")
+set_target_properties(pagesjaunes_test PROPERTIES
+  COMPILE_FLAGS "-std=c++11 -fno-rtti -DACTIVATE_TRACES_DEFINED"
+  LINK_FLAGS "-std=c++11 -fno-rtti")

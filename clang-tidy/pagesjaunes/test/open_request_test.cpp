@@ -73,7 +73,7 @@ namespace clang
 
           map_host_vars hv = clang::tidy::pagesjaunes::decodeHostVars(matches0[4]);
 
-          EXPECT_STREQ(hv[1]["full"].c_str(), ":pcOraNumnat,\n          ");
+          EXPECT_STREQ(hv[1]["full"].c_str(), ":pcOraNumnat,");
           EXPECT_STREQ(hv[1]["hostvar"].c_str(), "pcOraNumnat");
           EXPECT_STREQ(hv[1]["hostrecord"].c_str(), "pcOraNumnat");
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "pcOraNumnat");
@@ -85,7 +85,7 @@ namespace clang
           EXPECT_STREQ(hv[1]["hostmemberi"].c_str(), "");
           EXPECT_STREQ(hv[1]["derefi"].c_str(), "");
           
-          EXPECT_STREQ(hv[2]["full"].c_str(), ":pcOraNumlo,\n          ");
+          EXPECT_STREQ(hv[2]["full"].c_str(), ":pcOraNumlo,");
           EXPECT_STREQ(hv[2]["hostvar"].c_str(), "pcOraNumlo");
           EXPECT_STREQ(hv[2]["hostrecord"].c_str(), "pcOraNumlo");
           EXPECT_STREQ(hv[2]["hostmember"].c_str(), "pcOraNumlo");

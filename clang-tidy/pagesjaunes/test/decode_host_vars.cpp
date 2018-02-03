@@ -56,7 +56,7 @@ namespace clang
           EXPECT_EQ(hv.size(), 2);
           
           // var #1
-          //     full = ':var1, '
+          //     full = ':var1,'
           //     fulli = ''
           //     hostvar = 'var1'
           //     hostvari = ''
@@ -66,7 +66,7 @@ namespace clang
           //     hostmemberi = ''
           //     deref = ''
           //     derefi = ''
-          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1, ");
+          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1,");
           EXPECT_STREQ(hv[1]["hostvar"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostrecord"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "var1");
@@ -121,7 +121,7 @@ namespace clang
           //     hostmemberi = ''
           //     deref = ''
           //     derefi = ''
-          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1, ");
+          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1,");
           EXPECT_STREQ(hv[1]["hostvar"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostrecord"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "var1");
@@ -230,7 +230,7 @@ namespace clang
           EXPECT_EQ(hv.size(), 2);
           
           // var #1
-          //     full = ':var1->member1, '
+          //     full = ':var1->member1,'
           //     fulli = ''
           //     hostvar = 'var1->member1'
           //     hostvari = ''
@@ -240,7 +240,7 @@ namespace clang
           //     hostmemberi = ''
           //     deref = '->'
           //     derefi = ''
-          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1->member1, ");
+          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1->member1,");
           EXPECT_STREQ(hv[1]["hostvar"].c_str(), "var1->member1");
           EXPECT_STREQ(hv[1]["hostrecord"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "member1");
@@ -285,7 +285,7 @@ namespace clang
           EXPECT_EQ(hv.size(), 2);
           
           // var #1
-          //     full = ':var1.member1, '
+          //     full = ':var1.member1,'
           //     fulli = ''
           //     hostvar = 'var1.member1'
           //     hostvari = ''
@@ -295,7 +295,7 @@ namespace clang
           //     hostmemberi = ''
           //     deref = '.'
           //     derefi = ''
-          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1.member1, ");
+          EXPECT_STREQ(hv[1]["full"].c_str(), ":var1.member1,");
           EXPECT_STREQ(hv[1]["hostvar"].c_str(), "var1.member1");
           EXPECT_STREQ(hv[1]["hostrecord"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "member1");
@@ -341,7 +341,7 @@ namespace clang
           
           // var #1
           //     full = ':var1'
-          //     fulli = ':Ivar1, '
+          //     fulli = ':Ivar1,'
           //     hostvar = 'var1'
           //     hostvari = 'Ivar1'
           //     hostrecord = 'var1'
@@ -356,7 +356,7 @@ namespace clang
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["deref"].c_str(), "");
 
-          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Ivar1, ");
+          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Ivar1,");
           EXPECT_STREQ(hv[1]["hostvari"].c_str(), "Ivar1");
           EXPECT_STREQ(hv[1]["hostrecordi"].c_str(), "Ivar1");
           EXPECT_STREQ(hv[1]["hostmemberi"].c_str(), "Ivar1");
@@ -396,7 +396,7 @@ namespace clang
           
           // var #1
           //     full = ':p->var1'
-          //     fulli = ':Ip->Ivar1, '
+          //     fulli = ':Ip->Ivar1,'
           //     hostvar = 'p->var1'
           //     hostvari = 'Ip->Ivar1'
           //     hostrecord = 'p'
@@ -411,7 +411,7 @@ namespace clang
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["deref"].c_str(), "->");
 
-          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Ip->Ivar1, ");
+          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Ip->Ivar1,");
           EXPECT_STREQ(hv[1]["hostvari"].c_str(), "Ip->Ivar1");
           EXPECT_STREQ(hv[1]["hostrecordi"].c_str(), "Ip");
           EXPECT_STREQ(hv[1]["hostmemberi"].c_str(), "Ivar1");
@@ -451,7 +451,7 @@ namespace clang
           
           // var #1
           //     full = ':s.var1'
-          //     fulli = ':Is.Ivar1, '
+          //     fulli = ':Is.Ivar1,'
           //     hostvar = 's.var1'
           //     hostvari = 'Is.Ivar1'
           //     hostrecord = 's'
@@ -466,7 +466,7 @@ namespace clang
           EXPECT_STREQ(hv[1]["hostmember"].c_str(), "var1");
           EXPECT_STREQ(hv[1]["deref"].c_str(), ".");
 
-          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Is.Ivar1, ");
+          EXPECT_STREQ(hv[1]["fulli"].c_str(), ":Is.Ivar1,");
           EXPECT_STREQ(hv[1]["hostvari"].c_str(), "Is.Ivar1");
           EXPECT_STREQ(hv[1]["hostrecordi"].c_str(), "Is");
           EXPECT_STREQ(hv[1]["hostmemberi"].c_str(), "Ivar1");
@@ -506,7 +506,7 @@ namespace clang
           
           // var #1
           //     full = ':p->var1'
-          //     fulli = ':Is.Ivar1, '
+          //     fulli = ':Is.Ivar1,'
           //     hostvar = 'p->var1'
           //     hostvari = 'Is.Ivar1'
           //     hostrecord = 'p'
@@ -521,7 +521,7 @@ namespace clang
           EXPECT_STREQ(hv1[1]["hostmember"].c_str(), "var1");
           EXPECT_STREQ(hv1[1]["deref"].c_str(), "->");
 
-          EXPECT_STREQ(hv1[1]["fulli"].c_str(), ":Is.Ivar1, ");
+          EXPECT_STREQ(hv1[1]["fulli"].c_str(), ":Is.Ivar1,");
           EXPECT_STREQ(hv1[1]["hostvari"].c_str(), "Is.Ivar1");
           EXPECT_STREQ(hv1[1]["hostrecordi"].c_str(), "Is");
           EXPECT_STREQ(hv1[1]["hostmemberi"].c_str(), "Ivar1");
@@ -558,7 +558,7 @@ namespace clang
           
           // var #1
           //     full = ':p->var1'
-          //     fulli = ':Is.Ivar1, '
+          //     fulli = ':Is.Ivar1,'
           //     hostvar = 'p->var1'
           //     hostvari = 'Is.Ivar1'
           //     hostrecord = 'p'
@@ -573,7 +573,7 @@ namespace clang
           EXPECT_STREQ(hv2[1]["hostmember"].c_str(), "var1");
           EXPECT_STREQ(hv2[1]["deref"].c_str(), "->");
 
-          EXPECT_STREQ(hv2[1]["fulli"].c_str(), ":Is.Ivar1, ");
+          EXPECT_STREQ(hv2[1]["fulli"].c_str(), ":Is.Ivar1,");
           EXPECT_STREQ(hv2[1]["hostvari"].c_str(), "Is.Ivar1");
           EXPECT_STREQ(hv2[1]["hostrecordi"].c_str(), "Is");
           EXPECT_STREQ(hv2[1]["hostmemberi"].c_str(), "Ivar1");
@@ -581,7 +581,7 @@ namespace clang
 
           // var #2
           //     full = ':p->var2'
-          //     fulli = ':Is.Ivar2, '
+          //     fulli = ':Is.Ivar2,'
           //     hostvar = 'p->var2'
           //     hostvari = 'Is.Ivar2'
           //     hostrecord = 'p'
@@ -596,7 +596,7 @@ namespace clang
           EXPECT_STREQ(hv2[2]["hostmember"].c_str(), "var2");
           EXPECT_STREQ(hv2[2]["deref"].c_str(), "->");
 
-          EXPECT_STREQ(hv2[2]["fulli"].c_str(), ":Is.Ivar2, ");
+          EXPECT_STREQ(hv2[2]["fulli"].c_str(), ":Is.Ivar2,");
           EXPECT_STREQ(hv2[2]["hostvari"].c_str(), "Is.Ivar2");
           EXPECT_STREQ(hv2[2]["hostrecordi"].c_str(), "Is");
           EXPECT_STREQ(hv2[2]["hostmemberi"].c_str(), "Ivar2");
@@ -604,7 +604,7 @@ namespace clang
 
           // var #3
           //     full = ':s.var3'
-          //     fulli = ':Ip->Ivar3, '
+          //     fulli = ':Ip->Ivar3,'
           //     hostvar = 's.var3'
           //     hostvari = 'Ip->Ivar3'
           //     hostrecord = 's'
@@ -619,7 +619,7 @@ namespace clang
           EXPECT_STREQ(hv2[3]["hostmember"].c_str(), "var3");
           EXPECT_STREQ(hv2[3]["deref"].c_str(), ".");
 
-          EXPECT_STREQ(hv2[3]["fulli"].c_str(), ":Ip->Ivar3, ");
+          EXPECT_STREQ(hv2[3]["fulli"].c_str(), ":Ip->Ivar3,");
           EXPECT_STREQ(hv2[3]["hostvari"].c_str(), "Ip->Ivar3");
           EXPECT_STREQ(hv2[3]["hostrecordi"].c_str(), "Ip");
           EXPECT_STREQ(hv2[3]["hostmemberi"].c_str(), "Ivar3");
@@ -682,7 +682,7 @@ namespace clang
           EXPECT_EQ(hv1.size(), 1);
           
           // var #1
-          //     full = ':ptr ->	member '
+          //     full = ':ptr ->	member'
           //     fulli = ':  \n ptr2 \n -> \n	member2'
           //     hostvar = 'ptr ->	member'
           //     hostvari = 'ptr2 \n -> \n	member2'
@@ -692,14 +692,14 @@ namespace clang
           //     hostmemberi = 'member2'
           //     deref = '->'
           //     derefi = '->'
-          EXPECT_STREQ(hv1[1]["full"].c_str(), ":ptr ->	member ");
-          EXPECT_STREQ(hv1[1]["hostvar"].c_str(), "ptr ->	member ");
+          EXPECT_STREQ(hv1[1]["full"].c_str(), ":ptr ->\tmember");
+          EXPECT_STREQ(hv1[1]["hostvar"].c_str(), "ptr ->\tmember");
           EXPECT_STREQ(hv1[1]["hostrecord"].c_str(), "ptr");
-          EXPECT_STREQ(hv1[1]["hostmember"].c_str(), "member ");
+          EXPECT_STREQ(hv1[1]["hostmember"].c_str(), "member");
           EXPECT_STREQ(hv1[1]["deref"].c_str(), "->");
 
           EXPECT_STREQ(hv1[1]["fulli"].c_str(), ":  \n ptr2 \n -> \n	member2");
-          EXPECT_STREQ(hv1[1]["hostvari"].c_str(), "  \n ptr2 \n -> \n	member2");
+          EXPECT_STREQ(hv1[1]["hostvari"].c_str(), "ptr2 \n -> \n\tmember2");
           EXPECT_STREQ(hv1[1]["hostrecordi"].c_str(), "ptr2");
           EXPECT_STREQ(hv1[1]["hostmemberi"].c_str(), "member2");
           EXPECT_STREQ(hv1[1]["derefi"].c_str(), "->");

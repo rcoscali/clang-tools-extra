@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 #include <set>
 #include <vector>
 #include <map>
@@ -27,6 +29,7 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
+using namespace std::chrono;
 using emplace_ret_t = std::pair<std::set<std::string>::iterator, bool>;
 
 namespace clang 
@@ -157,10 +160,13 @@ namespace clang
 	   */
 	  /// Generate requests header files (bool)
 	  generate_req_headers(Options.get("Generate-requests-headers",
-					   false)),
+					   0U)),
 	  /// Generate requests source files (bool)
 	  generate_req_sources(Options.get("Generate-requests-sources",
-					   false)),
+					   0U)),
+	  /// Generate requests source files (bool)
+	  generate_req_allow_overwrite(Options.get("Generate-requests-allow-overwrite",
+                                                   1U)),
 	  /// Generation directory (string)
 	  generation_directory(Options.get("Generation-directory",
 					   "./")),
@@ -176,17 +182,30 @@ namespace clang
 						"./request_groups.json")),
 	  /// Simplify request args list if possible
 	  generation_simplify_function_args(Options.get("Generation-simplify-function-args",
-							false)),
+							0U)),
           /// Conditionnaly report modification in .pc file if this is true
           generation_do_report_modification_in_pc(Options.get("Generation-do-report-modification-in-PC",
-                                                              false)),
+                                                              1U)),
           /// Directory of the original .pc file in which to report modification
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
                                                             "./")),
           /// Keep EXEC SQL comments
           generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
-                                                                false))
+                                                                0U))
       {
+        llvm::outs() << "ExecSQLFetchToFunctionCall::ExecSQLFetchToFunctionCall(StringRef Name, ClangTidyContext *Context):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_simplify_function_args = " << (generation_simplify_function_args?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+
 	req_groups.clear();
 	std::filebuf fb;
 	if (fb.open(generation_request_groups, std::ios::in))
@@ -216,10 +235,10 @@ namespace clang
 	else
 	  {
 	    errs() << "Cannot load groups file: '" << generation_request_groups << "'\n";
-	    emitError(Context->getASTContext()->getDiagnostics(),
-		      SourceLocation(),
-		      ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
-		      &generation_request_groups);
+	    // emitError(Context->getASTContext()->getDiagnostics(),
+	    //           SourceLocation(),
+	    //           ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE,
+	    //           &generation_request_groups);
 	  }
       }
       
@@ -246,9 +265,10 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::onEndOfTranslationUnit()
       {
-        clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
-                                                         generation_report_modification_in_dir,
-                                                         generation_do_keep_commented_out_exec_sql);
+        if (generation_do_report_modification_in_pc)
+          clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
+                                                           generation_report_modification_in_dir,
+                                                           generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -272,13 +292,28 @@ namespace clang
       {
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
+	Options.store(Opts, "Generate-requests-allow-overwrite", generate_req_allow_overwrite);
 	Options.store(Opts, "Generation-directory", generation_directory);
 	Options.store(Opts, "Generation-header-template", generation_header_template);
 	Options.store(Opts, "Generation-source-template", generation_source_template);
 	Options.store(Opts, "Generation-request-groups", generation_request_groups);
 	Options.store(Opts, "Generation-simplify-function-args", generation_simplify_function_args);
         Options.store(Opts, "Generation-do-report-modification-in-PC", generation_do_report_modification_in_pc);
-        Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);        
+        Options.store(Opts, "Generation-report-modification-in-dir", generation_report_modification_in_dir);  
+        Options.store(Opts, "Generation-keep-commented-out-exec-sql-in-PC", generation_do_keep_commented_out_exec_sql);  
+
+        llvm::outs() << "ExecSQLFetchToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_simplify_function_args = " << (generation_simplify_function_args?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
       }
       
       /**
@@ -297,6 +332,9 @@ namespace clang
       void 
       ExecSQLFetchToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
+        if (!getLangOpts().CPlusPlus)
+          return;
+        
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
         Finder->addMatcher(varDecl(
@@ -344,7 +382,8 @@ namespace clang
       std::string
       ExecSQLFetchToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
                                                  const SourceLocation& loc_end,
-                                                 const std::string& function_name)
+                                                 const std::string& function_name,
+                                                 const std::string& function_args)
       {
 	/* Range of the statement to change */
 	SourceRange stmt_range(loc_start, loc_end);
@@ -359,7 +398,9 @@ namespace clang
 
 	/* Replacement code built */
 	std::string replt_code = function_name;
-	replt_code.append(std::string("();"));
+	replt_code.append(std::string("("));
+	replt_code.append(function_args);
+	replt_code.append(std::string(");"));
 
 	/* Emit the replacement over the found statement range */
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
@@ -376,7 +417,6 @@ namespace clang
        * @param[in] tmpl	 Template file pathname
        * @param[in] fname	 Output file pathname
        * @param[in] values_map	 Map containing values to be replaced
-       * @param[in] anon_structs Map containing anonymous structs to be defined
        *
        * @retval true 	if template was processed and file was created
        * @retval false 	if something wrong occurs
@@ -384,8 +424,7 @@ namespace clang
       bool
       ExecSQLFetchToFunctionCall::processTemplate(const std::string& tmpl,
                                                   const std::string& fname,
-                                                  string2_map& values_map,
-                                                  ushort_string_map& anon_structs)
+                                                  string2_map& values_map)
       {
 	// Return value
 	bool ret = false;
@@ -414,94 +453,28 @@ namespace clang
 		// Read line in buffer
 		is.getline(buf, 255);
 		std::string aline = buf;
-                StringRef Aline = StringRef(aline);
+		// Iterate on all map values
+		for (auto it = values_map.begin();
+		     it != values_map.end();
+		     ++it)
+		  {
+		    // Position of found value name
+		    size_t pos = 0;
+		    do
+		      {
+			// If we found the current value name
+			if ((pos = aline.find(it->first, pos)) != std::string::npos)
+			  {
+			    // Erase value name at found position in input line
+			    aline.erase(pos, it->first.length());
+			    // Insert value replacement at the same position
+			    aline.insert(pos, it->second);
+			  }
+		      }
+		    // Do it until end of line
+		    while (pos != std::string::npos);
+		  }
 
-                if (aline.find("@repeat on "))
-                  {
-                    // First check consistency of request
-                    if (anon_structs.size() < 1)
-                      {
-                        outs() << "Error: Cannot instanciate repeat statement with no value\n";
-                        return false;
-                      }
-                    
-                    Regex tmplRepeatRe(PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_RE);
-                    SmallVector<StringRef, 8> repeatMatches;
-                    if (tmplRepeatRe.match(Aline, &repeatMatches))
-                      {
-                        std::string repeatBasename = repeatMatches[1].str();
-                        std::vector<std::string> repeatMembers;
-                        StringRef membersString = repeatMatches[3];
-                        StringRef firstMember = repeatMatches[2];
-                        Regex membersTmplRe(PAGESJAUNES_REGEX_EXEC_SQL_ALL_TMPL_REPEAT_MEMBERS_RE);
-                        SmallVector<StringRef, 8> repeatMembersMatches;
-                        while (membersTmplRe.match(membersString, &repeatMembersMatches))
-                          {
-                            repeatMembers.push_back(repeatMembersMatches[2].str());
-                            membersString = membersString.take_front(membersString.rfind(repeatMembersMatches[1]));
-                          }
-                        repeatMembers.push_back(firstMember.str());
-                        
-                        do
-                          {
-                            is.getline(buf, 255);
-                            aline = buf;
-                            for (auto anonit = anon_structs.begin(); anonit != anon_structs.end(); anonit++)
-                              {
-                                for (auto mit = repeatMembers.end(); mit != repeatMembers.begin(); mit--)
-                                  {
-                                    std::string struct_name = (*mit);
-                                    std::string map_key = "@";
-                                    map_key.append(repeatBasename);
-                                    map_key.append("#");
-                                    map_key.append(struct_name);
-                                    map_key.append("@");
-                                    auto map_values = (*anonit).second;
-                                    std::string map_value = map_values[struct_name];
-                                    size_t sp = aline.find(map_key);
-                                    if (sp != std::string::npos)
-                                      aline.replace(sp, map_key.length(), map_value);
-                                  }
-
-                                // Output processed line
-                                os << aline << std::endl;
-                              }
-                          }
-                        while (aline.compare("@") != 0);
-
-                        // Add empty line
-                        os << std::endl;
-                      }
-                    else
-                      {
-                        outs() << "Error: Cannot match a repeat statement in template!\n";
-                        return false;
-                      }
-                  }
-                else
-
-                  // Iterate on all map values
-                  for (auto it = values_map.begin();
-                       it != values_map.end();
-                       ++it)
-                    {
-                      // Position of found value name
-                      size_t pos = 0;
-                      do
-                        {
-                          // If we found the current value name
-                          if ((pos = aline.find(it->first, pos)) != std::string::npos)
-                            {
-                              // Erase value name at found position in input line
-                              aline.erase(pos, it->first.length());
-                              // Insert value replacement at the same position
-                              aline.insert(pos, it->second);
-                            }
-                        }
-                      // Do it until end of line
-                      while (pos != std::string::npos);
-                    }
-                
 		// Output processed line
 		os << aline << std::endl;
 	      }
@@ -538,8 +511,7 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::doRequestSourceGeneration(DiagnosticsEngine& diag_engine,
                                                             const std::string& tmpl,
-                                                            string2_map& values_map,
-                                                            ushort_string_map& anon_structs)
+                                                            string2_map& values_map)
       {
 	SourceLocation dummy;
         struct stat buffer;   
@@ -567,13 +539,14 @@ namespace clang
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
 		    &fileName);          
-        else if ((stat (fileName.c_str(), &buffer) == 0))
+        else if (!generate_req_allow_overwrite &&
+                 (stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating source file
-	else if (!processTemplate(tmpl, fileName, values_map, anon_structs))
+	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
@@ -591,14 +564,12 @@ namespace clang
        *
        * @param[in] tmpl         Template file pathname
        * @param[in] values_map   Map containing values for replacement strings
-       * @param[in] anon_structs Map containing anonymous structs to be defined
        *
        */
       void
       ExecSQLFetchToFunctionCall::doRequestHeaderGeneration(DiagnosticsEngine& diag_engine,
                                                             const std::string& tmpl,
-                                                            string2_map& values_map,
-                                                            ushort_string_map& anon_structs)
+                                                            string2_map& values_map)
       {	
 	SourceLocation dummy;
         struct stat buffer;   
@@ -626,13 +597,14 @@ namespace clang
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
 		    &fileName);          
-        else if ((stat (fileName.c_str(), &buffer) == 0))
+        else if (!generate_req_allow_overwrite &&
+                 (stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
 	// Process template for creating header file
-	else if (!processTemplate(tmpl, fileName, values_map, anon_structs))
+	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
@@ -675,14 +647,14 @@ namespace clang
           default:
             diag_id =TidyContext->getASTContext()->getDiagnostics().
               getCustomDiagID(DiagnosticsEngine::Warning,
-                              "Unexpected error occured?!") ;
+                              "Unexpected error occured?!");
             diag_engine.Report(err_loc, diag_id);
             break;
 
             /** No error ID: it should never occur */
           case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_NO_ERROR:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Remark,
+              getCustomDiagID(DiagnosticsEngine::Ignored,
                               "No error");
             diag_engine.Report(err_loc, diag_id);
             break;
@@ -730,7 +702,7 @@ namespace clang
             /** Cannot generate request source file (already exists) */
           case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
+              getCustomDiagID(DiagnosticsEngine::Warning,
                               "Source file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
@@ -738,7 +710,7 @@ namespace clang
             /** Cannot generate request header file (already exists) */
           case ExecSQLFetchToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
+              getCustomDiagID(DiagnosticsEngine::Warning,
                               "Header file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
@@ -833,6 +805,116 @@ namespace clang
 	return ret;
       }
 
+      /*
+       * ExecSQLFetchToFunctionCall::createParamsDef
+       *
+       * @brief Format a string for providing params definition
+       *
+       * This method allows to format a string containing one parameter
+       * definition.
+       *
+       * @param[in] type	the type of the parameter
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       * @param[in] name	the name of the parameter
+       *
+       * @return the string formatted for providing params definition
+       */
+      std::string
+      ExecSQLFetchToFunctionCall::createParamsDef(const std::string& type,
+                                                 const std::string& elemtype,
+                                                 const std::string& size,
+                                                 const std::string& name)
+      {
+        return clang::tidy::pagesjaunes::createParamsDef(type, elemtype, size, name);
+      }
+
+      /*
+       * ExecSQLFetchToFunctionCall::createParamsDeclareSection
+       *
+       * @brief Format a string for providing the declare section
+       *
+       * This method allows to format a string containing one parameter
+       * and one host variable in a declare section
+       *
+       * @param[in] type	the type of the parameter/host variable
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       * @param[in] name	the name of the host variable
+       * @param[in] paramname	the name of the parameter
+       *
+       * @return the string formatted for providing params/host vars
+       *         declare section
+       */
+      std::string
+      ExecSQLFetchToFunctionCall::createParamsDeclareSection(const std::string& type,
+                                                            const std::string& elemtype,
+                                                            const std::string& size,
+                                                            const std::string& name,
+                                                            const std::string& paramname)
+      {
+        return clang::tidy::pagesjaunes::createParamsDeclareSection(type, elemtype, size, name, paramname);
+      }
+
+      /*
+       * ExecSQLFetchToFunctionCall::createParamsDecl
+       *
+       * @brief Format a string for providing params declaration
+       *
+       * This method allows to format a string containing one parameter
+       * declaration.
+       *
+       * @param[in] type	the type of the parameter
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       *
+       * @return the string formatted for providing params declaration
+       */
+      std::string
+      ExecSQLFetchToFunctionCall::createParamsDecl(const std::string& type,
+                                                  const std::string& elemtype,
+                                                  const std::string& size)
+      {
+        return clang::tidy::pagesjaunes::createParamsDecl(type, elemtype, size);
+      }
+      
+      /*
+       * ExecSQLFetchToFunctionCall::createParamsCall
+       *
+       * @brief Format a string for providing function call arguments
+       *
+       * This method allows to format a string containing one parameter
+       * for function call.
+       *
+       * @param[in] name	the name of the parameter
+       *
+       * @return the string formatted for providing params declaration
+       */
+      std::string
+      ExecSQLFetchToFunctionCall::createParamsCall(const std::string& name)
+      {
+        return clang::tidy::pagesjaunes::createParamsCall(name);
+      }
+      
+      /*
+       * ExecSQLFetchToFunctionCall::createHostVarList
+       *
+       * @brief Format a string for providing host var list for the request
+       *
+       * This method allows to format a string containing one host variable
+       * for the request.
+       *
+       * @param[in] name	the name of the host variable
+       *
+       * @return the string formatted for providing host variable list for
+       *         the request
+       */
+      std::string
+      ExecSQLFetchToFunctionCall::createHostVarList(const std::string& name, bool isIndicator = false)
+      {
+        return clang::tidy::pagesjaunes::createHostVarList(name, isIndicator);
+      }
+      
       /**
        * ExecSQLFetchToFunctionCall::findSymbolInFunction
        *
@@ -848,33 +930,115 @@ namespace clang
        * @return The pointer to the varDecl node instance for the searched symbol
        */
       const VarDecl *
-      ExecSQLFetchToFunctionCall::findSymbolInFunction(ClangTool *tool, std::string& varName, const FunctionDecl *func)
+      ExecSQLFetchToFunctionCall::findSymbolInFunction(std::string& varName, const FunctionDecl *func)
       {
-	const VarDecl *ret = nullptr;
+        VarDeclMatcher vdMatcher(this);
+        return clang::tidy::pagesjaunes::findSymbolInFunction(vdMatcher,
+                                                              TidyContext->getToolPtr(),
+                                                              varName,
+                                                              func,
+                                                              m_req_var_decl_collector);
+      }
 
-	DeclarationMatcher m_matcher
-	  // find a varDecl
-	  = varDecl(hasName(varName.c_str()),
-		    // and this decl is in the current function (call bound to varDecl))
-		    hasAncestor(functionDecl(hasName(func->getNameAsString().insert(0, "::"))))).bind("varDecl");
-	
-	// Prepare matcher finder for our customized matcher
-	VarDeclMatcher vdMatcher(this);
-	// The matcher implementing visitor pattern
-	MatchFinder finder;
-	// Add our matcher to our processing class
-	finder.addMatcher(m_matcher, &vdMatcher);
-	// Clear collector vector (the result filled with found patterns)
-	m_req_var_decl_collector.clear();
-	// Run the visitor pattern for collecting matches
-	tool->run(newFrontendActionFactory(&finder).get());
+      /**
+       * ExecSQLFetchToFunctionCall::findDeclInFunction
+       *
+       * @brief Find a declaration of a symbol in the context of a function by using the function
+       * DeclContext iterators until the symbol is found.
+       * This method do not update AST. It only browse known declarations in the context of a function.
+       * On successfull completion the map will contain:
+       * - a key "symName" with the symbol name provided
+       * - a key "typeName" with the symbol type name found
+       * - a key "elementType" with the type of the element if the type
+       *   found is a constant array type
+       * - a key "elemntSize" with the number of element if the type
+       *   found is a constant array type
+       *
+       * @param[in] func 	the function of browse for finding the symbol
+       * @param[in] symName 	the name of the symbol to find
+       *
+       * @return the map containing informations on the found symbol. The map is empty is no symbol
+       *         with the same name were found.
+       */
+      string2_map
+      ExecSQLFetchToFunctionCall::findDeclInFunction(const FunctionDecl *func, const std::string& symName)
+      {
+        return clang::tidy::pagesjaunes::findDeclInFunction(func, symName);
+      }
 
-	if (!m_req_var_decl_collector.empty())
-	  {
-	    ret = m_req_var_decl_collector[0]->varDecl;
-	  }
+      /**
+       * ExecSQLFetchToFunctionCall::findCXXRecordMemberInTranslationUnit
+       *
+       * @brief This function will browse a translation unit and search for a specific 
+       *        named CXXRecord and a named member of it
+       * 
+       * @param[in]	the translation unit declaration context to browse for the record
+       * @param[in] 	the struct/union/class name to find in the context of the translation
+       *                unit
+       * @param[in] 	the member name to find in the class/struct
+       *
+       * @return a map containing informations about the found member. if no record/member were 
+       *         found, the returned map is empty
+       */
+      string2_map
+      ExecSQLFetchToFunctionCall::findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *transUnit,
+                                                                      const std::string& cxxRecordName,
+                                                                      const std::string& memberName)
+      {
+        return clang::tidy::pagesjaunes::findCXXRecordMemberInTranslationUnit(transUnit, cxxRecordName, memberName);
+      }
 
-	return ret;
+      /**
+       * ExecSQLFetchToFunctionCall::decodeHostVars
+       *
+       * This function decode an input string of host variables (and indicators). It
+       * parse the string and return a data structure made of maps containing host
+       * variables. 
+       * It supports pointers and struct dereferencing and returns values of record 
+       * or struct variables, members, indicators.
+       * It trims record and member values.
+       * The first level of map contains the number of the host variable as key and a map
+       * for the host variable description.
+       *
+       *  #1 -> map host var #1
+       *  #2 -> map host var #2
+       *  #3 -> map host var #3
+       *  ...
+       *  #n -> map host var #n
+       *
+       * Each host var map contains some string keys for each variable component.
+       * They are:
+       *  - "full": the full match for this host variable (contains spaces and is the exact value matched)
+       *  - "hostvar": the complete host var referencing expr (spaces were trimmed)
+       *  - "hostrecord": the value of the host variable record/struct variable value.
+       *  - "hostmember": the value of the record/struct member for this host variable expr.
+       *  - "deref": Dereferencing operator for this host variable. Empty if not a dereferencing expr.  
+       * 
+       * For indicators the same field/keys are available with an 'i' appended for 'indicators'.
+       * Unitary tests are availables in test/decode_host_vars.cpp
+       * For example: the expr ':var1:Ivar1, :var2:Ivar2'
+       * returns the following maps
+       *
+       * var #1                          var #2
+       *     full = ':var1'                 full = ':var2'
+       *     fulli = ':Ivar1, '             fulli = ':Ivar2'      
+       *     hostvar = 'var1'               hostvar = 'var2'         
+       *     hostvari = 'Ivar1'             hostvari = 'Ivar2'          
+       *     hostrecord = 'var1'            hostrecord = 'var2'            
+       *     hostrecordi = 'Ivar1'          hostrecordi = 'Ivar2'             
+       *     hostmember = 'var1'            hostmember = 'var2'         
+       *     hostmemberi = 'Ivar1'          hostmemberi = 'Ivar2'              
+       *     deref = ''                     deref = ''      
+       *     derefi = ''                    derefi = ''         
+       *                             
+       * @param[in]  hostVarList the host vars expr to parse/decode
+       *
+       * @return a map containing the host parsed variables expr
+       */
+      map_host_vars
+      ExecSQLFetchToFunctionCall::decodeHostVars(const std::string &hostVarsList)
+      {
+        return clang::tidy::pagesjaunes::decodeHostVars(hostVarsList);
       }
 
       /**
@@ -894,13 +1058,13 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
+        outs() << "void ExecSQLFetchToFunctionCall::check(const MatchFinder::MatchResult &result): ENTRY!\n";
         map_replacement_values rv;
         
 	// Get the source manager
         ASTContext* astCtxt = result.Context;
 	SourceManager &srcMgr = astCtxt->getSourceManager();
 	DiagnosticsEngine &diagEngine = astCtxt->getDiagnostics();
-	ClangTool *tool = TidyContext->getToolPtr();
 
 	/*
 	 * Init check context
@@ -929,6 +1093,8 @@ namespace clang
           originalSourceFileBasename.erase(0, originalSourceFileBasename.rfind("/")+1);
         originalSourceFileBasename.erase(originalSourceFileBasename.rfind("."), std::string::npos);
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
+
+	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
 
 	/*
 	 * Find the comment for the EXEC SQL statement
@@ -1071,7 +1237,7 @@ namespace clang
 	    // Until no more is found
 	    while (crpos != std::string::npos);
 
-	    //outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
+	    outs() << "comment found for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
 	    /*
 	     * Create function call for the request
@@ -1085,18 +1251,21 @@ namespace clang
 
 	    /* Templating engines vars
 	     *   - RequestFunctionName
-	     *   - RequestCursorParamsDef
+	     *   - RequestFunctionArgs
+	     *   - RequestFunctionParamDef
+	     *   - RequestFunctionParamDecl
 	     *   - RequestExecSql
 	     */
 	    std::string requestFunctionName;
-	    std::string requestCursorParamsDef = "void";
+	    std::string requestFunctionArgs;
+	    std::string requestExecSqlDeclareSection;
+	    std::string requestFunctionParamsDef;
+	    std::string requestFunctionParamsDecl;
 	    std::string requestExecSql;
+	    std::string generationDateTime;
 
 	    std::string requestInto;
 	    std::string requestArgs;
-
-            ushort_string_map anonymousStructs;
-            anonymousStructs.clear();
 
 	    /*
 	     * Now we match against a more permissive regex for all other (simpler) requests
@@ -1109,11 +1278,190 @@ namespace clang
 		 */
 		
 		// The request name used in ProC
-                requestExecSql = matches[1];
+                requestExecSql = matches[PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE_EXECSQL];
                 requestExecSql.append(" ");
-		std::string reqName = matches[2];
-		std::string intoReqNames = matches[4];
+		std::string reqName = matches[PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE_REQNAME];
+		std::string intoReqNames = matches[PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE_INTONAMES];
+                std::string newHostVarList;
+                std::set<std::string> cursorArgsSet;
+                emplace_ret_t emplace_ret;
 
+                // Let's iterate over each host variable (if some are used)
+                map_host_vars mhv = decodeHostVars(intoReqNames);
+                for (auto mhvit = mhv.begin(); mhvit != mhv.end(); ++mhvit)
+                  {
+                    auto hvm = mhvit->second;
+                    // We have one host variable
+                    if (!hvm["hostvar"].empty())
+                      {
+                        // Find the corresponding declaration in the function
+                        string2_map hostVarMap = findDeclInFunction(curFunc, hvm["hostrecord"]);
+                        // If the host variable is a field of a struct
+                        if (!hvm["deref"].empty())
+                          {
+                            // Find the struct definition for getting the field
+                            string2_map memberVarMap = findCXXRecordMemberInTranslationUnit(result.Context->getTranslationUnitDecl(),
+                                                                                            hostVarMap["typeName"],
+                                                                                            hvm["hostmember"]);
+                            // Let's rename the parameter by prepending 'a_'
+                            // FIXME: handle potential collisions on param names
+                            std::string paramName = "a_";
+                            paramName.append(memberVarMap["fieldName"]);
+
+                            if (generation_simplify_function_args)
+			      emplace_ret = cursorArgsSet.emplace(paramName);
+
+			    if (!generation_simplify_function_args || emplace_ret.second)
+			      {
+                                // Format the various usage we make of it
+                                requestFunctionParamsDef.append(createParamsDef(memberVarMap["fieldTypeName"],
+                                                                                memberVarMap["elementType"],
+                                                                                memberVarMap["elementSize"],
+                                                                                paramName));
+                                requestExecSqlDeclareSection.append(createParamsDeclareSection(memberVarMap["fieldTypeName"],
+                                                                                               memberVarMap["elementType"],
+                                                                                               memberVarMap["elementSize"],
+                                                                                               memberVarMap["fieldName"],
+                                                                                               paramName));
+                                requestFunctionParamsDecl.append(createParamsDecl(memberVarMap["fieldTypeName"],
+                                                                                  memberVarMap["elementType"],
+                                                                                  memberVarMap["elementSize"]));
+                                requestFunctionArgs.append(createParamsCall(hvm["hostvar"]));
+                                newHostVarList.append(createHostVarList(memberVarMap["fieldName"]));
+                              }
+                          }
+                        // Host var is a standard decl in the function
+                        else
+                          {
+                            // Let's rename the parameter by prepending 'a_'
+                            std::string paramName = "a_";
+                            paramName.append(hostVarMap["symName"]);
+                            
+                            if (generation_simplify_function_args)
+			      emplace_ret = cursorArgsSet.emplace(paramName);
+
+			    if (!generation_simplify_function_args || emplace_ret.second)
+			      {
+                                // Format the various usage we make of it
+                                requestFunctionParamsDef.append(createParamsDef(hostVarMap["typeName"],
+                                                                                hostVarMap["elementType"],
+                                                                                hostVarMap["elementSize"],
+                                                                                paramName));
+                                requestExecSqlDeclareSection.append(createParamsDeclareSection(hostVarMap["typeName"],
+                                                                                               hostVarMap["elementType"],
+                                                                                               hostVarMap["elementSize"],
+                                                                                               hostVarMap["symName"],
+                                                                                               paramName));
+                                requestFunctionParamsDecl.append(createParamsDecl(hostVarMap["typeName"],
+                                                                                  hostVarMap["elementType"],
+                                                                                  hostVarMap["elementSize"]));
+                                requestFunctionArgs.append(createParamsCall(hostVarMap["symName"]));
+                                newHostVarList.append(createHostVarList(hostVarMap["symName"]));
+                              }
+                          }                        
+                      }
+
+                    // We also have an indicator for this host variable
+                    if (!hvm["hostvari"].empty())
+                      {
+                        // Find the decl in func
+                        string2_map hostIndicVarMap = findDeclInFunction(curFunc, hvm["hostrecordi"]);
+                        // Member of a struct
+                        if (!hvm["derefi"].empty())
+                          {
+                            // Find the struct definition for getting field specification
+                            string2_map memberIndicVarMap = findCXXRecordMemberInTranslationUnit(result.Context->getTranslationUnitDecl(),
+                                                                                                 hostIndicVarMap["typeName"],
+                                                                                                 hvm["hostmemberi"]);
+                            // Prepend "a_" for param name
+                            std::string paramName = "a_";
+                            paramName.append(memberIndicVarMap["fieldName"]);
+
+                            if (generation_simplify_function_args)
+			      emplace_ret = cursorArgsSet.emplace(paramName);
+
+			    if (!generation_simplify_function_args || emplace_ret.second)
+			      {
+                                // Format various usage we make of it
+                                requestFunctionParamsDef.append(createParamsDef(memberIndicVarMap["fieldTypeName"],
+                                                                                memberIndicVarMap["elementType"],
+                                                                                memberIndicVarMap["elementSize"],
+                                                                                paramName));
+                                requestExecSqlDeclareSection.append(createParamsDeclareSection(memberIndicVarMap["fieldTypeName"],
+                                                                                               memberIndicVarMap["elementType"],
+                                                                                               memberIndicVarMap["elementSize"],
+                                                                                               memberIndicVarMap["fieldName"],
+                                                                                               paramName));
+                                requestFunctionParamsDecl.append(createParamsDecl(memberIndicVarMap["fieldTypeName"],
+                                                                                  memberIndicVarMap["elementType"],
+                                                                                  memberIndicVarMap["elementSize"]));
+                                requestFunctionArgs.append(createParamsCall(hvm["hostvari"]));
+                                newHostVarList.append(createHostVarList(memberIndicVarMap["fieldName"], /*isIndicator=*/true));
+                              }
+                          }
+                        // Not a member of struct
+                        else
+                          {
+                            // Compute a param name
+                            std::string paramName = "a_";
+                            paramName.append(hostIndicVarMap["symName"]);
+
+                            if (generation_simplify_function_args)
+			      emplace_ret = cursorArgsSet.emplace(paramName);
+
+			    if (!generation_simplify_function_args || emplace_ret.second)
+			      {
+                                // And format usages
+                                requestFunctionParamsDef.append(createParamsDef(hostIndicVarMap["typeName"],
+                                                                                hostIndicVarMap["elementType"],
+                                                                                hostIndicVarMap["elementSize"],
+                                                                                paramName));
+                                requestExecSqlDeclareSection.append(createParamsDeclareSection(hostIndicVarMap["typeName"],
+                                                                                               hostIndicVarMap["elementType"],
+                                                                                               hostIndicVarMap["elementSize"],
+                                                                                               hostIndicVarMap["symName"],
+                                                                                               paramName));
+                                requestFunctionParamsDecl.append(createParamsDecl(hostIndicVarMap["typeName"],
+                                                                                  hostIndicVarMap["elementType"],
+                                                                                  hostIndicVarMap["elementSize"]));
+                                requestFunctionArgs.append(createParamsCall(hostIndicVarMap["symName"]));
+                                newHostVarList.append(createHostVarList(hostIndicVarMap["symName"], /*isIndicator=*/true));
+                              }
+                          }
+                      }
+                    else
+                      newHostVarList.append(createHostVarList("", /*isIndicator=*/true));
+                  }
+
+                // Remove last commas + space
+                if (requestFunctionParamsDef.length() > 2)
+                  requestFunctionParamsDef.erase(requestFunctionParamsDef.length() -2, std::string::npos);
+                else
+                  requestFunctionParamsDef.assign("void");
+                
+                // Remove last commas + space
+                if (requestFunctionParamsDecl.length() > 2)
+                  requestFunctionParamsDecl.erase(requestFunctionParamsDecl.length() -2, std::string::npos);
+                else
+                  requestFunctionParamsDecl.assign("void");
+                
+                // Remove last commas + space
+                if (requestFunctionArgs.length() > 2)
+                  requestFunctionArgs.erase(requestFunctionArgs.length() -2, std::string::npos);
+                
+                // Remove last CR
+                if (requestExecSqlDeclareSection.length() > 2)
+                  {
+                    requestExecSqlDeclareSection.insert(0, "    EXEC SQL BEGIN DECLARE SECTION;\n");
+                    requestExecSqlDeclareSection.append("    EXEC SQL END DECLARE SECTION;\n");
+                  }
+                else
+                  requestExecSqlDeclareSection.assign("    // No declare section");
+
+                // Remove last comma + space
+                if (newHostVarList.length() > 2)
+                  newHostVarList.erase(newHostVarList.length() -2, std::string::npos);
+                    
                 if (generation_do_report_modification_in_pc)
                   {
                     std::ostringstream had_cr_strstream;
@@ -1138,350 +1486,13 @@ namespace clang
                       }
                   }
                     
-		outs() << "!!!*** Prepare request comment match: into var name is '" << intoReqNames
-		       << "' and request name is '"<< reqName << "' number of matches = " << matches.size() << "\n";
-
                 requestInto.assign(" ");
-                requestInto.append(matches[3]);
+                requestInto.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE_INTO]);
                 requestInto.append(" ");
                 
-		if (!intoReqNames.empty())
-		  {
-		    std::set<std::string> cursorArgsSet;
-		    emplace_ret_t emplace_ret;
-		    
-		    requestCursorParamsDef.assign("");
-		    
-		    // The intoReqNames is of form:
-		    //     :<var_or_member_expr>[,:<var_or_member_expr>,]+
-		    // Then we need to iterate on each expr
-		    do
-		      {
-			std::string expr;
-			std::string varName;
-			std::string indicVarName;
-			std::string memberName;
-			std::string indicMemberName;
-			const VarDecl *varDecl = nullptr;
-			const VarDecl *indicVarDecl = nullptr;
-
-			// Find a comma
-			std::string::size_type pos = intoReqNames.find(",", 0);
-			// Not found
-			if (pos == std::string::npos)
-			  {
-			    // Last expr
-			    expr = intoReqNames;
-			    intoReqNames.clear();
-			  }
-			// We found one
-			else
-			  {
-			    // Extract expr and compute the rest
-			    expr = intoReqNames.substr(0, pos+1);
-			    intoReqNames.erase(0, pos+1);;
-			  }
-
-			// Removing junk chars around expr
-			{
-			  if (expr.find(":") != std::string::npos)
-			    expr.erase(0, expr.find(":")+1);
-			  if (expr.find_first_of(" \t,") != std::string::npos)
-			    expr.erase(expr.find_first_of(" \t,"), std::string::npos);
-			}
-
-                        // Indicatros are some host variables associated to another host variable
-                        // in order to indicate is the column that is bound to the host variable is NULL or not
-                        // If the column is NULL, the indicator is strictly positive (boolean true value)
-                        // Concretly it means that an indicator is another param to pass to the request function
-			
-			// According to the kind of expr
-                        // Initial dbl colon was removed, then only indicator dbl colon remains
-			//  <var_symbol>[:<var_symbol_indic>]
-			//  <var_symbol>[:<var_symbol_ptr_indic> -> <member_indic>]
-			//  <var_symbol>[:<var_symbol_dot_indic>] . <member_indic>]
-			//  <var_symbol_ptr> -> <member>[:<var_symbol_indic>]
-			//  <var_symbol_ptr> -> <member>[:<var_symbol_ptr_indic> -> <member_indic>]
-			//  <var_symbol_ptr> -> <member>[:<var_symbol_dot_indic>] . <member_indic>]
-			//  <var_symbol_ref> . <member>[:<var_symbol_indic>]
-			//  <var_symbol_ref> . <member>[:<var_symbol_ptr_indic> -> <member_indic>]
-			//  <var_symbol_ref> . <member>[:<var_symbol_dot_indic>] . <member_indic>]
-			std::string::size_type pos_arrow = expr.find("->");		// Search for the arrow of the host var (could also find arrow of the indic)
-			std::string::size_type pos_dot = expr.find(".");		// Search for the dot of the host var (could also find dot of the indic)
-			std::string::size_type pos_indic = expr.find(":", 1);		// Search for an indicator
-			std::string::size_type pos_indic_arrow = std::string::npos;	// Init pos of indic arrow
-			std::string::size_type pos_indic_dot = std::string::npos;	// Init pos of indic dot
-
-                        // Handle case where member is on indic only (host variable is not member,
-                        // hence handling case where arrow is in indic and not in host var: ex :toto:ptr->tata)
-                        if (pos_indic != std::string::npos && pos_arrow > pos_indic)
-                          // swap pos_indic & pos_indic_arrow
-                          std::swap(pos_arrow, pos_indic_arrow);
-                        else
-                          {
-                            // get pos in expr for indicator arrow
-                            pos_indic_arrow = expr.find_last_of("->");
-                            // Handle case where indic as no arrow
-                            if (pos_indic_arrow == pos_arrow)
-                              pos_indic_arrow = std::string::npos;
-                          }
-
-                        // Handle case where member is on indic only (host variable is not member,
-                        // hence handling case where dot is in indic and not in host var: ex :toto:var.tata)
-                        if (pos_indic != std::string::npos && pos_dot > pos_indic)
-                          // swap pos_indic & pos_indic_arrow
-                          std::swap(pos_dot, pos_indic_dot);
-                        else
-                          {
-                            // get pos in expr for indicator dot
-                            pos_indic_dot = expr.find_last_of(".");
-                            // Handle case where indic as no arrow
-                            if (pos_indic_dot == pos_dot)
-                              pos_indic_dot = std::string::npos;                            
-                          }
-
-                        // If host var is a memeber of a pointer to struct (:ptr->tata)
-			if (pos_arrow != std::string::npos)
-			  {
-			    // It is a member of a pointer: get var symbol and member name
-			    varName = expr.substr(0, pos_arrow);
-			    memberName = expr.substr(pos_arrow+2, pos_indic-pos_dot-1);
-			    varDecl = findSymbolInFunction(tool, varName, curFunc);
-                            // Handle indicator (:host_var:indic, with or without dot/arrow)
-                            if (pos_indic != std::string::npos)
-                              {
-                                // member of a pointer indicator (:host_var:ptr->indicMember)
-                                if (pos_indic_arrow != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow - pos_indic);
-                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                // member of struct indicator (:host_var:struct.member)
-                                else if (pos_indic_dot != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot - pos_indic);
-                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                else
-                                  {
-                                    // Host var is pointed member and indic is var
-                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                              }
-			  }
-                        // Host var is a member of a struct var
-			else if (pos_dot != std::string::npos)
-			  {
-			    // It is a member of an instance
-			    varName = expr.substr(0, pos_dot);
-			    memberName = expr.substr(pos_dot+1, pos_indic-pos_dot-1);
-			    varDecl = findSymbolInFunction(tool, varName, curFunc);
-                            if (pos_indic != std::string::npos)
-                              {
-                                // Indic is a member of a record pointer 
-                                if (pos_indic_arrow != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow - pos_indic);
-                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                // Indic is a member of a record
-                                else if (pos_indic_dot != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot - pos_indic);
-                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                // Indic is a host variable
-                                else
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                              }
-			  }
-                        // Finally host var is just variable
-			else
-			  {
-			    // It is a var symbol
-			    varName = expr.substr(0, pos_indic);
-			    varDecl = findSymbolInFunction(tool, varName, curFunc);
-                            if (pos_indic != std::string::npos)
-                              {
-                                // If indicator is a member of a record pointer 
-                                if (pos_indic_arrow != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_arrow-pos_indic-1);
-                                    indicMemberName = expr.substr(pos_indic_arrow+2, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                // If indicator is a member of a record var
-                                else if (pos_indic_dot != std::string::npos)
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, pos_indic_dot-pos_indic-1);
-                                    indicMemberName = expr.substr(pos_indic_dot+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                                // Or indicator is a var
-                                else
-                                  {
-                                    indicVarName = expr.substr(pos_indic+1, std::string::npos);
-                                    indicVarDecl = findSymbolInFunction(tool, indicVarName, curFunc);
-                                  }
-                              }
-			  }
-
-                        // Then once we got all infos we generate the code for call, decl and impl
-			if (varDecl != nullptr)
-			  {
-                            std::string Name;
-                            std::string TypeName;
-
-                            //outs() << "varDecl dump: ";
-                            //varDecl->dump();
-                            //outs() << "\n";
-                            
-                            // const NamedDecl* ndecl = dyn_cast<NamedDecl>(varDecl);
-                            // if (ndecl->getDeclName())
-                            //   {
-                            //     Name = ndecl->getNameAsString();
-                            //     outs() << "Name from varDecl dyn cast as NamedDecl: " <<  Name << "\n";
-                            //   }
-                            // const ValueDecl* vdecl = dyn_cast<ValueDecl>(varDecl);
-			    // QualType qtype = vdecl->getType();
-                            // SplitQualType qt_split = qtype.split();
-                            // TypeName = QualType::getAsString(qt_split);
-                            
-                            DeclarationName dname = varDecl->getDeclName();
-                            outs() << "VarDecl name is '" << dname.getAsString() << "'\n";
-                            QualType qtype = dname.getCXXNameType();
-                            TypeName = QualType::getAsString(qtype.split());
-                            outs() << "VarDecl type name is '" << TypeName << "'\n";
-                            DeclContext::lookup_result R = curFunc->lookup(dname);
-                            for (auto lit = R.begin(); lit != R.end(); lit++)
-                              {
-                                ValueDecl *vdecl = dyn_cast<ValueDecl>(*lit);
-                                Name = vdecl->getNameAsString();
-                                TypeName = QualType::getAsString(vdecl->getType().split());
-                                outs() << "Typename for var decl '" << Name << "' =  '" << TypeName << "'\n";
-                              }
-                            
-			    if (generation_simplify_function_args)
-			      emplace_ret = cursorArgsSet.emplace(varName);
-
-			    if (!generation_simplify_function_args || emplace_ret.second)
-			      {
-				if (qtype->isConstantArrayType())
-				  {
-				    const ConstantArrayType *catype = varDecl->getASTContext()
-				      .getAsConstantArrayType(qtype);
-				    requestCursorParamsDef.append(catype->getElementType().getAsString());
-				    requestCursorParamsDef.append(" ");
-				    requestCursorParamsDef.append(varName);
-				    requestCursorParamsDef.append("[");
-				    requestCursorParamsDef.append(catype->getSize().toString(10, false));
-				    requestCursorParamsDef.append("], ");
-				  }
-				else if (qtype->isRecordType() ||
-					 qtype->isStructureType() ||
-					 qtype->isClassType())
-				  {
-                                    // In the struct case we should handle anonymous struct case
-                                    if (TypeName.find("anonymous struct"))
-                                      {
-                                        // We should declare the struct locally
-                                        
-                                      }
-                                    else
-                                      {
-                                        requestCursorParamsDef.append(TypeName);
-                                        requestCursorParamsDef.append("& ");
-                                        requestCursorParamsDef.append(varName);
-                                        requestCursorParamsDef.append(", ");
-                                      }
-                                  }
-				else
-				  {
-				    requestCursorParamsDef.append(TypeName);
-				    if (!qtype.getTypePtr()->isPointerType())
-				      requestCursorParamsDef.append(" ");
-				    requestCursorParamsDef.append(varName);
-				    requestCursorParamsDef.append(", ");
-				  }
-			      }
-                            // Only need to do it here, expr already contains indicator,
-                            // then we do it for host var and its indicator, only for main host var
-			    requestArgs.append(":");
-			    requestArgs.append(expr);
-			    requestArgs.append(",");
-			  }
-                        
-                        // Then once we got all infos we generate the code for call, decl and impl
-			if (indicVarDecl != nullptr)
-			  {
-                            std::string IndicName;
-                            std::string IndicTypeName;
-                            
-                            // outs() << "indicVarDecl dump: ";
-                            // indicVarDecl->dump();
-                            // outs() << "\n";
-                            
-			    QualType qtype = indicVarDecl->getType();
-			    std::string typeName = QualType::getAsString(qtype.split());
-
-			    if (generation_simplify_function_args)
-			      emplace_ret = cursorArgsSet.emplace(indicVarName);
-
-			    if (!generation_simplify_function_args || emplace_ret.second)
-			      {
-				if (qtype->isConstantArrayType())
-				  {
-				    const ConstantArrayType *catype = indicVarDecl->getASTContext()
-				      .getAsConstantArrayType(qtype);
-				    requestCursorParamsDef.append(catype->getElementType().getAsString());
-				    requestCursorParamsDef.append(" ");
-				    requestCursorParamsDef.append(indicVarName);
-				    requestCursorParamsDef.append("[");
-				    requestCursorParamsDef.append(catype->getSize().toString(10, false));
-				    requestCursorParamsDef.append("], ");
-				  }
-				else if (qtype->isRecordType() ||
-					 qtype->isStructureType() ||
-					 qtype->isClassType())
-				  {
-				    requestCursorParamsDef.append(typeName);
-				      requestCursorParamsDef.append("& ");
-				    requestCursorParamsDef.append(indicVarName);
-				    requestCursorParamsDef.append(", ");
-				  }
-				else
-				  {
-				    requestCursorParamsDef.append(typeName);
-				    if (!qtype.getTypePtr()->isPointerType())
-				      requestCursorParamsDef.append(" ");
-				    requestCursorParamsDef.append(indicVarName);
-				    requestCursorParamsDef.append(", ");
-				  }
-			      }
-			  }
-		      }
-		    while (!intoReqNames.empty());
-
-		    //outs() << "requestCursorParamsDef = '" << requestCursorParamsDef << "'\n";
-		    //outs() << "requestArgs = '" << requestArgs << "'\n";
-
-                    if (requestCursorParamsDef.length() >= 2)
-                      requestCursorParamsDef.erase(requestCursorParamsDef.length()-2,2);
-                    if (requestArgs.length() >= 1)
-                      requestArgs.erase(requestArgs.length()-1,1);
-		  }
-		
                 requestExecSql.append(reqName);
 		requestExecSql.append(requestInto);
-		requestExecSql.append(matches[4]);
+		requestExecSql.append(newHostVarList);
 		
 		requestFunctionName = "fetch";
 		reqName[0] &= ~0x20;
@@ -1496,21 +1507,24 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
                   }
 
+                auto now_time = system_clock::to_time_t(system_clock::now());
+                generationDateTime = std::ctime(&now_time);
+
 		// If headers generation was requested
 		if (generate_req_headers)
 		  {
 		    // Build the map for templating engine
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
-		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
+		    values_map["@RequestFunctionParamsDecl@"] = requestFunctionParamsDecl;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                    values_map["@GenerationDateTime@"] = generationDateTime;
 
 		    // And call it
 		    doRequestHeaderGeneration(diagEngine,
 					      generation_header_template,
-					      values_map,
-                                              anonymousStructs);
+					      values_map);
 		  }
 		
 		// If source generation was requested
@@ -1519,19 +1533,20 @@ namespace clang
 		    // Build the map for templating engine
 		    string2_map values_map;
 		    values_map["@RequestFunctionName@"] = requestFunctionName;
+		    values_map["@RequestFunctionParamsDef@"] = requestFunctionParamsDef;
+		    values_map["@ExecSqlDeclareSection@"] = requestExecSqlDeclareSection;
 		    values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
                     values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-		    values_map["@RequestCursorParamsDef@"] = requestCursorParamsDef;
 		    values_map["@RequestExecSql@"] = requestExecSql;
+                    values_map["@GenerationDateTime@"] = generationDateTime;
 		    // And call it
 		    doRequestSourceGeneration(diagEngine,
 					      generation_source_template,
-					      values_map,
-                                              anonymousStructs);
+					      values_map);
 		  }
 		
 		// Emit errors, warnings and fixes
-		std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName);
+		std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName, requestFunctionArgs);
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -1539,6 +1554,11 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("originalfile", originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1)));
                     std::ostringstream commentStartLineNum;
                     commentStartLineNum << comment << ":" << startLineNum;
+                    outs() << "Replacements values for " << commentStartLineNum.str() << "\n";
+                    for (auto repit = rv.begin(); repit != rv.end(); ++repit)
+                      {
+                        outs() << "key: '" << repit->first << "' = '" << repit->second << "'\n";
+                      }
                     replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
                   }                
 	      }
