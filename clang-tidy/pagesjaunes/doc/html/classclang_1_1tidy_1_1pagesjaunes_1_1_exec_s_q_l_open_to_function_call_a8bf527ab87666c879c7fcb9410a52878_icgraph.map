@@ -1,0 +1,4 @@
+<map id="clang::tidy::pagesjaunes::ExecSQLOpenToFunctionCall::emitError" name="clang::tidy::pagesjaunes::ExecSQLOpenToFunctionCall::emitError">
+<area shape="rect" id="node2" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call.html#a00b269de2e10d828f3f588911dfc749c" title="clang::tidy::pagesjaunes\l::ExecSQLOpenToFunctionCall\l::emitDiagAndFix" alt="" coords="259,5,464,61"/>
+<area shape="rect" id="node3" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call.html#ad459a073a4ef5dfcba189e46f618902d" title="This method is called each time a visited AST node matching our ASTMatcher is found. " alt="" coords="512,46,760,87"/>
+</map>

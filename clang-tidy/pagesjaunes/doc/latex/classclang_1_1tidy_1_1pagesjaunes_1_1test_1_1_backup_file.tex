@@ -1,0 +1,339 @@
+\hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file}{}\section{clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:test\+:\+:Backup\+File Class Reference}
+\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file}\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+
+
+{\ttfamily \#include $<$backup\+\_\+file.\+h$>$}
+
+
+
+Inheritance diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:test\+:\+:Backup\+File\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:test\+:\+:Backup\+File\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_1_1_s_h_a256}{S\+H\+A256}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1f42e8a56c0802a2e04f6a93471aa073}{Backup\+File} ()
+\item 
+virtual \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a8d9327a1868f6854635ef7d7f31813af}{$\sim$\+Backup\+File} ()
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aad0e95d0c9bad2e2104fb6cb8ec7cacc}{Set\+Up} (void)
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aff6562634de2e56533cb1220894c9b90}{Set\+Up\+Simple\+Backup} (void)
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1c3f8ddd2e12ac89a6a2b43bc269f69c}{Set\+Up\+Simple\+Backup0} (void)
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a20076e5d45d3df60f6417d6cd7e10f66}{Set\+Up\+Simple\+Backup1} (void)
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a88f365e11813a35d63d07fcf832b3c85}{Set\+Up\+Many\+Backup} (void)
+\item 
+virtual void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a9d2e724d4d88c6c330f9e3e43c5ecab8}{Tear\+Down} (void)
+\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_af922febe6734175a205f1572eb289730}{Print\+To} (const \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file}{Backup\+File} \&, \+::std\+::ostream $\ast$)
+\item 
+std\+::string \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a146fa015b7bb79122129c84f4d0ef54f}{sha256} (const std\+::string \&)
+\item 
+std\+::string \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a886904478367718ab3cda84138a64a68}{sha256} (std\+::ifstream \&)
+\item 
+int \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a68a79fc23d88b23608886199fc3b8673}{sha256cmp} (const std\+::string \&, const std\+::string \&)
+\item 
+int \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a62e30ec55b721ae4250ff077a21a780a}{sha256cmp} (std\+::ifstream \&, std\+::ifstream \&)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_afa28a0ba37bd55cda92f97904057a905}{m\+\_\+sha256\+\_\+value}
+\item 
+std\+::streamsize \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1be4aaaffaf4be578d521a1af395535e}{m\+\_\+length}
+\item 
+unsigned char $\ast$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_acddd3609ad623f6e5e122e31125509a6}{m\+\_\+buffer}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 62 of file backup\+\_\+file.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1f42e8a56c0802a2e04f6a93471aa073}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1f42e8a56c0802a2e04f6a93471aa073}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Backup\+File@{Backup\+File}}
+\index{Backup\+File@{Backup\+File}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Backup\+File()}{BackupFile()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Backup\+File (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line 51 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1f42e8a56c0802a2e04f6a93471aa073_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a8d9327a1868f6854635ef7d7f31813af}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a8d9327a1868f6854635ef7d7f31813af}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!````~Backup\+File@{$\sim$\+Backup\+File}}
+\index{````~Backup\+File@{$\sim$\+Backup\+File}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{$\sim$\+Backup\+File()}{~BackupFile()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::$\sim$\+Backup\+File (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 67 of file backup\+\_\+file.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_af922febe6734175a205f1572eb289730}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_af922febe6734175a205f1572eb289730}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Print\+To@{Print\+To}}
+\index{Print\+To@{Print\+To}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Print\+To()}{PrintTo()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Print\+To (\begin{DoxyParamCaption}\item[{const \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file}{Backup\+File} \&}]{backup\+\_\+file,  }\item[{\+::std\+::ostream $\ast$}]{os }\end{DoxyParamCaption})}
+
+
+
+Definition at line 142 of file backup\+\_\+file.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aad0e95d0c9bad2e2104fb6cb8ec7cacc}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aad0e95d0c9bad2e2104fb6cb8ec7cacc}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Set\+Up@{Set\+Up}}
+\index{Set\+Up@{Set\+Up}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Set\+Up()}{SetUp()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Set\+Up (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 73 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aad0e95d0c9bad2e2104fb6cb8ec7cacc_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a88f365e11813a35d63d07fcf832b3c85}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a88f365e11813a35d63d07fcf832b3c85}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Set\+Up\+Many\+Backup@{Set\+Up\+Many\+Backup}}
+\index{Set\+Up\+Many\+Backup@{Set\+Up\+Many\+Backup}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Set\+Up\+Many\+Backup()}{SetUpManyBackup()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Set\+Up\+Many\+Backup (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 118 of file backup\+\_\+file.\+cpp.
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a88f365e11813a35d63d07fcf832b3c85_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aff6562634de2e56533cb1220894c9b90}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aff6562634de2e56533cb1220894c9b90}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Set\+Up\+Simple\+Backup@{Set\+Up\+Simple\+Backup}}
+\index{Set\+Up\+Simple\+Backup@{Set\+Up\+Simple\+Backup}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Set\+Up\+Simple\+Backup()}{SetUpSimpleBackup()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Set\+Up\+Simple\+Backup (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 82 of file backup\+\_\+file.\+cpp.
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_aff6562634de2e56533cb1220894c9b90_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1c3f8ddd2e12ac89a6a2b43bc269f69c}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1c3f8ddd2e12ac89a6a2b43bc269f69c}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Set\+Up\+Simple\+Backup0@{Set\+Up\+Simple\+Backup0}}
+\index{Set\+Up\+Simple\+Backup0@{Set\+Up\+Simple\+Backup0}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Set\+Up\+Simple\+Backup0()}{SetUpSimpleBackup0()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Set\+Up\+Simple\+Backup0 (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 91 of file backup\+\_\+file.\+cpp.
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1c3f8ddd2e12ac89a6a2b43bc269f69c_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a20076e5d45d3df60f6417d6cd7e10f66}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a20076e5d45d3df60f6417d6cd7e10f66}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Set\+Up\+Simple\+Backup1@{Set\+Up\+Simple\+Backup1}}
+\index{Set\+Up\+Simple\+Backup1@{Set\+Up\+Simple\+Backup1}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Set\+Up\+Simple\+Backup1()}{SetUpSimpleBackup1()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Set\+Up\+Simple\+Backup1 (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 103 of file backup\+\_\+file.\+cpp.
+
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a20076e5d45d3df60f6417d6cd7e10f66_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a146fa015b7bb79122129c84f4d0ef54f}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a146fa015b7bb79122129c84f4d0ef54f}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!sha256@{sha256}}
+\index{sha256@{sha256}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{sha256()}{sha256()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily std\+::string clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::sha256 (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{input }\end{DoxyParamCaption})}
+
+
+
+Definition at line 328 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a146fa015b7bb79122129c84f4d0ef54f_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a146fa015b7bb79122129c84f4d0ef54f_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a886904478367718ab3cda84138a64a68}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a886904478367718ab3cda84138a64a68}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!sha256@{sha256}}
+\index{sha256@{sha256}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{sha256()}{sha256()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::string clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::sha256 (\begin{DoxyParamCaption}\item[{std\+::ifstream \&}]{is }\end{DoxyParamCaption})}
+
+
+
+Definition at line 346 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a886904478367718ab3cda84138a64a68_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a68a79fc23d88b23608886199fc3b8673}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a68a79fc23d88b23608886199fc3b8673}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!sha256cmp@{sha256cmp}}
+\index{sha256cmp@{sha256cmp}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{sha256cmp()}{sha256cmp()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::sha256cmp (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{s1,  }\item[{const std\+::string \&}]{s2 }\end{DoxyParamCaption})}
+
+
+
+Definition at line 360 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a68a79fc23d88b23608886199fc3b8673_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a62e30ec55b721ae4250ff077a21a780a}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a62e30ec55b721ae4250ff077a21a780a}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!sha256cmp@{sha256cmp}}
+\index{sha256cmp@{sha256cmp}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{sha256cmp()}{sha256cmp()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::sha256cmp (\begin{DoxyParamCaption}\item[{std\+::ifstream \&}]{is1,  }\item[{std\+::ifstream \&}]{is2 }\end{DoxyParamCaption})}
+
+
+
+Definition at line 368 of file backup\+\_\+file.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a62e30ec55b721ae4250ff077a21a780a_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a9d2e724d4d88c6c330f9e3e43c5ecab8}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a9d2e724d4d88c6c330f9e3e43c5ecab8}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!Tear\+Down@{Tear\+Down}}
+\index{Tear\+Down@{Tear\+Down}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{Tear\+Down()}{TearDown()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+Tear\+Down (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Definition at line 127 of file backup\+\_\+file.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_acddd3609ad623f6e5e122e31125509a6}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_acddd3609ad623f6e5e122e31125509a6}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!m\+\_\+buffer@{m\+\_\+buffer}}
+\index{m\+\_\+buffer@{m\+\_\+buffer}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{m\+\_\+buffer}{m\_buffer}}
+{\footnotesize\ttfamily unsigned char$\ast$ clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::m\+\_\+buffer}
+
+
+
+Definition at line 105 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1be4aaaffaf4be578d521a1af395535e}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_a1be4aaaffaf4be578d521a1af395535e}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!m\+\_\+length@{m\+\_\+length}}
+\index{m\+\_\+length@{m\+\_\+length}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{m\+\_\+length}{m\_length}}
+{\footnotesize\ttfamily std\+::streamsize clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::m\+\_\+length}
+
+
+
+Definition at line 104 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_afa28a0ba37bd55cda92f97904057a905}\label{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_afa28a0ba37bd55cda92f97904057a905}} 
+\index{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}!m\+\_\+sha256\+\_\+value@{m\+\_\+sha256\+\_\+value}}
+\index{m\+\_\+sha256\+\_\+value@{m\+\_\+sha256\+\_\+value}!clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File@{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}}
+\subsubsection{\texorpdfstring{m\+\_\+sha256\+\_\+value}{m\_sha256\_value}}
+{\footnotesize\ttfamily std\+::string clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::m\+\_\+sha256\+\_\+value}
+
+
+
+Definition at line 103 of file backup\+\_\+file.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+test/\hyperlink{backup__file_8h}{backup\+\_\+file.\+h}\item 
+test/\hyperlink{backup__file_8cpp}{backup\+\_\+file.\+cpp}\end{DoxyCompactItemize}

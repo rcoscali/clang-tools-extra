@@ -1,0 +1,232 @@
+\hypertarget{backup__file_8h}{}\section{test/backup\+\_\+file.h File Reference}
+\label{backup__file_8h}\index{test/backup\+\_\+file.\+h@{test/backup\+\_\+file.\+h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}gtest/gtest.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}llvm/\+Support/\+Regex.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Exec\+S\+Q\+L\+Common.\+h\char`\"{}}\newline
+Include dependency graph for backup\+\_\+file.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{backup__file_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{backup__file_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file}{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1test_1_1_backup_file_1_1_s_h_a256}{clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}
+\end{DoxyCompactItemize}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \hyperlink{namespaceclang}{clang}
+\item 
+ \hyperlink{namespaceclang_1_1tidy}{clang\+::tidy}
+\item 
+ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes}{clang\+::tidy\+::pagesjaunes}
+\item 
+ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_1_1test}{clang\+::tidy\+::pagesjaunes\+::test}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{backup__file_8h_a7a7492e164247bce7f02d79f8c01105d}{O\+N\+E\+K\+I\+LO}~(1024)
+\item 
+\#define \hyperlink{backup__file_8h_a5901f71104992f172a7fdb81b8dcade0}{O\+N\+E\+M\+E\+GA}~(1024$\ast$\hyperlink{backup__file_8h_a7a7492e164247bce7f02d79f8c01105d}{O\+N\+E\+K\+I\+LO})
+\item 
+\#define \hyperlink{backup__file_8h_a0022bce414f3c176fb862d3f00bf6abd}{O\+N\+E\+G\+I\+GA}~(1024$\ast$\hyperlink{backup__file_8h_a5901f71104992f172a7fdb81b8dcade0}{O\+N\+E\+M\+E\+GA})
+\item 
+\#define \hyperlink{backup__file_8h_a0a0e7e0d135e9feff1da2e46fa556d50}{S\+H\+A2\+\_\+\+S\+H\+FR}(x,  n)~(x $>$$>$ n)
+\item 
+\#define \hyperlink{backup__file_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  n)~((x $>$$>$ n) $\vert$ (x $<$$<$ ((sizeof(x) $<$$<$ 3) -\/ n)))
+\item 
+\#define \hyperlink{backup__file_8h_a0fcefdff5f2609b2c5eb1d0f99214199}{S\+H\+A2\+\_\+\+R\+O\+TL}(x,  n)~((x $<$$<$ n) $\vert$ (x $>$$>$ ((sizeof(x) $<$$<$ 3) -\/ n)))
+\item 
+\#define \hyperlink{backup__file_8h_a1d4a72c3cb3d85b0c82736081042c1a4}{S\+H\+A2\+\_\+\+CH}(x,  y,  z)~((x \& y) $^\wedge$ ($\sim$x \& z))
+\item 
+\#define \hyperlink{backup__file_8h_ae9222f6c22449097806fb1dac2a58107}{S\+H\+A2\+\_\+\+M\+AJ}(x,  y,  z)~((x \& y) $^\wedge$ (x \& z) $^\wedge$ (y \& z))
+\item 
+\#define \hyperlink{backup__file_8h_a0ae1b70e2104958a43d1d8f32cb79eb6}{S\+H\+A256\+\_\+\+F1}(x)~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  2) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 13) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 22))
+\item 
+\#define \hyperlink{backup__file_8h_afc002a02aab7533fb0bfe557a25266e1}{S\+H\+A256\+\_\+\+F2}(x)~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  6) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 11) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 25))
+\item 
+\#define \hyperlink{backup__file_8h_a9435ee6ad07985796b91077d13eaf7a0}{S\+H\+A256\+\_\+\+F3}(x)~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  7) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 18) $^\wedge$ \hyperlink{buffer__split_8h_a0a0e7e0d135e9feff1da2e46fa556d50}{S\+H\+A2\+\_\+\+S\+H\+FR}(x,  3))
+\item 
+\#define \hyperlink{backup__file_8h_afc7152c6ff0146084db95994f2852b56}{S\+H\+A256\+\_\+\+F4}(x)~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 17) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 19) $^\wedge$ \hyperlink{buffer__split_8h_a0a0e7e0d135e9feff1da2e46fa556d50}{S\+H\+A2\+\_\+\+S\+H\+FR}(x, 10))
+\item 
+\#define \hyperlink{backup__file_8h_a2dc032adc83afe8e265a7941ef11f258}{S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}(x,  str)
+\item 
+\#define \hyperlink{backup__file_8h_a7275957ed17d7fe14f0ab6e32c18f9b7}{S\+H\+A2\+\_\+\+P\+A\+C\+K32}(str,  x)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{backup__file_8h_a0022bce414f3c176fb862d3f00bf6abd}\label{backup__file_8h_a0022bce414f3c176fb862d3f00bf6abd}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!O\+N\+E\+G\+I\+GA@{O\+N\+E\+G\+I\+GA}}
+\index{O\+N\+E\+G\+I\+GA@{O\+N\+E\+G\+I\+GA}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{O\+N\+E\+G\+I\+GA}{ONEGIGA}}
+{\footnotesize\ttfamily \#define O\+N\+E\+G\+I\+GA~(1024$\ast$\hyperlink{backup__file_8h_a5901f71104992f172a7fdb81b8dcade0}{O\+N\+E\+M\+E\+GA})}
+
+
+
+Definition at line 22 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a7a7492e164247bce7f02d79f8c01105d}\label{backup__file_8h_a7a7492e164247bce7f02d79f8c01105d}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!O\+N\+E\+K\+I\+LO@{O\+N\+E\+K\+I\+LO}}
+\index{O\+N\+E\+K\+I\+LO@{O\+N\+E\+K\+I\+LO}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{O\+N\+E\+K\+I\+LO}{ONEKILO}}
+{\footnotesize\ttfamily \#define O\+N\+E\+K\+I\+LO~(1024)}
+
+
+
+Definition at line 20 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a5901f71104992f172a7fdb81b8dcade0}\label{backup__file_8h_a5901f71104992f172a7fdb81b8dcade0}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!O\+N\+E\+M\+E\+GA@{O\+N\+E\+M\+E\+GA}}
+\index{O\+N\+E\+M\+E\+GA@{O\+N\+E\+M\+E\+GA}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{O\+N\+E\+M\+E\+GA}{ONEMEGA}}
+{\footnotesize\ttfamily \#define O\+N\+E\+M\+E\+GA~(1024$\ast$\hyperlink{backup__file_8h_a7a7492e164247bce7f02d79f8c01105d}{O\+N\+E\+K\+I\+LO})}
+
+
+
+Definition at line 21 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a0ae1b70e2104958a43d1d8f32cb79eb6}\label{backup__file_8h_a0ae1b70e2104958a43d1d8f32cb79eb6}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A256\+\_\+\+F1@{S\+H\+A256\+\_\+\+F1}}
+\index{S\+H\+A256\+\_\+\+F1@{S\+H\+A256\+\_\+\+F1}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A256\+\_\+\+F1}{SHA256\_F1}}
+{\footnotesize\ttfamily \#define S\+H\+A256\+\_\+\+F1(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  2) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 13) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 22))}
+
+
+
+Definition at line 29 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_afc002a02aab7533fb0bfe557a25266e1}\label{backup__file_8h_afc002a02aab7533fb0bfe557a25266e1}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A256\+\_\+\+F2@{S\+H\+A256\+\_\+\+F2}}
+\index{S\+H\+A256\+\_\+\+F2@{S\+H\+A256\+\_\+\+F2}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A256\+\_\+\+F2}{SHA256\_F2}}
+{\footnotesize\ttfamily \#define S\+H\+A256\+\_\+\+F2(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  6) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 11) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 25))}
+
+
+
+Definition at line 30 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a9435ee6ad07985796b91077d13eaf7a0}\label{backup__file_8h_a9435ee6ad07985796b91077d13eaf7a0}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A256\+\_\+\+F3@{S\+H\+A256\+\_\+\+F3}}
+\index{S\+H\+A256\+\_\+\+F3@{S\+H\+A256\+\_\+\+F3}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A256\+\_\+\+F3}{SHA256\_F3}}
+{\footnotesize\ttfamily \#define S\+H\+A256\+\_\+\+F3(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x,  7) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 18) $^\wedge$ \hyperlink{buffer__split_8h_a0a0e7e0d135e9feff1da2e46fa556d50}{S\+H\+A2\+\_\+\+S\+H\+FR}(x,  3))}
+
+
+
+Definition at line 31 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_afc7152c6ff0146084db95994f2852b56}\label{backup__file_8h_afc7152c6ff0146084db95994f2852b56}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A256\+\_\+\+F4@{S\+H\+A256\+\_\+\+F4}}
+\index{S\+H\+A256\+\_\+\+F4@{S\+H\+A256\+\_\+\+F4}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A256\+\_\+\+F4}{SHA256\_F4}}
+{\footnotesize\ttfamily \#define S\+H\+A256\+\_\+\+F4(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~(\hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 17) $^\wedge$ \hyperlink{buffer__split_8h_a9509f7c1f927cb12f98d9995ae2f92d3}{S\+H\+A2\+\_\+\+R\+O\+TR}(x, 19) $^\wedge$ \hyperlink{buffer__split_8h_a0a0e7e0d135e9feff1da2e46fa556d50}{S\+H\+A2\+\_\+\+S\+H\+FR}(x, 10))}
+
+
+
+Definition at line 32 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a1d4a72c3cb3d85b0c82736081042c1a4}\label{backup__file_8h_a1d4a72c3cb3d85b0c82736081042c1a4}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+CH@{S\+H\+A2\+\_\+\+CH}}
+\index{S\+H\+A2\+\_\+\+CH@{S\+H\+A2\+\_\+\+CH}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+CH}{SHA2\_CH}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+CH(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{y,  }\item[{}]{z }\end{DoxyParamCaption})~((x \& y) $^\wedge$ ($\sim$x \& z))}
+
+
+
+Definition at line 27 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_ae9222f6c22449097806fb1dac2a58107}\label{backup__file_8h_ae9222f6c22449097806fb1dac2a58107}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+M\+AJ@{S\+H\+A2\+\_\+\+M\+AJ}}
+\index{S\+H\+A2\+\_\+\+M\+AJ@{S\+H\+A2\+\_\+\+M\+AJ}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+M\+AJ}{SHA2\_MAJ}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+M\+AJ(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{y,  }\item[{}]{z }\end{DoxyParamCaption})~((x \& y) $^\wedge$ (x \& z) $^\wedge$ (y \& z))}
+
+
+
+Definition at line 28 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a7275957ed17d7fe14f0ab6e32c18f9b7}\label{backup__file_8h_a7275957ed17d7fe14f0ab6e32c18f9b7}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+P\+A\+C\+K32@{S\+H\+A2\+\_\+\+P\+A\+C\+K32}}
+\index{S\+H\+A2\+\_\+\+P\+A\+C\+K32@{S\+H\+A2\+\_\+\+P\+A\+C\+K32}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+P\+A\+C\+K32}{SHA2\_PACK32}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+P\+A\+C\+K32(\begin{DoxyParamCaption}\item[{}]{str,  }\item[{}]{x }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\{                                             \(\backslash\)
+    *(x) =   ((uint32) *((str) + 3)      )    \(\backslash\)
+           | ((uint32) *((str) + 2) <<  8)    \(\backslash\)
+           | ((uint32) *((str) + 1) << 16)    \(\backslash\)
+           | ((uint32) *((str) + 0) << 24);   \(\backslash\)
+\}
+\end{DoxyCode}
+
+
+Definition at line 42 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a0fcefdff5f2609b2c5eb1d0f99214199}\label{backup__file_8h_a0fcefdff5f2609b2c5eb1d0f99214199}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+R\+O\+TL@{S\+H\+A2\+\_\+\+R\+O\+TL}}
+\index{S\+H\+A2\+\_\+\+R\+O\+TL@{S\+H\+A2\+\_\+\+R\+O\+TL}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+R\+O\+TL}{SHA2\_ROTL}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+R\+O\+TL(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{n }\end{DoxyParamCaption})~((x $<$$<$ n) $\vert$ (x $>$$>$ ((sizeof(x) $<$$<$ 3) -\/ n)))}
+
+
+
+Definition at line 26 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a9509f7c1f927cb12f98d9995ae2f92d3}\label{backup__file_8h_a9509f7c1f927cb12f98d9995ae2f92d3}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+R\+O\+TR@{S\+H\+A2\+\_\+\+R\+O\+TR}}
+\index{S\+H\+A2\+\_\+\+R\+O\+TR@{S\+H\+A2\+\_\+\+R\+O\+TR}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+R\+O\+TR}{SHA2\_ROTR}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+R\+O\+TR(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{n }\end{DoxyParamCaption})~((x $>$$>$ n) $\vert$ (x $<$$<$ ((sizeof(x) $<$$<$ 3) -\/ n)))}
+
+
+
+Definition at line 25 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a0a0e7e0d135e9feff1da2e46fa556d50}\label{backup__file_8h_a0a0e7e0d135e9feff1da2e46fa556d50}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+S\+H\+FR@{S\+H\+A2\+\_\+\+S\+H\+FR}}
+\index{S\+H\+A2\+\_\+\+S\+H\+FR@{S\+H\+A2\+\_\+\+S\+H\+FR}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+S\+H\+FR}{SHA2\_SHFR}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+S\+H\+FR(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{n }\end{DoxyParamCaption})~(x $>$$>$ n)}
+
+
+
+Definition at line 24 of file backup\+\_\+file.\+h.
+
+\mbox{\Hypertarget{backup__file_8h_a2dc032adc83afe8e265a7941ef11f258}\label{backup__file_8h_a2dc032adc83afe8e265a7941ef11f258}} 
+\index{backup\+\_\+file.\+h@{backup\+\_\+file.\+h}!S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32@{S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}}
+\index{S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32@{S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}!backup\+\_\+file.\+h@{backup\+\_\+file.\+h}}
+\subsubsection{\texorpdfstring{S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}{SHA2\_UNPACK32}}
+{\footnotesize\ttfamily \#define S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32(\begin{DoxyParamCaption}\item[{}]{x,  }\item[{}]{str }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\{                                             \(\backslash\)
+    *((str) + 3) = (uint8) ((x)      );       \(\backslash\)
+    *((str) + 2) = (uint8) ((x) >>  8);       \(\backslash\)
+    *((str) + 1) = (uint8) ((x) >> 16);       \(\backslash\)
+    *((str) + 0) = (uint8) ((x) >> 24);       \(\backslash\)
+\}
+\end{DoxyCode}
+
+
+Definition at line 34 of file backup\+\_\+file.\+h.
+

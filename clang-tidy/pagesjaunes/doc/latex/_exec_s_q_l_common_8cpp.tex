@@ -1,0 +1,86 @@
+\hypertarget{_exec_s_q_l_common_8cpp}{}\section{Exec\+S\+Q\+L\+Common.\+cpp File Reference}
+\label{_exec_s_q_l_common_8cpp}\index{Exec\+S\+Q\+L\+Common.\+cpp@{Exec\+S\+Q\+L\+Common.\+cpp}}
+{\ttfamily \#include $<$sys/stat.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$set$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include \char`\"{}Exec\+S\+Q\+L\+Common.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}clang/\+A\+S\+T/\+A\+S\+T\+Context.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}clang/\+A\+S\+T\+Matchers/\+A\+S\+T\+Match\+Finder.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}clang/\+Frontend/\+Compiler\+Instance.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}clang/\+Frontend/\+Frontend\+Action.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}llvm/\+Support/\+Regex.\+h\char`\"{}}\newline
+Include dependency graph for Exec\+S\+Q\+L\+Common.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_exec_s_q_l_common_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \hyperlink{namespaceclang}{clang}
+\item 
+ \hyperlink{namespaceclang_1_1tidy}{clang\+::tidy}
+\item 
+ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes}{clang\+::tidy\+::pagesjaunes}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{_exec_s_q_l_common_8cpp_a91c413b8d154a8c33b205087c810c6ea}{emplace\+\_\+ret\+\_\+t} = std\+::pair$<$ std\+::set$<$ std\+::string $>$\+::iterator, bool $>$
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a1701f2f2432329ae3bb191dec9a9fa25}{clang\+::tidy\+::pagesjaunes\+::create\+Params\+Def} (const std\+::string \&type, const std\+::string \&elemtype, const std\+::string \&size, const std\+::string \&name)
+\item 
+std\+::string \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a99da61353138ae9d98e57b2c77bf025c}{clang\+::tidy\+::pagesjaunes\+::create\+Params\+Declare\+Section} (const std\+::string \&type, const std\+::string \&elemtype, const std\+::string \&size, const std\+::string \&name, const std\+::string \&paramname)
+\item 
+std\+::string \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_ac854225e0b2f981f6b0d6f052968fa88}{clang\+::tidy\+::pagesjaunes\+::create\+Params\+Decl} (const std\+::string \&type, const std\+::string \&elemtype, const std\+::string \&size)
+\item 
+std\+::string \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_ae8c5cda28d525b0b8a9cbbc4120275c8}{clang\+::tidy\+::pagesjaunes\+::create\+Params\+Call} (const std\+::string \&name)
+\item 
+std\+::string \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_aec0e9fb404aeca42708f76ae537048c6}{clang\+::tidy\+::pagesjaunes\+::create\+Host\+Var\+List} (const std\+::string \&name, bool is\+Indicator=false)
+\item 
+const Var\+Decl $\ast$ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a7fb85380c1d6d7f0778ea98d38abb7ee}{clang\+::tidy\+::pagesjaunes\+::find\+Symbol\+In\+Function} (Match\+Finder\+::\+Match\+Callback \&vd\+Matcher, Clang\+Tool $\ast$tool, std\+::string \&var\+Name, const Function\+Decl $\ast$func, std\+::vector$<$ struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_var_decl_match_record}{clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record} $\ast$$>$ \&collector)
+\begin{DoxyCompactList}\small\item\em Find a symbol, its definition and line number in the current function. \end{DoxyCompactList}\item 
+\hyperlink{_exec_s_q_l_common_8h_a68798f7ec86fe00f8e9d5e01773e583b}{string2\+\_\+map} \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a67de085293c9e68c265f89f9159c7b8f}{clang\+::tidy\+::pagesjaunes\+::find\+Decl\+In\+Function} (const Function\+Decl $\ast$func, const std\+::string \&sym\+Name)
+\begin{DoxyCompactList}\small\item\em Find a declaration of a symbol in the context of a function by using the function Decl\+Context iterators until the symbol is found. This method do not update A\+ST. It only browse known declarations in the context of a function. On successfull completion the map will contain\+: \end{DoxyCompactList}\item 
+\hyperlink{_exec_s_q_l_common_8h_a68798f7ec86fe00f8e9d5e01773e583b}{string2\+\_\+map} \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a6adf1713b6f527e8823a8098aa1022ef}{clang\+::tidy\+::pagesjaunes\+::find\+C\+X\+X\+Record\+Member\+In\+Translation\+Unit} (const Translation\+Unit\+Decl $\ast$trans\+Unit, const std\+::string \&cxx\+Record\+Name, const std\+::string \&member\+Name)
+\begin{DoxyCompactList}\small\item\em This function will browse a translation unit and search for a specific named C\+X\+X\+Record and a named member of it. \end{DoxyCompactList}\item 
+\hyperlink{_exec_s_q_l_common_8h_a981798828f60d3148ce03aefeba8b71e}{map\+\_\+host\+\_\+vars} \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a3ebb843a3b48b63600a608b7953b7a90}{clang\+::tidy\+::pagesjaunes\+::decode\+Host\+Vars} (const std\+::string \&host\+Var\+List)
+\item 
+void \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a2ab2e0d5d7deb5eea7106a4c7a8c3e10}{clang\+::tidy\+::pagesjaunes\+::create\+Backup\+File} (const std\+::string \&pathname)
+\begin{DoxyCompactList}\small\item\em Create a backup file for file pathname provided. \end{DoxyCompactList}\item 
+std\+::vector$<$ std\+::string $>$ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_aba7a8f3d6ead090299ad745421c3f77e}{clang\+::tidy\+::pagesjaunes\+::buffer\+Split} (char $\ast$buffer, std\+::vector$<$ std\+::string $>$\+::size\+\_\+type \&nlines, std\+::vector$<$ std\+::string $>$\+::size\+\_\+type reserve, bool start\+\_\+at\+\_\+0)
+\item 
+const char $\ast$ \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a0b01f45cc67d6eaa7514e381edabfeba}{clang\+::tidy\+::pagesjaunes\+::read\+Text\+File} (const char $\ast$filename, std\+::size\+\_\+t \&filesize)
+\begin{DoxyCompactList}\small\item\em read a text file and correctly append 0 at end of read string \end{DoxyCompactList}\item 
+void \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_a02da712a4fa75552524d9f2e1964c270}{clang\+::tidy\+::pagesjaunes\+::on\+Start\+Of\+Translation\+Unit} (\hyperlink{_exec_s_q_l_common_8h_a488fa487a3b35e0a4a38116ffab0a469}{map\+\_\+comment\+\_\+map\+\_\+replacement\+\_\+values} \&replacement\+\_\+per\+\_\+comment)
+\begin{DoxyCompactList}\small\item\em called at start of processing of translation unit \end{DoxyCompactList}\item 
+void \hyperlink{namespaceclang_1_1tidy_1_1pagesjaunes_ac8e5dd22a5698742b52fd8207096a3de}{clang\+::tidy\+::pagesjaunes\+::on\+End\+Of\+Translation\+Unit} (\hyperlink{_exec_s_q_l_common_8h_a488fa487a3b35e0a4a38116ffab0a469}{map\+\_\+comment\+\_\+map\+\_\+replacement\+\_\+values} \&replacement\+\_\+per\+\_\+comment, const std\+::string \&generation\+\_\+report\+\_\+modification\+\_\+in\+\_\+dir, bool generation\+\_\+do\+\_\+keep\+\_\+commented\+\_\+out\+\_\+exec\+\_\+sql)
+\begin{DoxyCompactList}\small\item\em called at end of processing of translation unit \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{_exec_s_q_l_common_8cpp_a91c413b8d154a8c33b205087c810c6ea}\label{_exec_s_q_l_common_8cpp_a91c413b8d154a8c33b205087c810c6ea}} 
+\index{Exec\+S\+Q\+L\+Common.\+cpp@{Exec\+S\+Q\+L\+Common.\+cpp}!emplace\+\_\+ret\+\_\+t@{emplace\+\_\+ret\+\_\+t}}
+\index{emplace\+\_\+ret\+\_\+t@{emplace\+\_\+ret\+\_\+t}!Exec\+S\+Q\+L\+Common.\+cpp@{Exec\+S\+Q\+L\+Common.\+cpp}}
+\subsubsection{\texorpdfstring{emplace\+\_\+ret\+\_\+t}{emplace\_ret\_t}}
+{\footnotesize\ttfamily using \hyperlink{_exec_s_q_l_allocate_to_function_call_8cpp_a91c413b8d154a8c33b205087c810c6ea}{emplace\+\_\+ret\+\_\+t} =  std\+::pair$<$std\+::set$<$std\+::string$>$\+::iterator, bool$>$}
+
+
+
+Definition at line 39 of file Exec\+S\+Q\+L\+Common.\+cpp.
+

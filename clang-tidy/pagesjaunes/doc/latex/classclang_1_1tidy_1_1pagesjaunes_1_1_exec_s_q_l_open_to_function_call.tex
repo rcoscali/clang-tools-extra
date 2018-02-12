@@ -1,0 +1,454 @@
+\hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call}{}\section{clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+Open\+To\+Function\+Call Class Reference}
+\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+
+
+{\ttfamily \#include $<$Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h$>$}
+
+
+
+Inheritance diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_before}{Source\+Range\+Before}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}
+\begin{DoxyCompactList}\small\item\em Collect data about macro expansion for string literals. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind} \{ \newline
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca194d1f5c664958c809e1ff7f09f846ec}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR} = 0, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcacc79fcca817a9621f34ae537ee46ec22}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca90fa9c8bfe4596c6c9f5c150070b834b}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca09fd10071940da41259b893caf4172e5}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH}, 
+\newline
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcab07fdba245a0cc3556f5c84836b4f8ab}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad8f20257dd66918f7922143eb8c06e67}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca42f54637d21cc7e501d0dc0a9b0efea6}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca62ca353ac42137dd9240f853085e160c}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}, 
+\newline
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca5e14e99873ced66d92fef101a0229312}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca32e3fe64f97ded3d9b664db0d7a40785}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca44990ed438db863584972cb0589ce3b7}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET}, 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca06f9e4d8a222ac1817b0b610c3f873d4}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE}, 
+\newline
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad926fafc4de8b5cc04a236c94d5a94ca}{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND}
+ \}
+\item 
+using \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a0d57b8381030c35aacb2c3eb8e2d7bc6}{source\+\_\+range\+\_\+set\+\_\+t} = std\+::multiset$<$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}, \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_before}{Source\+Range\+Before} $>$
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_acea024dc1151ac348418c1fb5d4e65b0}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call} (String\+Ref, Clang\+Tidy\+Context $\ast$)
+\begin{DoxyCompactList}\small\item\em Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call} rewriting check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a55b576bd9764d3756ec7a10340a2c339}{store\+Options} (Clang\+Tidy\+Options\+::\+Option\+Map \&Opts) override
+\begin{DoxyCompactList}\small\item\em Store options for this check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a873f655e036659f80ff9478510e0e556}{register\+Matchers} (ast\+\_\+matchers\+::\+Match\+Finder $\ast$) override
+\begin{DoxyCompactList}\small\item\em Register the A\+S\+T\+Matcher that will found nodes we are interested in. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a85a5f5ed46dfa97a2cf12e5af10c1591}{register\+P\+P\+Callbacks} (Compiler\+Instance \&Compiler) override
+\begin{DoxyCompactList}\small\item\em Register callback for intercepting all pre-\/processor actions. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_ad459a073a4ef5dfcba189e46f618902d}{check} (const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&) override
+\begin{DoxyCompactList}\small\item\em This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. \end{DoxyCompactList}\item 
+std\+::string \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a00b269de2e10d828f3f588911dfc749c}{emit\+Diag\+And\+Fix} (const Source\+Location \&, const Source\+Location \&, const std\+::string \&, const std\+::string \&)
+\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a8bf527ab87666c879c7fcb9410a52878}{emit\+Error} (Diagnostics\+Engine \&, const Source\+Location \&, enum \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}, const std\+::string $\ast$msgptr=nullptr)
+\begin{DoxyCompactList}\small\item\em Manage error conditions by emiting an error. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Clang\+Tidy\+Context $\ast$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a304eb2e17cc9ae4e3cbd173a0d34fb74}{Tidy\+Context}
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_var_decl_match_record}{clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record} $\ast$ $>$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a6113aee6328fb5829b679587def404c5}{m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 27 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h.
+
+
+
+\subsection{Member Typedef Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a0d57b8381030c35aacb2c3eb8e2d7bc6}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a0d57b8381030c35aacb2c3eb8e2d7bc6}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!source\+\_\+range\+\_\+set\+\_\+t@{source\+\_\+range\+\_\+set\+\_\+t}}
+\index{source\+\_\+range\+\_\+set\+\_\+t@{source\+\_\+range\+\_\+set\+\_\+t}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{source\+\_\+range\+\_\+set\+\_\+t}{source\_range\_set\_t}}
+{\footnotesize\ttfamily using \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a0d57b8381030c35aacb2c3eb8e2d7bc6}{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::source\+\_\+range\+\_\+set\+\_\+t} =  std\+::multiset$<$\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}, \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_1_1_source_range_before}{Source\+Range\+Before}$>$}
+
+
+
+Definition at line 142 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h.
+
+
+
+\subsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind@{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}}
+\index{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind@{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}{ExecSQLOpenToFunctionCallErrorKind}}
+{\footnotesize\ttfamily enum \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca194d1f5c664958c809e1ff7f09f846ec}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca194d1f5c664958c809e1ff7f09f846ec}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+N\+O\+\_\+\+E\+R\+R\+OR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcacc79fcca817a9621f34ae537ee46ec22}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcacc79fcca817a9621f34ae537ee46ec22}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+C\+C\+E\+S\+S\+\_\+\+C\+H\+A\+R\+\_\+\+D\+A\+TA&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca90fa9c8bfe4596c6c9f5c150070b834b}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca90fa9c8bfe4596c6c9f5c150070b834b}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+A\+N\+T\+\_\+\+F\+I\+N\+D\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+S\+T\+A\+RT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca09fd10071940da41259b893caf4172e5}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca09fd10071940da41259b893caf4172e5}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+D\+O\+N\+T\+\_\+\+M\+A\+T\+CH&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcab07fdba245a0cc3556f5c84836b4f8ab}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcab07fdba245a0cc3556f5c84836b4f8ab}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad8f20257dd66918f7922143eb8c06e67}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad8f20257dd66918f7922143eb8c06e67}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+E\+X\+I\+S\+TS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca42f54637d21cc7e501d0dc0a9b0efea6}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca42f54637d21cc7e501d0dc0a9b0efea6}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca62ca353ac42137dd9240f853085e160c}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca62ca353ac42137dd9240f853085e160c}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+G\+E\+N\+E\+R\+A\+T\+I\+ON&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca5e14e99873ced66d92fef101a0229312}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca5e14e99873ced66d92fef101a0229312}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+E\+X\+I\+S\+TS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca32e3fe64f97ded3d9b664db0d7a40785}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca32e3fe64f97ded3d9b664db0d7a40785}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+D\+IR&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca44990ed438db863584972cb0589ce3b7}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca44990ed438db863584972cb0589ce3b7}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+U\+N\+S\+U\+P\+P\+O\+R\+T\+E\+D\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+C\+H\+A\+R\+S\+ET&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca06f9e4d8a222ac1817b0b610c3f873d4}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fca06f9e4d8a222ac1817b0b610c3f873d4}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+I\+N\+V\+A\+L\+I\+D\+\_\+\+G\+R\+O\+U\+P\+S\+\_\+\+F\+I\+LE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND@{E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND}}}\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad926fafc4de8b5cc04a236c94d5a94ca}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fcad926fafc4de8b5cc04a236c94d5a94ca}} 
+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+2\+\_\+\+F\+U\+N\+C\+\_\+\+E\+R\+R\+O\+R\+\_\+\+A\+S\+S\+I\+G\+N\+M\+E\+N\+T\+\_\+\+N\+O\+T\+\_\+\+F\+O\+U\+ND&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 31 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_acea024dc1151ac348418c1fb5d4e65b0}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_acea024dc1151ac348418c1fb5d4e65b0}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\index{Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{Exec\+S\+Q\+L\+Open\+To\+Function\+Call()}{ExecSQLOpenToFunctionCall()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call (\begin{DoxyParamCaption}\item[{String\+Ref}]{Name,  }\item[{Clang\+Tidy\+Context $\ast$}]{Context }\end{DoxyParamCaption})}
+
+
+
+Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call} rewriting check. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call} constructor
+
+The rule is created a new check using its {\ttfamily Clang\+Tidy\+Check} base class. Name and context are provided and stored locally. Some diag ids corresponding to errors handled by rule are created\+:
+\begin{DoxyItemize}
+\item unexpected\+\_\+diag\+\_\+id\+: Unexpected error
+\item no\+\_\+error\+\_\+diag\+\_\+id\+: No error
+\item access\+\_\+char\+\_\+data\+\_\+diag\+\_\+id\+: Couldn\textquotesingle{}t access memory buffer for comment (unexpected)
+\item cant\+\_\+find\+\_\+comment\+\_\+diag\+\_\+id\+: Comment not available (unexpected)
+\item comment\+\_\+dont\+\_\+match\+\_\+diag\+\_\+id\+: Invalid comment structure (unexpected)
+\item source\+\_\+generation\+\_\+failure\+\_\+diag\+\_\+id\+: Request source file generation failed (unexpected)
+\item header\+\_\+generation\+\_\+failure\+\_\+diag\+\_\+id\+: Request header file generation failed (unexpected)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Name} & A String\+Ref for the new check name \\
+\hline
+{\em Context} & The Clang\+Tidy\+Context allowing to access other contexts\+Init check (super class) Init our Tidy\+Context instance Request grouping option\+: Filename containing a json map for a group name indexing a vector of requests name \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 153 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_acea024dc1151ac348418c1fb5d4e65b0_cgraph}
+\end{center}
+\end{figure}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_ad459a073a4ef5dfcba189e46f618902d}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_ad459a073a4ef5dfcba189e46f618902d}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!check@{check}}
+\index{check@{check}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{check()}{check()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::check (\begin{DoxyParamCaption}\item[{const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. 
+
+check
+
+This method will navigated and inspect the found A\+ST nodes for\+:
+\begin{DoxyItemize}
+\item determining if the found nodes are elligible for rewrite
+\item extracting all necessary informations for computing rewrite location and code (find ProC generated comment)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Result} & The match result provided by the recursive visitor allowing us to access A\+ST nodes bound to variables \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1061 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_ad459a073a4ef5dfcba189e46f618902d_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a00b269de2e10d828f3f588911dfc749c}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a00b269de2e10d828f3f588911dfc749c}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!emit\+Diag\+And\+Fix@{emit\+Diag\+And\+Fix}}
+\index{emit\+Diag\+And\+Fix@{emit\+Diag\+And\+Fix}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{emit\+Diag\+And\+Fix()}{emitDiagAndFix()}}
+{\footnotesize\ttfamily std\+::string clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::emit\+Diag\+And\+Fix (\begin{DoxyParamCaption}\item[{const Source\+Location \&}]{loc\+\_\+start,  }\item[{const Source\+Location \&}]{loc\+\_\+end,  }\item[{const std\+::string \&}]{function\+\_\+name,  }\item[{const std\+::string \&}]{function\+\_\+args }\end{DoxyParamCaption})}
+
+
+
+Definition at line 385 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a00b269de2e10d828f3f588911dfc749c_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a00b269de2e10d828f3f588911dfc749c_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a8bf527ab87666c879c7fcb9410a52878}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a8bf527ab87666c879c7fcb9410a52878}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!emit\+Error@{emit\+Error}}
+\index{emit\+Error@{emit\+Error}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{emit\+Error()}{emitError()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::emit\+Error (\begin{DoxyParamCaption}\item[{Diagnostics\+Engine \&}]{diag\+\_\+engine,  }\item[{const Source\+Location \&}]{err\+\_\+loc,  }\item[{enum \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_abed8dbc3acbddecbc56bee7b5b5a75fc}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}}]{kind,  }\item[{const std\+::string $\ast$}]{msgptr = {\ttfamily nullptr} }\end{DoxyParamCaption})}
+
+
+
+Manage error conditions by emiting an error. 
+
+emit\+Error
+
+This method manage any error condition by emitting a specific error message to the L\+L\+V\+M/\+Clang Diagnostics\+Engine. It uses diag ids that were created in constructor.
+
+
+\begin{DoxyParams}{Parameters}
+{\em diag\+\_\+engine} & L\+L\+V\+M/\+Clang Diagnostics\+Engine instance \\
+\hline
+{\em err\+\_\+loc} & Error location \\
+\hline
+{\em kind} & Kind of error to report \\
+\hline
+\end{DoxyParams}
+Default unexpected diagnostic id
+
+No error ID\+: it should never occur
+
+Access char data diag ID
+
+Can\textquotesingle{}t find a comment
+
+Cannot match comment
+
+Cannot generate request source file (no location)
+
+Cannot generate request header file (no location)
+
+Cannot generate request source file (already exists)
+
+Cannot generate request header file (already exists)
+
+Cannot generate request source file (create dir)
+
+Cannot generate request header file (no location)
+
+Unsupported String Literal charset
+
+Invalid groups file error 
+
+Definition at line 632 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a8bf527ab87666c879c7fcb9410a52878_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a8bf527ab87666c879c7fcb9410a52878_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a873f655e036659f80ff9478510e0e556}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a873f655e036659f80ff9478510e0e556}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!register\+Matchers@{register\+Matchers}}
+\index{register\+Matchers@{register\+Matchers}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{register\+Matchers()}{registerMatchers()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::register\+Matchers (\begin{DoxyParamCaption}\item[{ast\+\_\+matchers\+::\+Match\+Finder $\ast$}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register the A\+S\+T\+Matcher that will found nodes we are interested in. 
+
+register\+Matchers
+
+This method register 1 matcher for each oracle ProC generated statement to rewrite. The matcher bind elements we will use, for detecting the found statement we want to rewrite , and for writing new code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em Finder} & the recursive visitor that will use our matcher for sending us A\+ST node. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 333 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a85a5f5ed46dfa97a2cf12e5af10c1591}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a85a5f5ed46dfa97a2cf12e5af10c1591}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!register\+P\+P\+Callbacks@{register\+P\+P\+Callbacks}}
+\index{register\+P\+P\+Callbacks@{register\+P\+P\+Callbacks}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{register\+P\+P\+Callbacks()}{registerPPCallbacks()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::register\+P\+P\+Callbacks (\begin{DoxyParamCaption}\item[{Compiler\+Instance \&}]{compiler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register callback for intercepting all pre-\/processor actions. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a85a5f5ed46dfa97a2cf12e5af10c1591}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::register\+P\+P\+Callbacks}
+
+Allows to register a callback for executing our actions at every C/\+C++ pre-\/processor processing. Thanks to this callback we will collect all string literal macro expansions.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em compiler} & the compiler instance we will intercept \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 358 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a55b576bd9764d3756ec7a10340a2c339}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a55b576bd9764d3756ec7a10340a2c339}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!store\+Options@{store\+Options}}
+\index{store\+Options@{store\+Options}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{store\+Options()}{storeOptions()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::store\+Options (\begin{DoxyParamCaption}\item[{Clang\+Tidy\+Options\+::\+Option\+Map \&}]{Opts }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Store options for this check. 
+
+store\+Options
+
+This check support one option for customizing comment regex
+\begin{DoxyItemize}
+\item Generate-\/requests-\/headers
+\item Generate-\/requests-\/sources
+\item Generation-\/directory
+\item Generation-\/header-\/template
+\item Generation-\/source-\/template
+\item Generation-\/request-\/groups
+\item Generation-\/simplify-\/function-\/args
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Opts} & The option map in which to store supported options \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 291 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a6113aee6328fb5829b679587def404c5}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a6113aee6328fb5829b679587def404c5}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector@{m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}}
+\index{m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector@{m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}{m\_req\_var\_decl\_collector}}
+{\footnotesize\ttfamily std\+::vector$<$struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_var_decl_match_record}{clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record} $\ast$$>$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 171 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a304eb2e17cc9ae4e3cbd173a0d34fb74}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_open_to_function_call_a304eb2e17cc9ae4e3cbd173a0d34fb74}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}!Tidy\+Context@{Tidy\+Context}}
+\index{Tidy\+Context@{Tidy\+Context}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{Tidy\+Context}{TidyContext}}
+{\footnotesize\ttfamily Clang\+Tidy\+Context$\ast$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Tidy\+Context}
+
+
+
+Definition at line 62 of file Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_exec_s_q_l_open_to_function_call_8h}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h}\item 
+\hyperlink{_exec_s_q_l_open_to_function_call_8cpp}{Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp}\end{DoxyCompactItemize}

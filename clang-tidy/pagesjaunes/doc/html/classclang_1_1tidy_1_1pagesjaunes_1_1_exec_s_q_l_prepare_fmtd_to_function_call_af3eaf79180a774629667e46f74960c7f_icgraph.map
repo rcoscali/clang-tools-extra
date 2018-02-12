@@ -1,0 +1,5 @@
+<map id="clang::tidy::pagesjaunes::ExecSQLPrepareFmtdToFunctionCall::emitError" name="clang::tidy::pagesjaunes::ExecSQLPrepareFmtdToFunctionCall::emitError">
+<area shape="rect" id="node2" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_prepare_fmtd_to_function_call.html#ab8711ab57fe8dab91a56a31d01da3631" title="Constructor for the ExecSQLPrepareFmtdToFunctionCall rewriting check. " alt="" coords="280,5,552,61"/>
+<area shape="rect" id="node3" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_prepare_fmtd_to_function_call.html#a384f21a310396151c6f01d282e0e484a" title="clang::tidy::pagesjaunes\l::ExecSQLPrepareFmtdToFunction\lCall::emitDiagAndFix" alt="" coords="303,85,529,141"/>
+<area shape="rect" id="node4" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_prepare_fmtd_to_function_call.html#a2110f550c514850972d8fe7a57c9d754" title="This method is called each time a visited AST node matching our ASTMatcher is found. " alt="" coords="600,119,827,175"/>
+</map>

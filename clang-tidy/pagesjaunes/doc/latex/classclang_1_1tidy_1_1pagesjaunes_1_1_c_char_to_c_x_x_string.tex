@@ -1,0 +1,188 @@
+\hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string}{}\section{clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:C\+Char\+To\+C\+X\+X\+String Class Reference}
+\label{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string}\index{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}}
+
+
+Checks that argument name match parameter name rules.  
+
+
+
+
+{\ttfamily \#include $<$C\+Char\+To\+C\+X\+X\+String.\+h$>$}
+
+
+
+Inheritance diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:C\+Char\+To\+C\+X\+X\+String\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:C\+Char\+To\+C\+X\+X\+String\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ae4b2b5f44a0edf261c3afbf773ae909c}{C\+Char\+To\+C\+X\+X\+String} (String\+Ref Name, Clang\+Tidy\+Context $\ast$Context)
+\begin{DoxyCompactList}\small\item\em Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string}{C\+Char\+To\+C\+X\+X\+String} rewriting Clang\+Tidy\+Check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab1991d7f4de935f7e8d1e682569aa6e4}{store\+Options} (Clang\+Tidy\+Options\+::\+Option\+Map \&Opts) override
+\begin{DoxyCompactList}\small\item\em Store options for this check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab0ef139bc40f42a606a376b6f7d41236}{register\+Matchers} (ast\+\_\+matchers\+::\+Match\+Finder $\ast$Finder) override
+\begin{DoxyCompactList}\small\item\em Register the A\+S\+T\+Matchers that will found nodes we are interested in. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_aebfaf36f2199b0b53bbf7e1241f09b77}{check} (const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&Result) override
+\begin{DoxyCompactList}\small\item\em This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Checks that argument name match parameter name rules. 
+
+These options are supported\+:
+\begin{DoxyItemize}
+\item {\ttfamily Include-\/\+Comment-\/\+Regex}\+: The regular expression to use for parsing comment default is 1 (process strcpy)
+\item {\ttfamily Handle-\/strcmp}\+: actually process or not strcpy default is 1 (process strcmp)
+\item {\ttfamily Handle-\/strlen}\+: actually process or not strcpy default is 1 (process strlen) 
+\end{DoxyItemize}
+
+Definition at line 37 of file C\+Char\+To\+C\+X\+X\+String.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ae4b2b5f44a0edf261c3afbf773ae909c}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ae4b2b5f44a0edf261c3afbf773ae909c}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}!C\+Char\+To\+C\+X\+X\+String@{C\+Char\+To\+C\+X\+X\+String}}
+\index{C\+Char\+To\+C\+X\+X\+String@{C\+Char\+To\+C\+X\+X\+String}!clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}}
+\subsubsection{\texorpdfstring{C\+Char\+To\+C\+X\+X\+String()}{CCharToCXXString()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String\+::\+C\+Char\+To\+C\+X\+X\+String (\begin{DoxyParamCaption}\item[{String\+Ref}]{Name,  }\item[{Clang\+Tidy\+Context $\ast$}]{Context }\end{DoxyParamCaption})}
+
+
+
+Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string}{C\+Char\+To\+C\+X\+X\+String} rewriting Clang\+Tidy\+Check. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string}{C\+Char\+To\+C\+X\+X\+String} constructor
+
+The rule is created a new check using its {\ttfamily Clang\+Tidy\+Check} base class. Name and context are provided and stored locally. Some diag ids corresponding to errors handled by rule are created\+:
+\begin{DoxyItemize}
+\item no\+\_\+error\+\_\+diag\+\_\+id\+: No error
+\item array\+\_\+type\+\_\+not\+\_\+found\+\_\+diag\+\_\+id\+: Didn\textquotesingle{}t found a constant array type
+\item record\+\_\+decl\+\_\+not\+\_\+found\+\_\+diag\+\_\+id\+: Didn\textquotesingle{}t found a Record\+Decl (this is a req)
+\item member\+\_\+has\+\_\+no\+\_\+def\+\_\+diag\+\_\+id\+: Didn\textquotesingle{}t found the definition for our type changed member
+\item member\+\_\+not\+\_\+found\+\_\+diag\+\_\+id\+: Didn\textquotesingle{}t found the member (unexpected)
+\item member2\+\_\+not\+\_\+found\+\_\+diag\+\_\+id\+: Didn\textquotesingle{}t found the second member (unexpected)
+\item unexpected\+\_\+ast\+\_\+node\+\_\+kind\+\_\+diag\+\_\+id\+: Bad node kind detected (unexpected)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Name} & A String\+Ref for the new check name \\
+\hline
+{\em Context} & The Clang\+Tidy\+Context allowing to access other contexts \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 52 of file C\+Char\+To\+C\+X\+X\+String.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_aebfaf36f2199b0b53bbf7e1241f09b77}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_aebfaf36f2199b0b53bbf7e1241f09b77}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}!check@{check}}
+\index{check@{check}!clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}}
+\subsubsection{\texorpdfstring{check()}{check()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String\+::check (\begin{DoxyParamCaption}\item[{const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&}]{Result }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. 
+
+check
+
+This method will navigated and inspect the found A\+ST nodes for\+:
+\begin{DoxyItemize}
+\item determining if the found nodes are elligible for rewrite
+\item extracting all necessary informations for computing rewrite location and code It handles rewriting three string manipulation functions\+:
+\item strcmp
+\item strcpy
+\item strlen
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & The match result provided by the recursive visitor allowing us to access A\+ST nodes bound to variables \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 794 of file C\+Char\+To\+C\+X\+X\+String.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab0ef139bc40f42a606a376b6f7d41236}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab0ef139bc40f42a606a376b6f7d41236}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}!register\+Matchers@{register\+Matchers}}
+\index{register\+Matchers@{register\+Matchers}!clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}}
+\subsubsection{\texorpdfstring{register\+Matchers()}{registerMatchers()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String\+::register\+Matchers (\begin{DoxyParamCaption}\item[{ast\+\_\+matchers\+::\+Match\+Finder $\ast$}]{Finder }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register the A\+S\+T\+Matchers that will found nodes we are interested in. 
+
+register\+Matchers
+
+This method register 3 matchers for each string manipulation calls we want to rewrite. These three calls are\+:
+\begin{DoxyItemize}
+\item strcmp
+\item strcpy
+\item strlen The matchers bind elements we will use, for detecting we want to rewrite the foudn statement, and for writing new code.
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Finder} & the recursive visitor that will use our matcher for sending us A\+ST node. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 100 of file C\+Char\+To\+C\+X\+X\+String.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab1991d7f4de935f7e8d1e682569aa6e4}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_c_char_to_c_x_x_string_ab1991d7f4de935f7e8d1e682569aa6e4}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}!store\+Options@{store\+Options}}
+\index{store\+Options@{store\+Options}!clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String@{clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}}
+\subsubsection{\texorpdfstring{store\+Options()}{storeOptions()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String\+::store\+Options (\begin{DoxyParamCaption}\item[{Clang\+Tidy\+Options\+::\+Option\+Map \&}]{Opts }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Store options for this check. 
+
+store\+Options
+
+This check support three options for enabling/disabling each call processing\+:
+\begin{DoxyItemize}
+\item Handle-\/strcpy\+: allowsto enable/disable processing of strcpy
+\item Handle-\/strcmp\+: allowsto enable/disable processing of strcmp
+\item Handle-\/strlen\+: allowsto enable/disable processing of strlen
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Opts} & The option map in which to store supported options \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 76 of file C\+Char\+To\+C\+X\+X\+String.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_c_char_to_c_x_x_string_8h}{C\+Char\+To\+C\+X\+X\+String.\+h}\item 
+\hyperlink{_c_char_to_c_x_x_string_8cpp}{C\+Char\+To\+C\+X\+X\+String.\+cpp}\end{DoxyCompactItemize}

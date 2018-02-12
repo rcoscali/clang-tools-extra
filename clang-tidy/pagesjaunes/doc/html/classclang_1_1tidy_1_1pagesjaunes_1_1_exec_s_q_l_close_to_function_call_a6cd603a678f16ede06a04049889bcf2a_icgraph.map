@@ -1,0 +1,5 @@
+<map id="clang::tidy::pagesjaunes::ExecSQLCloseToFunctionCall::emitError" name="clang::tidy::pagesjaunes::ExecSQLCloseToFunctionCall::emitError">
+<area shape="rect" id="node2" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_close_to_function_call.html#aba6dcb92a554c560136ecd20adc9bc53" title="Constructor for the ExecSQLCloseToFunctionCall rewriting check. " alt="" coords="261,5,469,61"/>
+<area shape="rect" id="node3" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_close_to_function_call.html#a9a58f75cf980f02ab9f29ac4796e3913" title="clang::tidy::pagesjaunes\l::ExecSQLCloseToFunctionCall\l::emitDiagAndFix" alt="" coords="261,85,469,141"/>
+<area shape="rect" id="node4" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_close_to_function_call.html#a1906033d14542dee9278065f2d7daa6a" title="This method is called each time a visited AST node matching our ASTMatcher is found. " alt="" coords="517,126,768,167"/>
+</map>

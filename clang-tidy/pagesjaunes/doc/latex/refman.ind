@@ -1,0 +1,2759 @@
+\begin{theindex}
+
+  \item {$\sim$\+Allocate\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{64}
+  \item {$\sim$\+Backup\+File}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{81}
+  \item {$\sim$\+Buffer\+Split\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{89}
+  \item {$\sim$\+Close\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{99}
+  \item {$\sim$\+Declare\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{101}
+  \item {$\sim$\+Decode\+Host\+Vars\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{103}
+  \item {$\sim$\+Fetch\+Decode\+Host\+Var}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{210}
+  \item {$\sim$\+Fetch\+Fileline\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{213}
+  \item {$\sim$\+Fetch\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{215}
+  \item {$\sim$\+Fetch\+Tmpl\+Repeat\+Members2\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{218}
+  \item {$\sim$\+Fetch\+Tmpl\+Repeat\+Members\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{220}
+  \item {$\sim$\+Fetch\+Tmpl\+Repeat\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{223}
+  \item {$\sim$\+File\+Manipulator}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{226}
+  \item {$\sim$\+Free\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{229}
+  \item {$\sim$\+Lob\+Create\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{232}
+  \item {$\sim$\+Lob\+Open\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{234}
+  \item {$\sim$\+Lob\+Read\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{237}
+  \item {$\sim$\+Open\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{239}
+  \item {$\sim$\+Open\+Request\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{242}
+  \item {$\sim$\+Prepare\+Fmtd\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{246}
+
+  \indexspace
+
+  \item {add\+Check\+Factories}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Pages\+Jaunes\+Module}, 
+		\hyperpage{244}
+  \item {allocate\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{387}
+    \subitem {R\+E\+Q1}, \hyperpage{387}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{388}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{388}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{388}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{388}
+  \item {Allocate\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{64}
+  \item {arg0}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{253}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{256}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{251}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{255}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{249}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{257}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{250}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{252}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{248}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{254}
+
+  \indexspace
+
+  \item {backup\+\_\+file.\+h}
+    \subitem {O\+N\+E\+G\+I\+GA}, \hyperpage{391}
+    \subitem {O\+N\+E\+K\+I\+LO}, \hyperpage{391}
+    \subitem {O\+N\+E\+M\+E\+GA}, \hyperpage{391}
+    \subitem {S\+H\+A256\+\_\+\+F1}, \hyperpage{392}
+    \subitem {S\+H\+A256\+\_\+\+F2}, \hyperpage{392}
+    \subitem {S\+H\+A256\+\_\+\+F3}, \hyperpage{392}
+    \subitem {S\+H\+A256\+\_\+\+F4}, \hyperpage{392}
+    \subitem {S\+H\+A2\+\_\+\+CH}, \hyperpage{392}
+    \subitem {S\+H\+A2\+\_\+\+M\+AJ}, \hyperpage{393}
+    \subitem {S\+H\+A2\+\_\+\+P\+A\+C\+K32}, \hyperpage{393}
+    \subitem {S\+H\+A2\+\_\+\+R\+O\+TL}, \hyperpage{393}
+    \subitem {S\+H\+A2\+\_\+\+R\+O\+TR}, \hyperpage{393}
+    \subitem {S\+H\+A2\+\_\+\+S\+H\+FR}, \hyperpage{394}
+    \subitem {S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}, \hyperpage{394}
+  \item {Backup\+File}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{80}
+  \item {bigbuf}
+    \subitem {buffer\+\_\+split.\+test.\+h}, \hyperpage{400}
+  \item {bigbuf2}
+    \subitem {buffer\+\_\+split.\+test2.\+h}, \hyperpage{400}
+  \item {binop}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{66}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{72}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{67}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{73}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{75}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{68}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{69}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{70}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{74}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{76}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{78}
+  \item {binop\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{66}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{72}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{67}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{73}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{75}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{68}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{69}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{70}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{74}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{78}
+  \item {buffer\+\_\+split.\+h}
+    \subitem {S\+H\+A256\+\_\+\+F1}, \hyperpage{396}
+    \subitem {S\+H\+A256\+\_\+\+F2}, \hyperpage{397}
+    \subitem {S\+H\+A256\+\_\+\+F3}, \hyperpage{397}
+    \subitem {S\+H\+A256\+\_\+\+F4}, \hyperpage{397}
+    \subitem {S\+H\+A2\+\_\+\+CH}, \hyperpage{397}
+    \subitem {S\+H\+A2\+\_\+\+M\+AJ}, \hyperpage{397}
+    \subitem {S\+H\+A2\+\_\+\+P\+A\+C\+K32}, \hyperpage{398}
+    \subitem {S\+H\+A2\+\_\+\+R\+O\+TL}, \hyperpage{398}
+    \subitem {S\+H\+A2\+\_\+\+R\+O\+TR}, \hyperpage{398}
+    \subitem {S\+H\+A2\+\_\+\+S\+H\+FR}, \hyperpage{398}
+    \subitem {S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}, \hyperpage{399}
+  \item {buffer\+\_\+split.\+test.\+h}
+    \subitem {bigbuf}, \hyperpage{400}
+  \item {buffer\+\_\+split.\+test2.\+h}
+    \subitem {bigbuf2}, \hyperpage{400}
+  \item {buffer\+Split}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{17}
+  \item {Buffer\+Split\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{89}
+
+  \indexspace
+
+  \item {C\+Char\+To\+C\+X\+X\+String}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}, 
+		\hyperpage{95}
+  \item {C\+Char\+To\+C\+X\+X\+String.\+cpp}, \hyperpage{339}
+  \item {C\+Char\+To\+C\+X\+X\+String.\+h}, \hyperpage{339}
+  \item {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+B\+I\+G\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{92}
+  \item {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{92}
+  \item {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+F\+I\+L\+E\+\_\+\+R\+E\+L\+A\+T\+I\+V\+E\+\_\+\+P\+A\+TH}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{93}
+  \item {call\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{325}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{320}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{327}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{332}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{322}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{333}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{330}
+  \item {call\+Expr}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{253}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{325}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{256}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{320}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{251}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{327}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{255}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{332}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{249}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{322}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{257}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{250}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{252}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{248}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{334}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{254}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{330}
+  \item {callexpr\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{253}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{256}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{251}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{255}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{249}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{257}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{250}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{252}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{248}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{254}
+  \item {check}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}, 
+		\hyperpage{96}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}, 
+		\hyperpage{106}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{111}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{118}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{126}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{134}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{140}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{145}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{152}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{157}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{164}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{169}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{176}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{185}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{196}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{205}
+  \item {clang}, \hyperpage{15}
+  \item {clang\+::tidy}, \hyperpage{15}
+    \subitem {Pages\+Jaunes\+Module\+Anchor\+Source}, \hyperpage{15}
+  \item {clang\+::tidy\+::pagesjaunes}, \hyperpage{15}
+    \subitem {buffer\+Split}, \hyperpage{17}
+    \subitem {create\+Backup\+File}, \hyperpage{17}
+    \subitem {create\+Host\+Var\+List}, \hyperpage{18}
+    \subitem {create\+Params\+Call}, \hyperpage{19}
+    \subitem {create\+Params\+Decl}, \hyperpage{20}
+    \subitem {create\+Params\+Declare\+Section}, \hyperpage{21}
+    \subitem {create\+Params\+Def}, \hyperpage{22}
+    \subitem {decode\+Host\+Vars}, \hyperpage{23}
+    \subitem {find\+C\+X\+X\+Record\+Member\+In\+Translation\+Unit}, 
+		\hyperpage{24}
+    \subitem {find\+Decl\+In\+Function}, \hyperpage{25}
+    \subitem {find\+Symbol\+In\+Function}, \hyperpage{26}
+    \subitem {on\+End\+Of\+Translation\+Unit}, \hyperpage{27}
+    \subitem {on\+Start\+Of\+Translation\+Unit}, \hyperpage{29}
+    \subitem {read\+Text\+File}, \hyperpage{31}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}, 
+		\hyperpage{94}
+    \subitem {C\+Char\+To\+C\+X\+X\+String}, \hyperpage{95}
+    \subitem {check}, \hyperpage{96}
+    \subitem {register\+Matchers}, \hyperpage{96}
+    \subitem {store\+Options}, \hyperpage{97}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}, 
+		\hyperpage{105}
+    \subitem {check}, \hyperpage{106}
+    \subitem {De\+Include\+Pre\+ProC}, \hyperpage{106}
+    \subitem {register\+Matchers}, \hyperpage{107}
+    \subitem {store\+Options}, \hyperpage{107}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{108}
+    \subitem {check}, \hyperpage{111}
+    \subitem {Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{110}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{114}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{114}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{114}
+    \subitem {register\+Matchers}, \hyperpage{111}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{113}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{110}
+    \subitem {store\+Options}, \hyperpage{113}
+    \subitem {Tidy\+Context}, \hyperpage{114}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{65}
+    \subitem {binop}, \hyperpage{66}
+    \subitem {binop\+\_\+linenum}, \hyperpage{66}
+    \subitem {lhs}, \hyperpage{66}
+    \subitem {rhs}, \hyperpage{66}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{252}
+    \subitem {arg0}, \hyperpage{253}
+    \subitem {call\+Expr}, \hyperpage{253}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{253}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{273}
+    \subitem {operator()}, \hyperpage{273}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{298}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{301}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{301}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{301}
+    \subitem {operator=}, \hyperpage{300}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{299, 300}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{325}
+    \subitem {call\+\_\+linenum}, \hyperpage{325}
+    \subitem {call\+Expr}, \hyperpage{325}
+    \subitem {linenum}, \hyperpage{326}
+    \subitem {literal}, \hyperpage{326}
+    \subitem {var\+Decl}, \hyperpage{326}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{326}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{115}
+    \subitem {check}, \hyperpage{118}
+    \subitem {emit\+Diag\+And\+Fix}, \hyperpage{119}
+    \subitem {emit\+Error}, \hyperpage{119}
+    \subitem {Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{117}
+    \subitem {Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+Error\+Kind}, 
+		\hyperpage{117}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{122}
+    \subitem {register\+Matchers}, \hyperpage{120}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{121}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{116}
+    \subitem {store\+Options}, \hyperpage{121}
+    \subitem {Tidy\+Context}, \hyperpage{122}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{267}
+    \subitem {operator()}, \hyperpage{268}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{307}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{310}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{310}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{310}
+    \subitem {operator=}, \hyperpage{309}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{308, 309}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{336}
+    \subitem {dummy1}, \hyperpage{336}
+    \subitem {dummy2}, \hyperpage{336}
+    \subitem {linenum}, \hyperpage{337}
+    \subitem {var\+Decl}, \hyperpage{337}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{123}
+    \subitem {check}, \hyperpage{126}
+    \subitem {emit\+Diag\+And\+Fix}, \hyperpage{127}
+    \subitem {emit\+Error}, \hyperpage{128}
+    \subitem {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{125}
+    \subitem {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+Error\+Kind}, 
+		\hyperpage{125}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{131}
+    \subitem {register\+Matchers}, \hyperpage{129}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{130}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{124}
+    \subitem {store\+Options}, \hyperpage{130}
+    \subitem {Tidy\+Context}, \hyperpage{131}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{268}
+    \subitem {operator()}, \hyperpage{268}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{292}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{294}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{295}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{295}
+    \subitem {operator=}, \hyperpage{294}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{293, 294}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{132}
+    \subitem {check}, \hyperpage{134}
+    \subitem {Exec\+S\+Q\+L\+For\+To\+Function\+Call}, \hyperpage{133}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{136}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{136}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{136}
+    \subitem {register\+Matchers}, \hyperpage{135}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{135}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{133}
+    \subitem {store\+Options}, \hyperpage{135}
+    \subitem {Tidy\+Context}, \hyperpage{137}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{71}
+    \subitem {binop}, \hyperpage{72}
+    \subitem {binop\+\_\+linenum}, \hyperpage{72}
+    \subitem {lhs}, \hyperpage{72}
+    \subitem {rhs}, \hyperpage{72}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{255}
+    \subitem {arg0}, \hyperpage{256}
+    \subitem {call\+Expr}, \hyperpage{256}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{256}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{274}
+    \subitem {operator()}, \hyperpage{274}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{279}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{281}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{282}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{282}
+    \subitem {operator=}, \hyperpage{281}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{280, 281}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{320}
+    \subitem {call\+\_\+linenum}, \hyperpage{320}
+    \subitem {call\+Expr}, \hyperpage{320}
+    \subitem {linenum}, \hyperpage{321}
+    \subitem {literal}, \hyperpage{321}
+    \subitem {var\+Decl}, \hyperpage{321}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{321}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{137}
+    \subitem {check}, \hyperpage{140}
+    \subitem {Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, \hyperpage{139}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{142}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{142}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{142}
+    \subitem {register\+Matchers}, \hyperpage{140}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{141}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{138}
+    \subitem {store\+Options}, \hyperpage{141}
+    \subitem {Tidy\+Context}, \hyperpage{142}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{66}
+    \subitem {binop}, \hyperpage{67}
+    \subitem {binop\+\_\+linenum}, \hyperpage{67}
+    \subitem {lhs}, \hyperpage{67}
+    \subitem {rhs}, \hyperpage{67}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{250}
+    \subitem {arg0}, \hyperpage{251}
+    \subitem {call\+Expr}, \hyperpage{251}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{251}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{267}
+    \subitem {operator()}, \hyperpage{267}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{301}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{304}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{304}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{304}
+    \subitem {operator=}, \hyperpage{303}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{302, 303}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{327}
+    \subitem {call\+\_\+linenum}, \hyperpage{327}
+    \subitem {call\+Expr}, \hyperpage{327}
+    \subitem {linenum}, \hyperpage{327}
+    \subitem {literal}, \hyperpage{327}
+    \subitem {var\+Decl}, \hyperpage{328}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{328}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{143}
+    \subitem {check}, \hyperpage{145}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{144}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{148}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{148}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{148}
+    \subitem {on\+End\+Of\+Translation\+Unit}, \hyperpage{146}
+    \subitem {on\+Start\+Of\+Translation\+Unit}, \hyperpage{146}
+    \subitem {register\+Matchers}, \hyperpage{146}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{147}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{144}
+    \subitem {store\+Options}, \hyperpage{147}
+    \subitem {Tidy\+Context}, \hyperpage{148}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{72}
+    \subitem {binop}, \hyperpage{73}
+    \subitem {binop\+\_\+linenum}, \hyperpage{73}
+    \subitem {lhs}, \hyperpage{73}
+    \subitem {rhs}, \hyperpage{73}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{254}
+    \subitem {arg0}, \hyperpage{255}
+    \subitem {call\+Expr}, \hyperpage{255}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{255}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{271}
+    \subitem {operator()}, \hyperpage{272}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{310}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{313}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{313}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{313}
+    \subitem {operator=}, \hyperpage{312}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{311, 312}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{331}
+    \subitem {call\+\_\+linenum}, \hyperpage{332}
+    \subitem {call\+Expr}, \hyperpage{332}
+    \subitem {linenum}, \hyperpage{332}
+    \subitem {literal}, \hyperpage{332}
+    \subitem {var\+Decl}, \hyperpage{332}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{333}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{149}
+    \subitem {check}, \hyperpage{152}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{151}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{154}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{154}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{154}
+    \subitem {register\+Matchers}, \hyperpage{152}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{153}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{150}
+    \subitem {store\+Options}, \hyperpage{153}
+    \subitem {Tidy\+Context}, \hyperpage{154}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{75}
+    \subitem {binop}, \hyperpage{75}
+    \subitem {binop\+\_\+linenum}, \hyperpage{75}
+    \subitem {lhs}, \hyperpage{75}
+    \subitem {rhs}, \hyperpage{76}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{248}
+    \subitem {arg0}, \hyperpage{249}
+    \subitem {call\+Expr}, \hyperpage{249}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{249}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{275}
+    \subitem {operator()}, \hyperpage{275}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{313}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{316}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{316}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{316}
+    \subitem {operator=}, \hyperpage{315}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{314, 315}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{322}
+    \subitem {call\+\_\+linenum}, \hyperpage{322}
+    \subitem {call\+Expr}, \hyperpage{322}
+    \subitem {linenum}, \hyperpage{322}
+    \subitem {literal}, \hyperpage{322}
+    \subitem {var\+Decl}, \hyperpage{323}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{323}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{155}
+    \subitem {check}, \hyperpage{157}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{156}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{160}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{160}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{161}
+    \subitem {register\+Matchers}, \hyperpage{158}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{158}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{156}
+    \subitem {store\+Options}, \hyperpage{160}
+    \subitem {Tidy\+Context}, \hyperpage{161}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{68}
+    \subitem {binop}, \hyperpage{68}
+    \subitem {binop\+\_\+linenum}, \hyperpage{68}
+    \subitem {lhs}, \hyperpage{68}
+    \subitem {rhs}, \hyperpage{68}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{256}
+    \subitem {arg0}, \hyperpage{257}
+    \subitem {call\+Expr}, \hyperpage{257}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{257}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{273}
+    \subitem {operator()}, \hyperpage{274}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{282}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{285}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{285}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{285}
+    \subitem {operator=}, \hyperpage{284}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{283, 284}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{323}
+    \subitem {call\+\_\+linenum}, \hyperpage{324}
+    \subitem {call\+Expr}, \hyperpage{324}
+    \subitem {linenum}, \hyperpage{324}
+    \subitem {literal}, \hyperpage{324}
+    \subitem {var\+Decl}, \hyperpage{324}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{324}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{161}
+    \subitem {check}, \hyperpage{164}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{163}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{165}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{166}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{166}
+    \subitem {register\+Matchers}, \hyperpage{164}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{164}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{163}
+    \subitem {store\+Options}, \hyperpage{165}
+    \subitem {Tidy\+Context}, \hyperpage{166}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{69}
+    \subitem {binop}, \hyperpage{69}
+    \subitem {binop\+\_\+linenum}, \hyperpage{69}
+    \subitem {lhs}, \hyperpage{69}
+    \subitem {rhs}, \hyperpage{70}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{249}
+    \subitem {arg0}, \hyperpage{250}
+    \subitem {call\+Expr}, \hyperpage{250}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{250}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{269}
+    \subitem {operator()}, \hyperpage{269}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{304}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{307}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{307}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{307}
+    \subitem {operator=}, \hyperpage{306}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{305, 306}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{328}
+    \subitem {call\+\_\+linenum}, \hyperpage{329}
+    \subitem {call\+Expr}, \hyperpage{329}
+    \subitem {linenum}, \hyperpage{329}
+    \subitem {literal}, \hyperpage{329}
+    \subitem {var\+Decl}, \hyperpage{329}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{329}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{167}
+    \subitem {check}, \hyperpage{169}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{168}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{172}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{172}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{172}
+    \subitem {register\+Matchers}, \hyperpage{170}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{170}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{168}
+    \subitem {store\+Options}, \hyperpage{171}
+    \subitem {Tidy\+Context}, \hyperpage{172}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{70}
+    \subitem {binop}, \hyperpage{70}
+    \subitem {binop\+\_\+linenum}, \hyperpage{70}
+    \subitem {cxxrecord}, \hyperpage{71}
+    \subitem {lhs}, \hyperpage{71}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{251}
+    \subitem {arg0}, \hyperpage{252}
+    \subitem {call\+Expr}, \hyperpage{252}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{252}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{270}
+    \subitem {operator()}, \hyperpage{270}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{276}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{278}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{278}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{279}
+    \subitem {operator=}, \hyperpage{278}
+    \subitem {Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{276, 277}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{335}
+    \subitem {dummy1}, \hyperpage{335}
+    \subitem {dummy2}, \hyperpage{335}
+    \subitem {linenum}, \hyperpage{335}
+    \subitem {var\+Decl}, \hyperpage{336}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{173}
+    \subitem {check}, \hyperpage{176}
+    \subitem {emit\+Diag\+And\+Fix}, \hyperpage{177}
+    \subitem {emit\+Error}, \hyperpage{178}
+    \subitem {Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, \hyperpage{175}
+    \subitem {Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}, 
+		\hyperpage{175}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{181}
+    \subitem {register\+Matchers}, \hyperpage{179}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{180}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{174}
+    \subitem {store\+Options}, \hyperpage{180}
+    \subitem {Tidy\+Context}, \hyperpage{181}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{271}
+    \subitem {operator()}, \hyperpage{271}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{316}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{319}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{319}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{319}
+    \subitem {operator=}, \hyperpage{319}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{317, 318}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{182}
+    \subitem {check}, \hyperpage{185}
+    \subitem {emit\+Diag\+And\+Fix}, \hyperpage{186}
+    \subitem {emit\+Error}, \hyperpage{187}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{184}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+Error\+Kind}, 
+		\hyperpage{184}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{192}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{192}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{192}
+    \subitem {register\+Matchers}, \hyperpage{189}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{191}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{183}
+    \subitem {store\+Options}, \hyperpage{191}
+    \subitem {Tidy\+Context}, \hyperpage{192}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{74}
+    \subitem {binop}, \hyperpage{74}
+    \subitem {binop\+\_\+linenum}, \hyperpage{74}
+    \subitem {lhs}, \hyperpage{74}
+    \subitem {rhs}, \hyperpage{74}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{247}
+    \subitem {arg0}, \hyperpage{248}
+    \subitem {call\+Expr}, \hyperpage{248}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{248}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{269}
+    \subitem {operator()}, \hyperpage{270}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{288}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{291}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{291}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{291}
+    \subitem {operator=}, \hyperpage{291}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{289, 290}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{193}
+    \subitem {check}, \hyperpage{196}
+    \subitem {emit\+Diag\+And\+Fix}, \hyperpage{197}
+    \subitem {emit\+Error}, \hyperpage{198}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{195}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+Error\+Kind}, 
+		\hyperpage{195}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{202}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{202}
+    \subitem {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}, 
+		\hyperpage{202}
+    \subitem {register\+Matchers}, \hyperpage{200}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{201}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{194}
+    \subitem {store\+Options}, \hyperpage{201}
+    \subitem {Tidy\+Context}, \hyperpage{202}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{76}
+    \subitem {binop}, \hyperpage{76}
+    \subitem {binop\+\_\+linenum}, \hyperpage{77}
+    \subitem {lhs}, \hyperpage{77}
+    \subitem {lhs\+Var}, \hyperpage{77}
+    \subitem {lhs\+Var\+\_\+linenum}, \hyperpage{77}
+    \subitem {rhs}, \hyperpage{77}
+    \subitem {rhs\+Var}, \hyperpage{77}
+    \subitem {rhs\+Var\+\_\+linenum}, \hyperpage{78}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{272}
+    \subitem {operator()}, \hyperpage{272}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{285}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{288}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{288}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{288}
+    \subitem {operator=}, \hyperpage{287}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{286, 287}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{333}
+    \subitem {call\+\_\+linenum}, \hyperpage{333}
+    \subitem {call\+Expr}, \hyperpage{334}
+    \subitem {linenum}, \hyperpage{334}
+    \subitem {literal}, \hyperpage{334}
+    \subitem {var\+Decl}, \hyperpage{334}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{334}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{203}
+    \subitem {check}, \hyperpage{205}
+    \subitem {Exec\+S\+Q\+L\+To\+Function\+Call}, \hyperpage{204}
+    \subitem {m\+\_\+req\+\_\+assign\+\_\+collector}, \hyperpage{208}
+    \subitem {m\+\_\+req\+\_\+copy\+\_\+collector}, \hyperpage{208}
+    \subitem {m\+\_\+req\+\_\+fmt\+\_\+collector}, \hyperpage{209}
+    \subitem {register\+Matchers}, \hyperpage{206}
+    \subitem {register\+P\+P\+Callbacks}, \hyperpage{206}
+    \subitem {source\+\_\+range\+\_\+set\+\_\+t}, \hyperpage{204}
+    \subitem {store\+Options}, \hyperpage{208}
+    \subitem {Tidy\+Context}, \hyperpage{209}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{78}
+    \subitem {binop}, \hyperpage{78}
+    \subitem {binop\+\_\+linenum}, \hyperpage{78}
+    \subitem {lhs}, \hyperpage{79}
+    \subitem {rhs}, \hyperpage{79}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Req\+Fmt\+Record}, 
+		\hyperpage{253}
+    \subitem {arg0}, \hyperpage{254}
+    \subitem {call\+Expr}, \hyperpage{254}
+    \subitem {callexpr\+\_\+linenum}, \hyperpage{254}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{275}
+    \subitem {operator()}, \hyperpage{276}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{295}
+    \subitem {m\+\_\+macro\+\_\+name}, \hyperpage{298}
+    \subitem {m\+\_\+macro\+\_\+range}, \hyperpage{298}
+    \subitem {m\+\_\+usage\+\_\+range}, \hyperpage{298}
+    \subitem {operator=}, \hyperpage{297}
+    \subitem {Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{296, 297}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{330}
+    \subitem {call\+\_\+linenum}, \hyperpage{330}
+    \subitem {call\+Expr}, \hyperpage{330}
+    \subitem {linenum}, \hyperpage{330}
+    \subitem {literal}, \hyperpage{331}
+    \subitem {var\+Decl}, \hyperpage{331}
+    \subitem {vardecl\+\_\+linenum}, \hyperpage{331}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Pages\+Jaunes\+Module}, 
+		\hyperpage{243}
+    \subitem {add\+Check\+Factories}, \hyperpage{244}
+    \subitem {get\+Module\+Options}, \hyperpage{244}
+  \item {clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{337}
+    \subitem {dummy1}, \hyperpage{337}
+    \subitem {dummy2}, \hyperpage{338}
+    \subitem {linenum}, \hyperpage{338}
+    \subitem {var\+Decl}, \hyperpage{338}
+  \item {clang\+::tidy\+::pagesjaunes\+::test}, \hyperpage{33}
+    \subitem {T\+E\+S\+T\+\_\+F}, \hyperpage{34--62}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{63}
+    \subitem {$\sim$\+Allocate\+Regex\+Test}, \hyperpage{64}
+    \subitem {Allocate\+Regex\+Test}, \hyperpage{64}
+    \subitem {get\+\_\+allocate\+\_\+re}, \hyperpage{64}
+    \subitem {Print\+To}, \hyperpage{64}
+    \subitem {Set\+Up}, \hyperpage{65}
+    \subitem {Tear\+Down}, \hyperpage{65}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{79}
+    \subitem {$\sim$\+Backup\+File}, \hyperpage{81}
+    \subitem {Backup\+File}, \hyperpage{80}
+    \subitem {m\+\_\+buffer}, \hyperpage{87}
+    \subitem {m\+\_\+length}, \hyperpage{87}
+    \subitem {m\+\_\+sha256\+\_\+value}, \hyperpage{87}
+    \subitem {Print\+To}, \hyperpage{81}
+    \subitem {Set\+Up}, \hyperpage{81}
+    \subitem {Set\+Up\+Many\+Backup}, \hyperpage{82}
+    \subitem {Set\+Up\+Simple\+Backup}, \hyperpage{82}
+    \subitem {Set\+Up\+Simple\+Backup0}, \hyperpage{83}
+    \subitem {Set\+Up\+Simple\+Backup1}, \hyperpage{83}
+    \subitem {sha256}, \hyperpage{84, 85}
+    \subitem {sha256cmp}, \hyperpage{85, 86}
+    \subitem {Tear\+Down}, \hyperpage{86}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{257}
+    \subitem {D\+I\+G\+E\+S\+T\+\_\+\+S\+I\+ZE}, \hyperpage{261}
+    \subitem {final}, \hyperpage{259}
+    \subitem {init}, \hyperpage{259}
+    \subitem {m\+\_\+block}, \hyperpage{261}
+    \subitem {m\+\_\+h}, \hyperpage{261}
+    \subitem {m\+\_\+len}, \hyperpage{261}
+    \subitem {m\+\_\+tot\+\_\+len}, \hyperpage{261}
+    \subitem {S\+H\+A224\+\_\+256\+\_\+\+B\+L\+O\+C\+K\+\_\+\+S\+I\+ZE}, 
+		\hyperpage{261}
+    \subitem {sha256\+\_\+k}, \hyperpage{262}
+    \subitem {transform}, \hyperpage{260}
+    \subitem {uint32}, \hyperpage{258}
+    \subitem {uint64}, \hyperpage{258}
+    \subitem {uint8}, \hyperpage{259}
+    \subitem {update}, \hyperpage{260}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{87}
+    \subitem {$\sim$\+Buffer\+Split\+Test}, \hyperpage{89}
+    \subitem {Buffer\+Split\+Test}, \hyperpage{89}
+    \subitem {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+B\+I\+G\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}, 
+		\hyperpage{92}
+    \subitem {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}, 
+		\hyperpage{92}
+    \subitem {C\+L\+A\+N\+G\+\_\+\+T\+I\+D\+Y\+\_\+\+T\+E\+S\+T\+\_\+\+F\+I\+L\+E\+\_\+\+R\+E\+L\+A\+T\+I\+V\+E\+\_\+\+P\+A\+TH}, 
+		\hyperpage{93}
+    \subitem {L\+L\+V\+M\+\_\+\+S\+R\+C\+\_\+\+R\+O\+O\+T\+\_\+\+D\+I\+R\+\_\+\+E\+N\+V\+V\+A\+R\+\_\+\+N\+A\+ME}, 
+		\hyperpage{93}
+    \subitem {m\+\_\+clang\+\_\+root\+\_\+directory}, \hyperpage{93}
+    \subitem {Print\+To}, \hyperpage{89}
+    \subitem {Set\+Up}, \hyperpage{89}
+    \subitem {sha256}, \hyperpage{89, 90}
+    \subitem {sha256cmp}, \hyperpage{91, 92}
+    \subitem {Tear\+Down}, \hyperpage{92}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{262}
+    \subitem {D\+I\+G\+E\+S\+T\+\_\+\+S\+I\+ZE}, \hyperpage{265}
+    \subitem {final}, \hyperpage{264}
+    \subitem {init}, \hyperpage{264}
+    \subitem {m\+\_\+block}, \hyperpage{265}
+    \subitem {m\+\_\+h}, \hyperpage{265}
+    \subitem {m\+\_\+len}, \hyperpage{266}
+    \subitem {m\+\_\+tot\+\_\+len}, \hyperpage{266}
+    \subitem {S\+H\+A224\+\_\+256\+\_\+\+B\+L\+O\+C\+K\+\_\+\+S\+I\+ZE}, 
+		\hyperpage{266}
+    \subitem {sha256\+\_\+k}, \hyperpage{266}
+    \subitem {transform}, \hyperpage{264}
+    \subitem {uint32}, \hyperpage{263}
+    \subitem {uint64}, \hyperpage{263}
+    \subitem {uint8}, \hyperpage{263}
+    \subitem {update}, \hyperpage{265}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{97}
+    \subitem {$\sim$\+Close\+Regex\+Test}, \hyperpage{99}
+    \subitem {Close\+Regex\+Test}, \hyperpage{98}
+    \subitem {get\+\_\+close\+\_\+re}, \hyperpage{99}
+    \subitem {Print\+To}, \hyperpage{99}
+    \subitem {Set\+Up}, \hyperpage{99}
+    \subitem {Tear\+Down}, \hyperpage{100}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{100}
+    \subitem {$\sim$\+Declare\+Regex\+Test}, \hyperpage{101}
+    \subitem {Declare\+Regex\+Test}, \hyperpage{101}
+    \subitem {get\+\_\+declare\+\_\+re}, \hyperpage{101}
+    \subitem {Print\+To}, \hyperpage{101}
+    \subitem {Set\+Up}, \hyperpage{102}
+    \subitem {Tear\+Down}, \hyperpage{102}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{102}
+    \subitem {$\sim$\+Decode\+Host\+Vars\+Test}, \hyperpage{103}
+    \subitem {Decode\+Host\+Vars\+Test}, \hyperpage{103}
+    \subitem {Print\+To}, \hyperpage{104}
+    \subitem {Set\+Up}, \hyperpage{104}
+    \subitem {Tear\+Down}, \hyperpage{104}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{209}
+    \subitem {$\sim$\+Fetch\+Decode\+Host\+Var}, \hyperpage{210}
+    \subitem {Fetch\+Decode\+Host\+Var}, \hyperpage{210}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{211}
+    \subitem {Print\+To}, \hyperpage{211}
+    \subitem {Set\+Up}, \hyperpage{211}
+    \subitem {Tear\+Down}, \hyperpage{211}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{212}
+    \subitem {$\sim$\+Fetch\+Fileline\+Test}, \hyperpage{213}
+    \subitem {Fetch\+Fileline\+Test}, \hyperpage{213}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{213}
+    \subitem {Print\+To}, \hyperpage{213}
+    \subitem {Set\+Up}, \hyperpage{214}
+    \subitem {Tear\+Down}, \hyperpage{214}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{214}
+    \subitem {$\sim$\+Fetch\+Regex\+Test}, \hyperpage{215}
+    \subitem {Fetch\+Regex\+Test}, \hyperpage{215}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{216}
+    \subitem {Print\+To}, \hyperpage{216}
+    \subitem {Set\+Up}, \hyperpage{216}
+    \subitem {Tear\+Down}, \hyperpage{216}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{217}
+    \subitem {$\sim$\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{218}
+    \subitem {Fetch\+Tmpl\+Repeat\+Members2\+Test}, \hyperpage{218}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{218}
+    \subitem {Print\+To}, \hyperpage{218}
+    \subitem {Set\+Up}, \hyperpage{219}
+    \subitem {Tear\+Down}, \hyperpage{219}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{219}
+    \subitem {$\sim$\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{220}
+    \subitem {Fetch\+Tmpl\+Repeat\+Members\+Test}, \hyperpage{220}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{221}
+    \subitem {Print\+To}, \hyperpage{221}
+    \subitem {Set\+Up}, \hyperpage{221}
+    \subitem {Tear\+Down}, \hyperpage{221}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{222}
+    \subitem {$\sim$\+Fetch\+Tmpl\+Repeat\+Test}, \hyperpage{223}
+    \subitem {Fetch\+Tmpl\+Repeat\+Test}, \hyperpage{223}
+    \subitem {get\+\_\+fetch\+\_\+re}, \hyperpage{223}
+    \subitem {Print\+To}, \hyperpage{223}
+    \subitem {Set\+Up}, \hyperpage{224}
+    \subitem {Tear\+Down}, \hyperpage{224}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{228}
+    \subitem {$\sim$\+Free\+Regex\+Test}, \hyperpage{229}
+    \subitem {Free\+Regex\+Test}, \hyperpage{229}
+    \subitem {get\+\_\+free\+\_\+re}, \hyperpage{230}
+    \subitem {Print\+To}, \hyperpage{230}
+    \subitem {Set\+Up}, \hyperpage{230}
+    \subitem {Tear\+Down}, \hyperpage{230}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{231}
+    \subitem {$\sim$\+Lob\+Create\+Regex\+Test}, \hyperpage{232}
+    \subitem {get\+\_\+lob\+\_\+create\+\_\+re}, \hyperpage{232}
+    \subitem {Lob\+Create\+Regex\+Test}, \hyperpage{232}
+    \subitem {Print\+To}, \hyperpage{232}
+    \subitem {Set\+Up}, \hyperpage{233}
+    \subitem {Tear\+Down}, \hyperpage{233}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{233}
+    \subitem {$\sim$\+Lob\+Open\+Regex\+Test}, \hyperpage{234}
+    \subitem {get\+\_\+lob\+\_\+open\+\_\+re}, \hyperpage{235}
+    \subitem {Lob\+Open\+Regex\+Test}, \hyperpage{234}
+    \subitem {Print\+To}, \hyperpage{235}
+    \subitem {Set\+Up}, \hyperpage{235}
+    \subitem {Tear\+Down}, \hyperpage{235}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{236}
+    \subitem {$\sim$\+Lob\+Read\+Regex\+Test}, \hyperpage{237}
+    \subitem {get\+\_\+lob\+\_\+read\+\_\+re}, \hyperpage{237}
+    \subitem {Lob\+Read\+Regex\+Test}, \hyperpage{237}
+    \subitem {Print\+To}, \hyperpage{237}
+    \subitem {Set\+Up}, \hyperpage{238}
+    \subitem {Tear\+Down}, \hyperpage{238}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{238}
+    \subitem {$\sim$\+Open\+Regex\+Test}, \hyperpage{239}
+    \subitem {get\+\_\+open\+\_\+re}, \hyperpage{240}
+    \subitem {Open\+Regex\+Test}, \hyperpage{239}
+    \subitem {Print\+To}, \hyperpage{240}
+    \subitem {Set\+Up}, \hyperpage{240}
+    \subitem {Tear\+Down}, \hyperpage{240}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{241}
+    \subitem {$\sim$\+Open\+Request\+Test}, \hyperpage{242}
+    \subitem {get\+\_\+open\+\_\+re}, \hyperpage{242}
+    \subitem {Open\+Request\+Test}, \hyperpage{242}
+    \subitem {Print\+To}, \hyperpage{242}
+    \subitem {Set\+Up}, \hyperpage{243}
+    \subitem {Tear\+Down}, \hyperpage{243}
+  \item {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{245}
+    \subitem {$\sim$\+Prepare\+Fmtd\+Regex\+Test}, \hyperpage{246}
+    \subitem {get\+\_\+prepare\+\_\+fmtd\+\_\+re}, \hyperpage{246}
+    \subitem {Prepare\+Fmtd\+Regex\+Test}, \hyperpage{246}
+    \subitem {Print\+To}, \hyperpage{246}
+    \subitem {Set\+Up}, \hyperpage{247}
+    \subitem {Tear\+Down}, \hyperpage{247}
+  \item {close\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q\+W\+E\+I\+RD}, \hyperpage{402}
+    \subitem {R\+EQ}, \hyperpage{401}
+  \item {Close\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{98}
+  \item {create\+\_\+line\+\_\+number\+\_\+mapping}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{226}
+  \item {create\+Backup\+File}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{17}
+  \item {create\+Host\+Var\+List}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{18}
+  \item {create\+Params\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{19}
+  \item {create\+Params\+Decl}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{20}
+  \item {create\+Params\+Declare\+Section}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{21}
+  \item {create\+Params\+Def}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{22}
+  \item {cxxrecord}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{71}
+
+  \indexspace
+
+  \item {D\+I\+G\+E\+S\+T\+\_\+\+S\+I\+ZE}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{265}
+  \item {De\+Include\+Pre\+Pro\+C.\+cpp}, \hyperpage{340}
+  \item {De\+Include\+Pre\+Pro\+C.\+h}, \hyperpage{341}
+  \item {De\+Include\+Pre\+ProC}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}, 
+		\hyperpage{106}
+  \item {declare\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q\+W\+E\+I\+RD}, \hyperpage{405--407}
+    \subitem {R\+EQ}, \hyperpage{405}
+  \item {Declare\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{101}
+  \item {decode\+Host\+Vars}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{23}
+  \item {Decode\+Host\+Vars\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{103}
+  \item {dummy1}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{336}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{335}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{337}
+  \item {dummy2}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{336}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{335}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{338}
+
+  \indexspace
+
+  \item {emit\+Diag\+And\+Fix}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{119}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{127}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{177}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{186}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{197}
+  \item {emit\+Error}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{119}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{128}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{178}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{187}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{198}
+  \item {emplace\+\_\+ret\+\_\+t}
+    \subitem {Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{342}
+    \subitem {Exec\+S\+Q\+L\+Close\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{344}
+    \subitem {Exec\+S\+Q\+L\+Common.\+cpp}, \hyperpage{347}
+    \subitem {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{361}
+    \subitem {Exec\+S\+Q\+L\+For\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{363}
+    \subitem {Exec\+S\+Q\+L\+Free\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{364}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{366}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{368}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{370}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{372}
+    \subitem {Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{374}
+    \subitem {Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{376}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{378}
+    \subitem {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{380}
+    \subitem {Exec\+S\+Q\+L\+To\+Function\+Call.\+cpp}, \hyperpage{382}
+  \item {Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{110}
+  \item {Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{342}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{342}
+  \item {Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call.\+h}, 
+		\hyperpage{343}
+  \item {Exec\+S\+Q\+L\+Close\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{117}
+  \item {Exec\+S\+Q\+L\+Close\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{344}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{344}
+  \item {Exec\+S\+Q\+L\+Close\+To\+Function\+Call.\+h}, \hyperpage{345}
+  \item {Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+Error\+Kind}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{117}
+  \item {Exec\+S\+Q\+L\+Common.\+cpp}, \hyperpage{346}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{347}
+  \item {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{347}
+    \subitem {G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+F\+I\+L\+E\+N\+A\+M\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+ON}, 
+		\hyperpage{350}
+    \subitem {G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+F\+I\+L\+E\+N\+A\+M\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+ON}, 
+		\hyperpage{350}
+    \subitem {map\+\_\+comment\+\_\+map\+\_\+replacement\+\_\+values}, 
+		\hyperpage{359}
+    \subitem {map\+\_\+host\+\_\+vars}, \hyperpage{359}
+    \subitem {map\+\_\+replacement\+\_\+values}, \hyperpage{359}
+    \subitem {map\+\_\+vector\+\_\+string}, \hyperpage{359}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+F\+I\+L\+E\+L\+I\+NE}, 
+		\hyperpage{350}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+L\+I\+N\+E\+\_\+\+D\+E\+F\+I\+N\+E\+\_\+\+RE}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+M\+E\+M\+B\+E\+R\+S\+\_\+\+R\+E2}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+M\+E\+M\+B\+E\+R\+S\+\_\+\+RE}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+RE}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+O\+C\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+O\+C\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{351}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+C\+L\+O\+S\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{352}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+D\+E\+C\+L\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{352}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+E\+X\+E\+C\+S\+QL}, 
+		\hyperpage{352}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+I\+N\+T\+O\+N\+A\+M\+ES}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+I\+N\+TO}, 
+		\hyperpage{352}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{352}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+U\+R\+S\+O\+R\+N\+A\+ME}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+C\+L\+O\+S\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{353}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{354}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{354}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+R\+E\+A\+D\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{354}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+V\+A\+RS}, 
+		\hyperpage{354}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}, 
+		\hyperpage{355}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{354}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+O\+M\+\_\+\+V\+A\+RS}, 
+		\hyperpage{355}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+OM}, 
+		\hyperpage{355}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+P\+R\+E\+P\+A\+RE}, 
+		\hyperpage{355}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+N\+A\+ME}, 
+		\hyperpage{356}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{355}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+O\+M\+\_\+\+V\+A\+RS}, 
+		\hyperpage{356}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+F\+R\+OM}, 
+		\hyperpage{356}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+N\+A\+ME}, 
+		\hyperpage{356}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+P\+R\+E\+P\+A\+RE}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}, 
+		\hyperpage{356}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+O\+M\+M\+A\+\_\+\+R\+P\+L\+T\+S\+TR}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+G\+R\+O\+UP}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+E\+N\+D\+S\+TR}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+S\+P\+A\+C\+E\+\_\+\+R\+P\+L\+T\+S\+TR}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+S\+T\+A\+R\+T\+S\+TR}, 
+		\hyperpage{357}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+D\+E\+R\+EF}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+F\+U\+L\+L\+M\+A\+T\+CH}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+M\+E\+M\+B\+ER}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+V\+AR}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+V\+A\+R\+I\+N\+D\+IC}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+RE}, 
+		\hyperpage{358}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+T\+R\+I\+M\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+\+R\+E\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}, 
+		\hyperpage{359}
+    \subitem {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+T\+R\+I\+M\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+\+RE}, 
+		\hyperpage{359}
+    \subitem {string2\+\_\+map}, \hyperpage{360}
+    \subitem {ushort\+\_\+string\+\_\+map}, \hyperpage{360}
+  \item {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{125}
+  \item {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{360}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{361}
+  \item {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call.\+h}, \hyperpage{361}
+  \item {Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+Error\+Kind}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{125}
+  \item {Exec\+S\+Q\+L\+For\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{133}
+  \item {Exec\+S\+Q\+L\+For\+To\+Function\+Call.\+cpp}, \hyperpage{362}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{363}
+  \item {Exec\+S\+Q\+L\+For\+To\+Function\+Call.\+h}, \hyperpage{363}
+  \item {Exec\+S\+Q\+L\+Free\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{139}
+  \item {Exec\+S\+Q\+L\+Free\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{364}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{364}
+  \item {Exec\+S\+Q\+L\+Free\+To\+Function\+Call.\+h}, \hyperpage{365}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{144}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{366}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{366}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call.\+h}, 
+		\hyperpage{367}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{151}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{368}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{368}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h}, 
+		\hyperpage{369}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{156}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{370}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{370}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call.\+h}, 
+		\hyperpage{371}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{163}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{372}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{372}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call.\+h}, 
+		\hyperpage{373}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{168}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{374}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{374}
+  \item {Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call.\+h}, 
+		\hyperpage{375}
+  \item {Exec\+S\+Q\+L\+Open\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{175}
+  \item {Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{376}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{376}
+  \item {Exec\+S\+Q\+L\+Open\+To\+Function\+Call.\+h}, \hyperpage{377}
+  \item {Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+Error\+Kind}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{175}
+  \item {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{184}
+  \item {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{378}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{378}
+  \item {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call.\+h}, 
+		\hyperpage{379}
+  \item {Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+Error\+Kind}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{184}
+  \item {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{195}
+  \item {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call.\+cpp}, 
+		\hyperpage{380}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{380}
+  \item {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call.\+h}, 
+		\hyperpage{381}
+  \item {Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+Error\+Kind}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{195}
+  \item {Exec\+S\+Q\+L\+To\+Function\+Call}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{204}
+  \item {Exec\+S\+Q\+L\+To\+Function\+Call.\+cpp}, \hyperpage{382}
+    \subitem {emplace\+\_\+ret\+\_\+t}, \hyperpage{382}
+  \item {Exec\+S\+Q\+L\+To\+Function\+Call.\+h}, \hyperpage{383}
+
+  \indexspace
+
+  \item {fetch\+\_\+decode\+\_\+host\+\_\+var.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{410}
+  \item {fetch\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{414}
+    \subitem {R\+E\+Q1}, \hyperpage{414}
+    \subitem {R\+E\+Q2}, \hyperpage{414}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{415}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{415}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{415}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{415}
+  \item {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{421}
+    \subitem {R\+E\+Q1}, \hyperpage{421}
+    \subitem {R\+E\+Q2}, \hyperpage{421}
+    \subitem {R\+E\+Q3}, \hyperpage{421}
+    \subitem {R\+E\+Q4}, \hyperpage{421}
+  \item {Fetch\+Decode\+Host\+Var}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{210}
+  \item {Fetch\+Fileline\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{213}
+  \item {Fetch\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{215}
+  \item {Fetch\+Tmpl\+Repeat\+Members2\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{218}
+  \item {Fetch\+Tmpl\+Repeat\+Members\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{220}
+  \item {Fetch\+Tmpl\+Repeat\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{223}
+  \item {File\+Manipulator}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{225}
+  \item {File\+Manipulator.\+cpp}, \hyperpage{384}
+  \item {File\+Manipulator.\+h}, \hyperpage{384}
+  \item {final}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{259}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{264}
+  \item {find\+C\+X\+X\+Record\+Member\+In\+Translation\+Unit}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{24}
+  \item {find\+Decl\+In\+Function}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{25}
+  \item {find\+Symbol\+In\+Function}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{26}
+  \item {free\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{423}
+    \subitem {R\+E\+Q1}, \hyperpage{423}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{424}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{424}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{424}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{424}
+  \item {Free\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{229}
+
+  \indexspace
+
+  \item {G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+F\+I\+L\+E\+N\+A\+M\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+ON}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{350}
+  \item {G\+E\+N\+E\+R\+A\+T\+I\+O\+N\+\_\+\+S\+O\+U\+R\+C\+E\+\_\+\+F\+I\+L\+E\+N\+A\+M\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+ON}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{350}
+  \item {get\+\_\+allocate\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{64}
+  \item {get\+\_\+close\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{99}
+  \item {get\+\_\+declare\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{101}
+  \item {get\+\_\+fetch\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{211}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{213}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{216}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{218}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{221}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{223}
+  \item {get\+\_\+free\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{230}
+  \item {get\+\_\+lob\+\_\+create\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{232}
+  \item {get\+\_\+lob\+\_\+open\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{235}
+  \item {get\+\_\+lob\+\_\+read\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{237}
+  \item {get\+\_\+number\+\_\+of\+\_\+lines}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{226}
+  \item {get\+\_\+open\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{240}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{242}
+  \item {get\+\_\+prepare\+\_\+fmtd\+\_\+re}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{246}
+  \item {get\+Module\+Options}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Pages\+Jaunes\+Module}, 
+		\hyperpage{244}
+
+  \indexspace
+
+  \item {init}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{259}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{264}
+
+  \indexspace
+
+  \item {jayacode}, \hyperpage{62}
+  \item {jayacode\+::\+File\+Manipulator}, \hyperpage{224}
+    \subitem {$\sim$\+File\+Manipulator}, \hyperpage{226}
+    \subitem {create\+\_\+line\+\_\+number\+\_\+mapping}, 
+		\hyperpage{226}
+    \subitem {File\+Manipulator}, \hyperpage{225}
+    \subitem {get\+\_\+number\+\_\+of\+\_\+lines}, \hyperpage{226}
+    \subitem {operator[]}, \hyperpage{227}
+    \subitem {reset\+\_\+line\+\_\+number\+\_\+mapping}, 
+		\hyperpage{227}
+    \subitem {set\+\_\+line}, \hyperpage{227}
+    \subitem {size}, \hyperpage{228}
+
+  \indexspace
+
+  \item {L\+L\+V\+M\+\_\+\+S\+R\+C\+\_\+\+R\+O\+O\+T\+\_\+\+D\+I\+R\+\_\+\+E\+N\+V\+V\+A\+R\+\_\+\+N\+A\+ME}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{93}
+  \item {lhs}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{66}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{72}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{67}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{73}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{75}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{68}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{69}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{71}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{74}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{79}
+  \item {lhs\+Var}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+  \item {lhs\+Var\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+  \item {linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{326}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{337}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{321}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{327}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{332}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{322}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{335}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{334}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{330}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{338}
+  \item {literal}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{326}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{321}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{327}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{332}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{322}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{334}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{331}
+  \item {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{426}
+    \subitem {R\+E\+Q1}, \hyperpage{426}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{426}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{426}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{426}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{427}
+  \item {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{429}
+    \subitem {R\+E\+Q1}, \hyperpage{429}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{429}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{429}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{429}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{429}
+  \item {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q0}, \hyperpage{431}
+    \subitem {R\+E\+Q1}, \hyperpage{431}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}, \hyperpage{432}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}, \hyperpage{432}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}, \hyperpage{432}
+    \subitem {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}, \hyperpage{432}
+  \item {Lob\+Create\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{232}
+  \item {Lob\+Open\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{234}
+  \item {Lob\+Read\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{237}
+
+  \indexspace
+
+  \item {m\+\_\+block}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{265}
+  \item {m\+\_\+buffer}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{87}
+  \item {m\+\_\+clang\+\_\+root\+\_\+directory}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{93}
+  \item {m\+\_\+h}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{265}
+  \item {m\+\_\+len}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{266}
+  \item {m\+\_\+length}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{87}
+  \item {m\+\_\+macro\+\_\+name}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{301}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{310}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{294}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{281}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{304}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{313}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{316}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{285}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{307}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{278}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{319}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{291}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{288}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{298}
+  \item {m\+\_\+macro\+\_\+range}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{301}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{310}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{295}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{282}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{304}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{313}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{316}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{285}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{307}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{278}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{319}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{291}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{288}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{298}
+  \item {m\+\_\+req\+\_\+assign\+\_\+collector}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{114}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{136}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{142}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{148}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{154}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{160}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{165}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{172}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{192}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{202}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{208}
+  \item {m\+\_\+req\+\_\+copy\+\_\+collector}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{114}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{136}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{142}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{148}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{154}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{160}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{166}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{202}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{208}
+  \item {m\+\_\+req\+\_\+fmt\+\_\+collector}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{114}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{136}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{142}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{148}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{154}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{161}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{166}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{172}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{192}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{209}
+  \item {m\+\_\+req\+\_\+var\+\_\+decl\+\_\+collector}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{122}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{131}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{172}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{181}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{192}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{202}
+  \item {m\+\_\+sha256\+\_\+value}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{87}
+  \item {m\+\_\+tot\+\_\+len}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{266}
+  \item {m\+\_\+usage\+\_\+range}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{301}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{310}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{295}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{282}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{304}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{313}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{316}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{285}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{307}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{279}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{319}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{291}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{288}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{298}
+  \item {main}
+    \subitem {test\+\_\+main.\+cpp}, \hyperpage{444}
+  \item {map\+\_\+comment\+\_\+map\+\_\+replacement\+\_\+values}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+  \item {map\+\_\+host\+\_\+vars}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+  \item {map\+\_\+replacement\+\_\+values}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+  \item {map\+\_\+vector\+\_\+string}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+
+  \indexspace
+
+  \item {O\+N\+E\+G\+I\+GA}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{391}
+  \item {O\+N\+E\+K\+I\+LO}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{391}
+  \item {O\+N\+E\+M\+E\+GA}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{391}
+  \item {on\+End\+Of\+Translation\+Unit}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{27}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{146}
+  \item {on\+Start\+Of\+Translation\+Unit}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{29}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{146}
+  \item {open\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q\+W\+E\+I\+RD}, \hyperpage{435, 436}
+    \subitem {R\+EQ}, \hyperpage{434, 435}
+  \item {open\+\_\+request\+\_\+test.\+cpp}
+    \subitem {R\+EQ}, \hyperpage{438}
+  \item {Open\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{239}
+  \item {Open\+Request\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{242}
+  \item {operator()}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{273}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{268}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{268}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{274}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{267}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{272}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{275}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{274}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{269}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{270}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{271}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{270}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{272}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+Before}, 
+		\hyperpage{276}
+  \item {operator=}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{300}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{309}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{294}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{281}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{303}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{312}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{315}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{284}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{306}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{278}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{319}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{291}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{287}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{297}
+  \item {operator[]}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{227}
+
+  \indexspace
+
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+F\+I\+L\+E\+L\+I\+NE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{350}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+L\+I\+N\+E\+\_\+\+D\+E\+F\+I\+N\+E\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+M\+E\+M\+B\+E\+R\+S\+\_\+\+R\+E2}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+M\+E\+M\+B\+E\+R\+S\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+\_\+\+T\+M\+P\+L\+\_\+\+R\+E\+P\+E\+A\+T\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+O\+C\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+A\+L\+L\+O\+C\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{351}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+C\+L\+O\+S\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{352}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+D\+E\+C\+L\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{352}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+E\+X\+E\+C\+S\+QL}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{352}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+I\+N\+T\+O\+N\+A\+M\+ES}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+I\+N\+TO}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{352}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+E\+T\+C\+H\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{352}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+U\+R\+S\+O\+R\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+C\+L\+O\+S\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+C\+R\+E\+A\+T\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{353}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+F\+R\+E\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{354}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{354}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+L\+O\+B\+\_\+\+R\+E\+A\+D\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{354}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+V\+A\+RS}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{354}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{355}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+O\+P\+E\+N\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{354}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+O\+M\+\_\+\+V\+A\+RS}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{355}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+OM}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{355}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+P\+R\+E\+P\+A\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{355}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{356}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+F\+M\+T\+D\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{355}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+F\+R\+O\+M\+\_\+\+V\+A\+RS}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{356}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+F\+R\+OM}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{356}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+N\+A\+ME}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{356}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+P\+R\+E\+P\+A\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+P\+R\+E\+P\+A\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{356}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+O\+M\+M\+A\+\_\+\+R\+P\+L\+T\+S\+TR}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+C\+O\+M\+M\+E\+N\+T\+\_\+\+G\+R\+O\+UP}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+E\+N\+D\+S\+TR}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+S\+P\+A\+C\+E\+\_\+\+R\+P\+L\+T\+S\+TR}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+E\+X\+E\+C\+\_\+\+S\+Q\+L\+\_\+\+R\+E\+Q\+\_\+\+R\+E\+\_\+\+S\+T\+A\+R\+T\+S\+TR}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{357}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+D\+E\+R\+EF}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+F\+U\+L\+L\+M\+A\+T\+CH}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+M\+E\+M\+B\+ER}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+H\+O\+S\+T\+V\+AR}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+R\+E\+\_\+\+V\+A\+R\+I\+N\+D\+IC}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+H\+O\+S\+T\+V\+A\+R\+\_\+\+D\+E\+C\+O\+D\+E\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{358}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+T\+R\+I\+M\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+\+R\+E\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+ER}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+  \item {P\+A\+G\+E\+S\+J\+A\+U\+N\+E\+S\+\_\+\+R\+E\+G\+E\+X\+\_\+\+T\+R\+I\+M\+\_\+\+I\+D\+E\+N\+T\+I\+F\+I\+E\+R\+\_\+\+RE}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{359}
+  \item {Pages\+Jaunes\+Module\+Anchor\+Source}
+    \subitem {clang\+::tidy}, \hyperpage{15}
+  \item {Pages\+Jaunes\+Tidy\+Module.\+cpp}, \hyperpage{386}
+  \item {prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+cpp}
+    \subitem {R\+E\+Q\+C\+O\+L\+ON}, \hyperpage{441}
+    \subitem {R\+E\+Q\+W\+E\+I\+RD}, \hyperpage{441--443}
+    \subitem {R\+EQ}, \hyperpage{440, 441}
+  \item {Prepare\+Fmtd\+Regex\+Test}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{246}
+  \item {Print\+To}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{64}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{81}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{89}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{99}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{101}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{104}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{211}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{213}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{216}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{218}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{221}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{223}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{230}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{232}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{235}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{237}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{240}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{242}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{246}
+
+  \indexspace
+
+  \item {R\+E\+Q0}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{387}
+    \subitem {fetch\+\_\+decode\+\_\+host\+\_\+var.\+cpp}, 
+		\hyperpage{410}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{414}
+    \subitem {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{421}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{423}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{426}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{431}
+  \item {R\+E\+Q1}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{387}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{414}
+    \subitem {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{421}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{423}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{426}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{431}
+  \item {R\+E\+Q2}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{414}
+    \subitem {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{421}
+  \item {R\+E\+Q3}
+    \subitem {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{421}
+  \item {R\+E\+Q4}
+    \subitem {fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{421}
+  \item {R\+E\+Q\+C\+O\+L\+ON}
+    \subitem {prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{441}
+  \item {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+0}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{388}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{415}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{424}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{426}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{432}
+  \item {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+1}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{388}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{415}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{424}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{426}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{432}
+  \item {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+2}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{388}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{415}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{424}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{426}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{432}
+  \item {R\+E\+Q\+W\+E\+I\+R\+D\+\_\+3}
+    \subitem {allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{388}
+    \subitem {fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{415}
+    \subitem {free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{424}
+    \subitem {lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{427}
+    \subitem {lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{429}
+    \subitem {lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{432}
+  \item {R\+E\+Q\+W\+E\+I\+RD}
+    \subitem {close\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{402}
+    \subitem {declare\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{405--407}
+    \subitem {open\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{435, 436}
+    \subitem {prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{441--443}
+  \item {R\+EQ}
+    \subitem {close\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{401}
+    \subitem {declare\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{405}
+    \subitem {open\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{434, 435}
+    \subitem {open\+\_\+request\+\_\+test.\+cpp}, \hyperpage{438}
+    \subitem {prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{440, 441}
+  \item {read\+Text\+File}
+    \subitem {clang\+::tidy\+::pagesjaunes}, \hyperpage{31}
+  \item {register\+Matchers}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}, 
+		\hyperpage{96}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}, 
+		\hyperpage{107}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{111}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{120}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{129}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{135}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{140}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{146}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{152}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{158}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{164}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{170}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{179}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{189}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{200}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{206}
+  \item {register\+P\+P\+Callbacks}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{113}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{121}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{130}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{135}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{141}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{147}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{153}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{158}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{164}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{170}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{180}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{191}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{201}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{206}
+  \item {reset\+\_\+line\+\_\+number\+\_\+mapping}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{227}
+  \item {rhs}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{66}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{72}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{67}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{73}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{76}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{68}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{70}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{74}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{79}
+  \item {rhs\+Var}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{77}
+  \item {rhs\+Var\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Assignment\+Record}, 
+		\hyperpage{78}
+
+  \indexspace
+
+  \item {S\+H\+A224\+\_\+256\+\_\+\+B\+L\+O\+C\+K\+\_\+\+S\+I\+ZE}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{261}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{266}
+  \item {S\+H\+A256\+\_\+\+F1}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{392}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{396}
+  \item {S\+H\+A256\+\_\+\+F2}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{392}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{397}
+  \item {S\+H\+A256\+\_\+\+F3}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{392}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{397}
+  \item {S\+H\+A256\+\_\+\+F4}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{392}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{397}
+  \item {S\+H\+A2\+\_\+\+CH}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{392}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{397}
+  \item {S\+H\+A2\+\_\+\+M\+AJ}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{393}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{397}
+  \item {S\+H\+A2\+\_\+\+P\+A\+C\+K32}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{393}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{398}
+  \item {S\+H\+A2\+\_\+\+R\+O\+TL}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{393}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{398}
+  \item {S\+H\+A2\+\_\+\+R\+O\+TR}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{393}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{398}
+  \item {S\+H\+A2\+\_\+\+S\+H\+FR}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{394}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{398}
+  \item {S\+H\+A2\+\_\+\+U\+N\+P\+A\+C\+K32}
+    \subitem {backup\+\_\+file.\+h}, \hyperpage{394}
+    \subitem {buffer\+\_\+split.\+h}, \hyperpage{399}
+  \item {set\+\_\+line}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{227}
+  \item {Set\+Up}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{65}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{81}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{89}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{99}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{102}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{104}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{211}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{214}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{216}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{219}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{221}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{224}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{230}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{233}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{235}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{238}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{240}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{243}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{247}
+  \item {Set\+Up\+Many\+Backup}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{82}
+  \item {Set\+Up\+Simple\+Backup}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{82}
+  \item {Set\+Up\+Simple\+Backup0}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{83}
+  \item {Set\+Up\+Simple\+Backup1}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{83}
+  \item {sha256}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{84, 85}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{89, 90}
+  \item {sha256\+\_\+k}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{262}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{266}
+  \item {sha256cmp}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{85, 86}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{91, 92}
+  \item {size}
+    \subitem {jayacode\+::\+File\+Manipulator}, \hyperpage{228}
+  \item {source\+\_\+range\+\_\+set\+\_\+t}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{110}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{116}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{124}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{133}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{138}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{144}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{150}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{156}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{163}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{168}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{174}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{183}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{194}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{204}
+  \item {Source\+Range\+For\+Integer\+N\+String\+Literals}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Source\+Range\+For\+Integer\+N\+String\+Literals}, 
+		\hyperpage{276, 277}
+  \item {Source\+Range\+For\+String\+Literals}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{299, 300}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{308, 309}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{293, 294}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{280, 281}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{302, 303}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{311, 312}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{314, 315}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{283, 284}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{305, 306}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{317, 318}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{289, 290}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{286, 287}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+Source\+Range\+For\+String\+Literals}, 
+		\hyperpage{296, 297}
+  \item {store\+Options}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+C\+Char\+To\+C\+X\+X\+String}, 
+		\hyperpage{97}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}, 
+		\hyperpage{107}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{113}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{121}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{130}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{135}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{141}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{147}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{153}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{160}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{165}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{171}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{180}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{191}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{201}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{208}
+  \item {string2\+\_\+map}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{360}
+
+  \indexspace
+
+  \item {T\+E\+S\+T\+\_\+F}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test}, \hyperpage{34--62}
+  \item {Tear\+Down}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Allocate\+Regex\+Test}, 
+		\hyperpage{65}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File}, 
+		\hyperpage{86}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test}, 
+		\hyperpage{92}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Close\+Regex\+Test}, 
+		\hyperpage{100}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Declare\+Regex\+Test}, 
+		\hyperpage{102}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Decode\+Host\+Vars\+Test}, 
+		\hyperpage{104}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Decode\+Host\+Var}, 
+		\hyperpage{211}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Fileline\+Test}, 
+		\hyperpage{214}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Regex\+Test}, 
+		\hyperpage{216}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members2\+Test}, 
+		\hyperpage{219}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Members\+Test}, 
+		\hyperpage{221}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Fetch\+Tmpl\+Repeat\+Test}, 
+		\hyperpage{224}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Free\+Regex\+Test}, 
+		\hyperpage{230}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Create\+Regex\+Test}, 
+		\hyperpage{233}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Open\+Regex\+Test}, 
+		\hyperpage{235}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Lob\+Read\+Regex\+Test}, 
+		\hyperpage{238}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Regex\+Test}, 
+		\hyperpage{240}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Open\+Request\+Test}, 
+		\hyperpage{243}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Prepare\+Fmtd\+Regex\+Test}, 
+		\hyperpage{247}
+  \item {test/allocate\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{386}
+  \item {test/allocate\+\_\+regex\+\_\+test.\+h}, \hyperpage{388}
+  \item {test/backup\+\_\+file.\+cpp}, \hyperpage{389}
+  \item {test/backup\+\_\+file.\+h}, \hyperpage{390}
+  \item {test/buffer\+\_\+split.\+cpp}, \hyperpage{394}
+  \item {test/buffer\+\_\+split.\+h}, \hyperpage{395}
+  \item {test/buffer\+\_\+split.\+test.\+h}, \hyperpage{399}
+  \item {test/buffer\+\_\+split.\+test2.\+h}, \hyperpage{400}
+  \item {test/close\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{401}
+  \item {test/close\+\_\+regex\+\_\+test.\+h}, \hyperpage{403}
+  \item {test/declare\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{404}
+  \item {test/declare\+\_\+regex\+\_\+test.\+h}, \hyperpage{407}
+  \item {test/decode\+\_\+host\+\_\+vars.\+cpp}, \hyperpage{408}
+  \item {test/decode\+\_\+host\+\_\+vars.\+h}, \hyperpage{409}
+  \item {test/fetch\+\_\+decode\+\_\+host\+\_\+var.\+cpp}, 
+		\hyperpage{410}
+  \item {test/fetch\+\_\+decode\+\_\+host\+\_\+var.\+h}, 
+		\hyperpage{411}
+  \item {test/fetch\+\_\+fileline\+\_\+test.\+cpp}, \hyperpage{412}
+  \item {test/fetch\+\_\+fileline\+\_\+test.\+h}, \hyperpage{412}
+  \item {test/fetch\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{413}
+  \item {test/fetch\+\_\+regex\+\_\+test.\+h}, \hyperpage{416}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+members2\+\_\+test.\+cpp}, 
+		\hyperpage{417}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+members2\+\_\+test.\+h}, 
+		\hyperpage{417}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+members\+\_\+test.\+cpp}, 
+		\hyperpage{418}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+members\+\_\+test.\+h}, 
+		\hyperpage{419}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+cpp}, 
+		\hyperpage{420}
+  \item {test/fetch\+\_\+tmpl\+\_\+repeat\+\_\+test.\+h}, 
+		\hyperpage{422}
+  \item {test/free\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{423}
+  \item {test/free\+\_\+regex\+\_\+test.\+h}, \hyperpage{424}
+  \item {test/lob\+\_\+create\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{425}
+  \item {test/lob\+\_\+create\+\_\+regex\+\_\+test.\+h}, 
+		\hyperpage{427}
+  \item {test/lob\+\_\+open\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{428}
+  \item {test/lob\+\_\+open\+\_\+regex\+\_\+test.\+h}, \hyperpage{430}
+  \item {test/lob\+\_\+read\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{431}
+  \item {test/lob\+\_\+read\+\_\+regex\+\_\+test.\+h}, \hyperpage{432}
+  \item {test/open\+\_\+regex\+\_\+test.\+cpp}, \hyperpage{433}
+  \item {test/open\+\_\+regex\+\_\+test.\+h}, \hyperpage{436}
+  \item {test/open\+\_\+request\+\_\+test.\+cpp}, \hyperpage{437}
+  \item {test/open\+\_\+request\+\_\+test.\+h}, \hyperpage{438}
+  \item {test/prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+cpp}, 
+		\hyperpage{439}
+  \item {test/prepare\+\_\+fmtd\+\_\+regex\+\_\+test.\+h}, 
+		\hyperpage{443}
+  \item {test/test\+\_\+main.\+cpp}, \hyperpage{444}
+  \item {test\+\_\+main.\+cpp}
+    \subitem {main}, \hyperpage{444}
+  \item {Tidy\+Context}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call}, 
+		\hyperpage{114}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call}, 
+		\hyperpage{122}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Fetch\+To\+Function\+Call}, 
+		\hyperpage{131}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call}, 
+		\hyperpage{137}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call}, 
+		\hyperpage{142}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call}, 
+		\hyperpage{148}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}, 
+		\hyperpage{154}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call}, 
+		\hyperpage{161}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call}, 
+		\hyperpage{166}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call}, 
+		\hyperpage{172}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Open\+To\+Function\+Call}, 
+		\hyperpage{181}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+Fmtd\+To\+Function\+Call}, 
+		\hyperpage{192}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call}, 
+		\hyperpage{202}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call}, 
+		\hyperpage{209}
+  \item {transform}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{260}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{264}
+
+  \indexspace
+
+  \item {uint32}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{258}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{263}
+  \item {uint64}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{258}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{263}
+  \item {uint8}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{259}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{263}
+  \item {update}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Backup\+File\+::\+S\+H\+A256}, 
+		\hyperpage{260}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::test\+::\+Buffer\+Split\+Test\+::\+S\+H\+A256}, 
+		\hyperpage{265}
+  \item {ushort\+\_\+string\+\_\+map}
+    \subitem {Exec\+S\+Q\+L\+Common.\+h}, \hyperpage{360}
+
+  \indexspace
+
+  \item {var\+Decl}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{326}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Close\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{337}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{321}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{328}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{332}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{323}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Read\+To\+Function\+Call\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{336}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{334}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{331}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Var\+Decl\+Match\+Record}, 
+		\hyperpage{338}
+  \item {vardecl\+\_\+linenum}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Allocate\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{326}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+For\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{321}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{328}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Close\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{333}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{323}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Free\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{324}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Open\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{329}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+Prepare\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{334}
+    \subitem {clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+To\+Function\+Call\+::\+String\+Literal\+Record}, 
+		\hyperpage{331}
+
+\end{theindex}

@@ -1,0 +1,4 @@
+<map id="clang::tidy::pagesjaunes::ExecSQLCloseToFunctionCall::emitDiagAndFix" name="clang::tidy::pagesjaunes::ExecSQLCloseToFunctionCall::emitDiagAndFix">
+<area shape="rect" id="node2" href="$classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_close_to_function_call.html#a6cd603a678f16ede06a04049889bcf2a" title="Manage error conditions by emiting an error. " alt="" coords="261,5,469,61"/>
+<area shape="rect" id="node3" href="$namespaceclang_1_1tidy_1_1pagesjaunes.html#a7fb85380c1d6d7f0778ea98d38abb7ee" title="Find a symbol, its definition and line number in the current function. " alt="" coords="517,13,680,54"/>
+</map>

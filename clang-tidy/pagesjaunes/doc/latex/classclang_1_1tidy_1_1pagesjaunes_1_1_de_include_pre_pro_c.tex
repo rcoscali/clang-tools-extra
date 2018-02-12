@@ -1,0 +1,171 @@
+\hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c}{}\section{clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:De\+Include\+Pre\+ProC Class Reference}
+\label{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c}\index{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}}
+
+
+{\ttfamily \#include $<$De\+Include\+Pre\+Pro\+C.\+h$>$}
+
+
+
+Inheritance diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:De\+Include\+Pre\+ProC\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:De\+Include\+Pre\+ProC\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab816dc100fb59f062328b7f8f44905cd}{De\+Include\+Pre\+ProC} (String\+Ref, Clang\+Tidy\+Context $\ast$)
+\begin{DoxyCompactList}\small\item\em Constructor for the {\ttfamily \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c}{De\+Include\+Pre\+ProC}} rewriting check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a9367e569272a7897ae9f899a5d36fea6}{store\+Options} (Clang\+Tidy\+Options\+::\+Option\+Map \&Opts) override
+\begin{DoxyCompactList}\small\item\em Store options for this check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a106ba63622e7283145e674287dc8749a}{register\+Matchers} (ast\+\_\+matchers\+::\+Match\+Finder $\ast$) override
+\begin{DoxyCompactList}\small\item\em Register the A\+S\+T\+Matcher that will found nodes we are interested in. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab9a11b66717687f7260093f83304fe33}{check} (const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&) override
+\begin{DoxyCompactList}\small\item\em This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 31 of file De\+Include\+Pre\+Pro\+C.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab816dc100fb59f062328b7f8f44905cd}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab816dc100fb59f062328b7f8f44905cd}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}!De\+Include\+Pre\+ProC@{De\+Include\+Pre\+ProC}}
+\index{De\+Include\+Pre\+ProC@{De\+Include\+Pre\+ProC}!clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}}
+\subsubsection{\texorpdfstring{De\+Include\+Pre\+Pro\+C()}{DeIncludePreProC()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+Pro\+C\+::\+De\+Include\+Pre\+ProC (\begin{DoxyParamCaption}\item[{String\+Ref}]{Name,  }\item[{Clang\+Tidy\+Context $\ast$}]{Context }\end{DoxyParamCaption})}
+
+
+
+Constructor for the {\ttfamily \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c}{De\+Include\+Pre\+ProC}} rewriting check. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c}{De\+Include\+Pre\+ProC} constructor
+
+The rule is created a new check using its {\ttfamily Clang\+Tidy\+Check} base class. Name and context are provided and stored locally. Some diag ids corresponding to errors handled by rule are created\+:
+\begin{DoxyItemize}
+\item {\ttfamily unexpected\+\_\+diag\+\_\+id\+:} Unexpected error
+\item {\ttfamily no\+\_\+error\+\_\+diag\+\_\+id\+:} No error
+\item {\ttfamily access\+\_\+char\+\_\+data\+\_\+diag\+\_\+id\+:} Couldn\textquotesingle{}t access memory buffer for comment (unexpected)
+\item {\ttfamily cant\+\_\+find\+\_\+comment\+\_\+diag\+\_\+id\+:} Comment not available (unexpected)
+\item {\ttfamily comment\+\_\+dont\+\_\+match\+\_\+diag\+\_\+id\+:} Invalid comment structure (unexpected) This check allows to customize several values through options. These options are\+:
+\item {\ttfamily Comment-\/regex}\+: Allows to customize the value of the regular expression used for finding comments created from the E\+X\+EC S\+QL include statements
+\item {\ttfamily Headers-\/to-\/include-\/in}\+: Allows to customize the headers IN filter. Headers that are not in this filter are not included and then not processed.
+\item {\ttfamily Headers-\/to-\/exclude-\/from}\+: Allows to customize the headers O\+UT filter. Headers that are in this filter are not included and then not processed.
+\item {\ttfamily Headers-\/directories}\+: Allows to customize the headers directories that will be searched. T\+O\+DO\+: Try to find a way to use compilation database to avoid this option.
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Name} & A String\+Ref for the new check name \\
+\hline
+{\em Context} & The Clang\+Tidy\+Context allowing to access other contexts\+Init check (super class) Init our Tidy\+Context instance Check option for comment regex Check option for setting a restriction list of headers to process Check option for setting a header exclusion list Check option for setting a list include directories \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 58 of file De\+Include\+Pre\+Pro\+C.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab9a11b66717687f7260093f83304fe33}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_ab9a11b66717687f7260093f83304fe33}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}!check@{check}}
+\index{check@{check}!clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}}
+\subsubsection{\texorpdfstring{check()}{check()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+Pro\+C\+::check (\begin{DoxyParamCaption}\item[{const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. 
+
+check
+
+This method will navigated and inspect the found A\+ST nodes for\+:
+\begin{DoxyItemize}
+\item determining if the found nodes are elligible for rewrite
+\item extracting all necessary informations for computing rewrite location and code (find ProC generated comment) The comment depends on which pre-\/processoris used. Default value is set for processing comments created through Oracle ProC. Customizing the regex is available through {\ttfamily Comment-\/regex} option. An example for setting this option is\+: \{ key\+: pagesjaunes-\/de-\/include-\/preproc.\+Comment-\/regex, value\+: \textquotesingle{}$^\wedge$.$\ast$\+E\+X\+EC S\+QL\mbox{[} \mbox{]}+include\mbox{[} \mbox{]}+"(\mbox{[}\+\_\+\+A-\/\+Za-\/z.\mbox{]}+)".$\ast$\$\textquotesingle{} \}
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Result} & The match result provided by the recursive visitor allowing us to access A\+ST nodes bound to variables \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 314 of file De\+Include\+Pre\+Pro\+C.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a106ba63622e7283145e674287dc8749a}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a106ba63622e7283145e674287dc8749a}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}!register\+Matchers@{register\+Matchers}}
+\index{register\+Matchers@{register\+Matchers}!clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}}
+\subsubsection{\texorpdfstring{register\+Matchers()}{registerMatchers()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+Pro\+C\+::register\+Matchers (\begin{DoxyParamCaption}\item[{ast\+\_\+matchers\+::\+Match\+Finder $\ast$}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register the A\+S\+T\+Matcher that will found nodes we are interested in. 
+
+register\+Matchers
+
+This method register 1 matcher for each oracle ProC generated statement to rewrite. The matcher bind elements we will use, for detecting the found statement we want to rewrite , and for writing new code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em Finder} & the recursive visitor that will use our matcher for sending us A\+ST node. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 123 of file De\+Include\+Pre\+Pro\+C.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a9367e569272a7897ae9f899a5d36fea6}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_de_include_pre_pro_c_a9367e569272a7897ae9f899a5d36fea6}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}!store\+Options@{store\+Options}}
+\index{store\+Options@{store\+Options}!clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC@{clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+ProC}}
+\subsubsection{\texorpdfstring{store\+Options()}{storeOptions()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+De\+Include\+Pre\+Pro\+C\+::store\+Options (\begin{DoxyParamCaption}\item[{Clang\+Tidy\+Options\+::\+Option\+Map \&}]{Opts }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Store options for this check. 
+
+store\+Options
+
+This check support one option for customizing comment regex
+\begin{DoxyItemize}
+\item Comment-\/regex
+\item Headers-\/to-\/include-\/in
+\item Headers-\/to-\/exclude-\/from
+\item Headers-\/directories
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Opts} & The option map in which to store supported options \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 101 of file De\+Include\+Pre\+Pro\+C.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_de_include_pre_pro_c_8h}{De\+Include\+Pre\+Pro\+C.\+h}\item 
+\hyperlink{_de_include_pre_pro_c_8cpp}{De\+Include\+Pre\+Pro\+C.\+cpp}\end{DoxyCompactItemize}

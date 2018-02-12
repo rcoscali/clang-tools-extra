@@ -1,0 +1,292 @@
+\hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call}{}\section{clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call Class Reference}
+\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call}\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+
+
+{\ttfamily \#include $<$Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h$>$}
+
+
+
+Inheritance diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=259pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for clang\+:\+:tidy\+:\+:pagesjaunes\+:\+:Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=259pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_assignment_record}{Assignment\+Record}
+\item 
+struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_req_fmt_record}{Req\+Fmt\+Record}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_before}{Source\+Range\+Before}
+\item 
+class \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}
+\item 
+struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_string_literal_record}{String\+Literal\+Record}
+\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a488600df6986ab8e78d3c1103e866503}{source\+\_\+range\+\_\+set\+\_\+t} = std\+::multiset$<$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}, \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_before}{Source\+Range\+Before} $>$
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_afe023bb4af1693a28a9de7978b9f9ccd}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call} (String\+Ref, Clang\+Tidy\+Context $\ast$)
+\begin{DoxyCompactList}\small\item\em Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call} rewriting check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a931fda30319276176bcb68f0c912dbac}{store\+Options} (Clang\+Tidy\+Options\+::\+Option\+Map \&Opts) override
+\begin{DoxyCompactList}\small\item\em Store options for this check. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_aaab1c3eda2a4c120576ca88bc6f87912}{register\+Matchers} (ast\+\_\+matchers\+::\+Match\+Finder $\ast$) override
+\begin{DoxyCompactList}\small\item\em Register the A\+S\+T\+Matcher that will found nodes we are interested in. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ab70058c9dd8607b7ba14f9de12b37b43}{register\+P\+P\+Callbacks} (Compiler\+Instance \&Compiler) override
+\begin{DoxyCompactList}\small\item\em Register callback for intercepting all pre-\/processor actions. \end{DoxyCompactList}\item 
+void \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a467bfebda1820296365c19c263ccea21}{check} (const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&) override
+\begin{DoxyCompactList}\small\item\em This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Clang\+Tidy\+Context $\ast$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a4d73eba1216ff222ff0d657c9e92b6ed}{Tidy\+Context}
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_string_literal_record}{String\+Literal\+Record} $\ast$ $>$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a38e88bc581f39bf4430717a72bf80f0e}{m\+\_\+req\+\_\+copy\+\_\+collector}
+\item 
+std\+::vector$<$ struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_assignment_record}{Assignment\+Record} $\ast$ $>$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ad8b6f7ea92efb40bbad025ae2981b8a4}{m\+\_\+req\+\_\+assign\+\_\+collector}
+\item 
+std\+::vector$<$ struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_req_fmt_record}{Req\+Fmt\+Record} $\ast$ $>$ \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a91312e562fe8dcd6ebffadfb809d4f6a}{m\+\_\+req\+\_\+fmt\+\_\+collector}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 27 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+
+
+\subsection{Member Typedef Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a488600df6986ab8e78d3c1103e866503}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a488600df6986ab8e78d3c1103e866503}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!source\+\_\+range\+\_\+set\+\_\+t@{source\+\_\+range\+\_\+set\+\_\+t}}
+\index{source\+\_\+range\+\_\+set\+\_\+t@{source\+\_\+range\+\_\+set\+\_\+t}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{source\+\_\+range\+\_\+set\+\_\+t}{source\_range\_set\_t}}
+{\footnotesize\ttfamily using \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a488600df6986ab8e78d3c1103e866503}{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::source\+\_\+range\+\_\+set\+\_\+t} =  std\+::multiset$<$\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_for_string_literals}{Source\+Range\+For\+String\+Literals}, \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_source_range_before}{Source\+Range\+Before}$>$}
+
+
+
+Definition at line 87 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_afe023bb4af1693a28a9de7978b9f9ccd}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_afe023bb4af1693a28a9de7978b9f9ccd}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\index{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call()}{ExecSQLLOBCreateToFunctionCall()}}
+{\footnotesize\ttfamily clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call (\begin{DoxyParamCaption}\item[{String\+Ref}]{Name,  }\item[{Clang\+Tidy\+Context $\ast$}]{Context }\end{DoxyParamCaption})}
+
+
+
+Constructor for the \hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call} rewriting check. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call} constructor
+
+The rule is created a new check using its {\ttfamily Clang\+Tidy\+Check} base class. Name and context are provided and stored locally. Some diag ids corresponding to errors handled by rule are created\+:
+\begin{DoxyItemize}
+\item unexpected\+\_\+diag\+\_\+id\+: Unexpected error
+\item no\+\_\+error\+\_\+diag\+\_\+id\+: No error
+\item access\+\_\+char\+\_\+data\+\_\+diag\+\_\+id\+: Couldn\textquotesingle{}t access memory buffer for comment (unexpected)
+\item cant\+\_\+find\+\_\+comment\+\_\+diag\+\_\+id\+: Comment not available (unexpected)
+\item comment\+\_\+dont\+\_\+match\+\_\+diag\+\_\+id\+: Invalid comment structure (unexpected)
+\item source\+\_\+generation\+\_\+failure\+\_\+diag\+\_\+id\+: Request source file generation failed (unexpected)
+\item header\+\_\+generation\+\_\+failure\+\_\+diag\+\_\+id\+: Request header file generation failed (unexpected)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Name} & A String\+Ref for the new check name \\
+\hline
+{\em Context} & The Clang\+Tidy\+Context allowing to access other contexts\+Init check (super class) Init our Tidy\+Context instance Request grouping option\+: Filename containing a json map for a group name indexing a vector of requests name \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 129 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp.
+
+Here is the call graph for this function\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_afe023bb4af1693a28a9de7978b9f9ccd_cgraph}
+\end{center}
+\end{figure}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a467bfebda1820296365c19c263ccea21}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a467bfebda1820296365c19c263ccea21}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!check@{check}}
+\index{check@{check}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{check()}{check()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::check (\begin{DoxyParamCaption}\item[{const ast\+\_\+matchers\+::\+Match\+Finder\+::\+Match\+Result \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+This method is called each time a visited A\+ST node matching our A\+S\+T\+Matcher is found. 
+
+check
+
+This method will navigated and inspect the found A\+ST nodes for\+:
+\begin{DoxyItemize}
+\item determining if the found nodes are elligible for rewrite
+\item extracting all necessary informations for computing rewrite location and code (find ProC generated comment)
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Result} & The match result provided by the recursive visitor allowing us to access A\+ST nodes bound to variables \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 620 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_aaab1c3eda2a4c120576ca88bc6f87912}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_aaab1c3eda2a4c120576ca88bc6f87912}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!register\+Matchers@{register\+Matchers}}
+\index{register\+Matchers@{register\+Matchers}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{register\+Matchers()}{registerMatchers()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::register\+Matchers (\begin{DoxyParamCaption}\item[{ast\+\_\+matchers\+::\+Match\+Finder $\ast$}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register the A\+S\+T\+Matcher that will found nodes we are interested in. 
+
+register\+Matchers
+
+This method register 1 matcher for each oracle ProC generated statement to rewrite. The matcher bind elements we will use, for detecting the found statement we want to rewrite , and for writing new code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em Finder} & the recursive visitor that will use our matcher for sending us A\+ST node. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 264 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ab70058c9dd8607b7ba14f9de12b37b43}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ab70058c9dd8607b7ba14f9de12b37b43}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!register\+P\+P\+Callbacks@{register\+P\+P\+Callbacks}}
+\index{register\+P\+P\+Callbacks@{register\+P\+P\+Callbacks}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{register\+P\+P\+Callbacks()}{registerPPCallbacks()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::register\+P\+P\+Callbacks (\begin{DoxyParamCaption}\item[{Compiler\+Instance \&}]{compiler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Register callback for intercepting all pre-\/processor actions. 
+
+\hyperlink{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ab70058c9dd8607b7ba14f9de12b37b43}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::register\+P\+P\+Callbacks}
+
+Allows to register a callback for executing our actions at every C/\+C++ pre-\/processor processing. Thanks to this callback we will collect all string literal macro expansions.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em compiler} & the compiler instance we will intercept \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 285 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a931fda30319276176bcb68f0c912dbac}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a931fda30319276176bcb68f0c912dbac}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!store\+Options@{store\+Options}}
+\index{store\+Options@{store\+Options}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{store\+Options()}{storeOptions()}}
+{\footnotesize\ttfamily void clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::store\+Options (\begin{DoxyParamCaption}\item[{Clang\+Tidy\+Options\+::\+Option\+Map \&}]{Opts }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+Store options for this check. 
+
+store\+Options
+
+This check support one option for customizing comment regex
+\begin{DoxyItemize}
+\item Generate-\/requests-\/headers
+\item Generate-\/requests-\/sources
+\item Generation-\/directory
+\item Generation-\/header-\/template
+\item Generation-\/source-\/template
+\item Generation-\/request-\/groups
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Opts} & The option map in which to store supported options \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 237 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ad8b6f7ea92efb40bbad025ae2981b8a4}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_ad8b6f7ea92efb40bbad025ae2981b8a4}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!m\+\_\+req\+\_\+assign\+\_\+collector@{m\+\_\+req\+\_\+assign\+\_\+collector}}
+\index{m\+\_\+req\+\_\+assign\+\_\+collector@{m\+\_\+req\+\_\+assign\+\_\+collector}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{m\+\_\+req\+\_\+assign\+\_\+collector}{m\_req\_assign\_collector}}
+{\footnotesize\ttfamily std\+::vector$<$struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_assignment_record}{Assignment\+Record} $\ast$$>$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::m\+\_\+req\+\_\+assign\+\_\+collector\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 174 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a38e88bc581f39bf4430717a72bf80f0e}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a38e88bc581f39bf4430717a72bf80f0e}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!m\+\_\+req\+\_\+copy\+\_\+collector@{m\+\_\+req\+\_\+copy\+\_\+collector}}
+\index{m\+\_\+req\+\_\+copy\+\_\+collector@{m\+\_\+req\+\_\+copy\+\_\+collector}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{m\+\_\+req\+\_\+copy\+\_\+collector}{m\_req\_copy\_collector}}
+{\footnotesize\ttfamily std\+::vector$<$struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_string_literal_record}{String\+Literal\+Record} $\ast$$>$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::m\+\_\+req\+\_\+copy\+\_\+collector\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 117 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a91312e562fe8dcd6ebffadfb809d4f6a}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a91312e562fe8dcd6ebffadfb809d4f6a}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!m\+\_\+req\+\_\+fmt\+\_\+collector@{m\+\_\+req\+\_\+fmt\+\_\+collector}}
+\index{m\+\_\+req\+\_\+fmt\+\_\+collector@{m\+\_\+req\+\_\+fmt\+\_\+collector}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{m\+\_\+req\+\_\+fmt\+\_\+collector}{m\_req\_fmt\_collector}}
+{\footnotesize\ttfamily std\+::vector$<$struct \hyperlink{structclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_1_1_req_fmt_record}{Req\+Fmt\+Record} $\ast$$>$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::m\+\_\+req\+\_\+fmt\+\_\+collector\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line 223 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+\mbox{\Hypertarget{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a4d73eba1216ff222ff0d657c9e92b6ed}\label{classclang_1_1tidy_1_1pagesjaunes_1_1_exec_s_q_l_l_o_b_create_to_function_call_a4d73eba1216ff222ff0d657c9e92b6ed}} 
+\index{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}!Tidy\+Context@{Tidy\+Context}}
+\index{Tidy\+Context@{Tidy\+Context}!clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call@{clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call}}
+\subsubsection{\texorpdfstring{Tidy\+Context}{TidyContext}}
+{\footnotesize\ttfamily Clang\+Tidy\+Context$\ast$ clang\+::tidy\+::pagesjaunes\+::\+Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call\+::\+Tidy\+Context}
+
+
+
+Definition at line 31 of file Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_exec_s_q_l_l_o_b_create_to_function_call_8h}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+h}\item 
+\hyperlink{_exec_s_q_l_l_o_b_create_to_function_call_8cpp}{Exec\+S\+Q\+L\+L\+O\+B\+Create\+To\+Function\+Call.\+cpp}\end{DoxyCompactItemize}
