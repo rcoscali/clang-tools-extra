@@ -332,6 +332,9 @@ namespace clang
        *
        * @return the map containing informations on the found symbol. The map is empty is no symbol
        *         with the same name were found.
+       *
+       * @todo Replace the associative array filled with some dedicated 
+       *       classes/AST instances
        */
       string2_map
       findDeclInFunction(const FunctionDecl *func, const std::string& symName)
@@ -397,6 +400,9 @@ namespace clang
        *
        * @return a map containing informations about the found member. if no record/member were 
        *         found, the returned map is empty
+       *
+       * @todo Replace the associative array filled with some dedicated 
+       *       classes/AST instances
        */
       string2_map
       findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *transUnit,
@@ -528,6 +534,9 @@ namespace clang
        * @param[in]  hostVarList the host vars expr to parse/decode
        *
        * @return a map containing the host parsed variables expr
+       *
+       * @todo Replace the associative array filled with some dedicated 
+       *       classes/AST instances
        */
       map_host_vars 
       decodeHostVars(const std::string &hostVarList)
