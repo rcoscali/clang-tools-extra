@@ -1266,9 +1266,6 @@ namespace clang
 	    std::string requestExecSql;
 	    std::string generationDateTime;
 
-	    std::string requestUsing;
-	    std::string requestArgs;
-
 	    /*
 	     * First let's try to match comment against a regex designed for prepape requests
 	     * ==============================================================================
@@ -1285,6 +1282,8 @@ namespace clang
 		// Some result that will be passed to the templating engine
 		std::string requestDefineValue;
 		std::string fromReqNameLength;
+		std::string requestLocalHostVarName;
+		std::string newHostVarList;
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -1342,15 +1341,18 @@ namespace clang
                     // something as:
                     //   char *req;
                     //   char reqBuf[1234];
-                    //   sprintf(req, fmt, ...);
+                    //   sprintf(reqBuf, fmt, ...);
                     //   req = reqBuf
                     //   EXEC SQL prepape aRequest from :req;
-                    // Let's try with <something> = <request> statement;
+                    // Let's try to find a '<something> = <request>' statement;
 
+                    requestLocalHostVarName.assign(hvm["hostvar"]);
+
+                    // Display matcher string in order to try with clang-query 
                     llvm::outs() << "binaryOperator(hasOperatorName(\"=\"), " <<
                       "hasLHS(declRefExpr(hasDeclaration(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\")))).bind(\"lhs\")), " <<
                       "hasRHS(hasDescendant(declRefExpr().bind(\"rhs\"))), " <<
-                      "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString() << "\")))).bind(\"binop\")\n";
+                      "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"binop\")\n";
 		
                     // Statement matcher for a binary operator = 
                     StatementMatcher m_matcher
@@ -1361,11 +1363,14 @@ namespace clang
 				       // The RHS is bound to rhs var
 		                       hasRHS(hasDescendant(declRefExpr().bind("rhs"))),
 				       // In the current function. Binary operator is bound to binop
-                                       hasAncestor(functionDecl(hasName(curFunc->getNameAsString())))).bind("binop");
+                                       hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("binop");
 
                     // Prepare matcher finder for our customized matcher
+                    // This class provides the run method that pushes results in the vector
                     FindAssignMatcher faMatcher(this);
+                    // MatchFinder is the visitor pattern impl
                     MatchFinder finder;
+                    // Provide the matcher to the visitor and associate with the finder
                     finder.addMatcher(m_matcher, &faMatcher);
                     // Clear collector vector
                     m_req_assign_collector.clear();
@@ -1380,6 +1385,7 @@ namespace clang
                     std::string requestCallArgsUsage;
                     std::string requestLiteralDefName, requestLiteralDefValue;
                     std::string sprintfTarget, requestInterName;
+                    std::string requestExecSqlDeclareSection;
 				
                     // The collected records
                     struct AssignmentRecord *lastRecord = (struct AssignmentRecord *)nullptr;
@@ -1477,28 +1483,33 @@ namespace clang
 
                                     // Local vars for args processing
                                     unsigned int num_arg = 0;
-                                    std::vector<const Expr *> argumentsVector;
+                                    std::vector<Expr *> argumentsVector;
                                     //const Expr *stringLiteralArg = nullptr;
                                     argumentsVector.clear();
                                     
                                     // Iterate on all args after the second one (args index start at 0) and store
                                     num_arg = 0;
-                                    for (auto argit = callExpr->arg_begin();
-                                         argit != callExpr->arg_end();
-                                         argit++,
-                                           num_arg++)
+                                    for (unsigned int n = 0;
+                                         n < callExpr->getNumArgs(); 
+                                         n++)
                                       {
                                         // Standard arg
-                                        if (num_arg > 1)
+                                        if (n > 1)
                                           {
-                                            outs() << "Storing arg #" << num_arg << "\n";                                        
-                                            argumentsVector.push_back((*argit));
+                                            outs() << "Storing arg #" << n << "\n";
+                                            if (isa<const Expr>(*(callExpr->getArg(n))))
+                                              {
+                                                Expr *localArg = const_cast<Expr *>(callExpr->getArg(n));
+                                                if (localArg)
+                                                  argumentsVector.push_back(localArg);
+                                              }
+                                            else
+                                              {
+                                                llvm::errs() << "Error: Invalid arg type!\n";
+                                                llvm::outs() << "Error: Invalid arg type! Trying to dump ...\n";
+                                                callExpr->getArg(n)->dump();
+                                              }
                                           }
-                                        // else if (num_arg == 1)
-                                        //   {
-                                        //     outs() << "Storing string literal arg #" << num_arg << "\n";                                        
-                                        //     stringLiteralArg = (*argit);
-                                        //   }
                                       }
                                     
                                     // Iterate on all args after the second one (args index start at 0)
@@ -1509,15 +1520,15 @@ namespace clang
                                       {
                                         outs() << "Processing arg #" << num_arg << "\n";
                                         // Let's get arg
-                                        const Expr *arg; 
-                                        const Expr *upper_arg = *avit;
+                                        Expr *arg; 
+                                        Expr *upper_arg = *avit;
                                         // Check if arg is null
                                         if (upper_arg != nullptr)
                                           {
                                             // Avoid implicit casts
                                             if ((arg = upper_arg->IgnoreImpCasts()))
                                               {
-                                                if (isa<DeclRefExpr>(*arg))
+                                                if (arg && isa<DeclRefExpr>(*arg))
                                                   {
                                                     // Get the decl ref expr
                                                     const DeclRefExpr &argExpr = llvm::cast<DeclRefExpr>(*arg);
@@ -1534,6 +1545,8 @@ namespace clang
                                                     requestFunctionParamsDecl.append(declName);
                                                     // Get the qualified type for this arg
                                                     QualType qargt = argExpr.getDecl()->getType();
+                                                    SplitQualType qt_split = qargt.split();
+                                                    std::string fieldTypeName = QualType::getAsString(qt_split);
                                                     // And the type pointer
                                                     const Type *argt = qargt.getTypePtr();
 
@@ -1543,72 +1556,46 @@ namespace clang
                                                     // the dedicated set (only if required through dedicated option)
                                                     if (generation_simplify_function_args)
                                                       emplace_ret = args_set.emplace(declName);
+                                                    std::string paramName = "a_";
+                                                    paramName.append(declName);
 						
                                                     //outs() << "emplace in set = "
                                                     //       << (emplace_ret.second ? "SUCCESS" : "FAILURE") << "\n";
 						
-                                                    // If arg is an array
-                                                    if (argt->isArrayType())
+                                                    // If could emplace it, it means it don't already exists in args list
+                                                    if (!generation_simplify_function_args || emplace_ret.second)
                                                       {
-                                                        // Get the ConstantArrayType for it (it is mandatory a
-                                                        // constant array type in our case, remember it is provided
-                                                        // to sprintf format string)
-                                                        // TODO: Perhaps we should check this
-                                                        const ConstantArrayType *arrt =
-                                                          argExpr.getDecl()->getASTContext()
-                                                          .getAsConstantArrayType(qargt);
-
-                                                        // If could emplace it, it means it don't already exists in args list
-                                                        if (!generation_simplify_function_args || emplace_ret.second)
+                                                        std::string elementType, elementSize;
+                                                        
+                                                        // If arg is an array
+                                                        if (argt->isArrayType())
                                                           {
-                                                            // First add coma for the third and after
-                                                            if (num_arg > 2)
-                                                              {
-                                                                requestFunctionParamsDef.append(", ");
-                                                                requestCallArgsUsage.append(", ");
-                                                              }
-                                                            // So we add it, first the element type
-                                                            requestFunctionParamsDef.append(arrt->getElementType().getAsString());
-                                                            // Then a space
-                                                            requestFunctionParamsDef.append(" ");
-                                                            // Then the param name
-                                                            requestFunctionParamsDef.append(declName);
-                                                            requestCallArgsUsage.append(declName);
-                                                            // An openning bracket before the size
-                                                            requestFunctionParamsDef.append("[");
-                                                            // The size as a number
-                                                            std::string arrsz = arrt->getSize().toString(10, false);
-                                                            // Formatted in a string
-                                                            requestFunctionParamsDef.append(arrsz);
-                                                            // And finally the closing bracket
-                                                            requestFunctionParamsDef.append("]");
+                                                            // Get the ConstantArrayType for it (it is mandatory a
+                                                            // constant array type in our case, remember it is provided
+                                                            // to sprintf format string)
+                                                            // TODO: Perhaps we should check this
+                                                            const ConstantArrayType *arrt =
+                                                              argExpr.getDecl()->getASTContext()
+                                                              .getAsConstantArrayType(qargt);
+                                                            elementType = arrt->getElementType().getAsString();
+                                                            elementSize = arrt->getSize().toString(10, false);
                                                           }
+                                                            
+                                                        requestFunctionParamsDef.append(createParamsDef(fieldTypeName,
+                                                                                                        elementType,
+                                                                                                        elementSize,
+                                                                                                        paramName));
+                                                        requestExecSqlDeclareSection.append(createParamsDeclareSection(fieldTypeName,
+                                                                                                                       elementType,
+                                                                                                                       elementSize,
+                                                                                                                       declName,
+                                                                                                                       paramName));
+                                                        requestFunctionParamsDecl.append(fieldTypeName,
+                                                                                         elementType,
+                                                                                         elementSize);
+                                                        requestCallArgsUsage.append(createParamsCall(declName));
+                                                        newHostVarList.append(createHostVarList(declName));
                                                       }
-                                                    // Type is builting type
-                                                    else
-                                                      {
-                                                        // We were able to add this arg to the set
-                                                        if (!generation_simplify_function_args || emplace_ret.second)
-                                                          {
-                                                            // First add coma for the third and after
-                                                            if (num_arg > 2)
-                                                              {
-                                                                requestFunctionParamsDef.append(", ");
-                                                                requestCallArgsUsage.append(", ");
-                                                              }
-							
-                                                            // Se we can add to the def/decl, first the type name
-                                                            requestFunctionParamsDef.append(qargt.getAsString());
-                                                            // Then a space
-                                                            requestFunctionParamsDef.append(" ");
-                                                            // and the param name
-                                                            requestFunctionParamsDef.append(declName);
-                                                            requestCallArgsUsage.append(declName);
-                                                          }
-                                                      }
-
-                                                    if (num_arg <num_args-1)
-                                                      requestFunctionParamsDecl.append(", ");
                                                   }
                                               }
                                             else
@@ -1636,6 +1623,35 @@ namespace clang
                                     // We got all we need! let's go on generation
                                     else
                                       {
+                                        // Remove last commas + space
+                                        if (requestFunctionParamsDef.length() > 2)
+                                          requestFunctionParamsDef.erase(requestFunctionParamsDef.length() -2, std::string::npos);
+                                        else
+                                          requestFunctionParamsDef.assign("void");
+                                        
+                                        // Remove last commas + space
+                                        if (requestFunctionParamsDecl.length() > 2)
+                                          requestFunctionParamsDecl.erase(requestFunctionParamsDecl.length() -2, std::string::npos);
+                                        else
+                                          requestFunctionParamsDecl.assign("void");
+                                        
+                                        // Remove last commas + space
+                                        if (requestCallArgsUsage.length() > 2)
+                                          requestCallArgsUsage.erase(requestCallArgsUsage.length() -2, std::string::npos);
+                                        
+                                        // Remove last CR
+                                        if (requestExecSqlDeclareSection.length() > 2)
+                                          {
+                                            requestExecSqlDeclareSection.insert(0, "    EXEC SQL BEGIN DECLARE SECTION;\n");
+                                            requestExecSqlDeclareSection.append("    EXEC SQL END DECLARE SECTION;\n");
+                                          }
+                                        else
+                                          requestExecSqlDeclareSection.assign("    // No declare section");
+                                        
+                                        // Remove last comma + space
+                                        if (newHostVarList.length() > 2)
+                                          newHostVarList.erase(newHostVarList.length() -2, std::string::npos);
+                    
                                         args_set.clear();
 
                                         // Compute function name
@@ -1672,9 +1688,9 @@ namespace clang
                                             // Build the map
                                             string2_map values_map;
                                             values_map["@RequestFunctionName@"] = requestFunctionName;
+                                            values_map["@RequestFunctionParamsDecl@"] = requestFunctionParamsDecl;
                                             values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
                                             values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-                                            values_map["@RequestFormatArgsDecl@"] = requestFunctionParamsDef;
                                             values_map["@GenerationDateTime@"] = generationDateTime;
 				    
                                             //outs() << "*>>> do source generation !\n";
@@ -1691,16 +1707,18 @@ namespace clang
                                             // Build the map
                                             string2_map values_map;
                                             values_map["@RequestFunctionName@"] = requestFunctionName;
-                                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                                            values_map["@RequestFunctionParamsDef@"] = requestFunctionParamsDef;
                                             values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
                                             values_map["@RequestLiteralDefName@"] = requestLiteralDefName;
                                             values_map["@RequestLiteralDefValue@"] = requestLiteralDefValue;
                                             values_map["@RequestInterName@"] = fromReqName;
-                                            values_map["@RequestFormatArgsDef@"] = requestFunctionParamsDef;
-                                            values_map["@FromRequestNameLength@"] = fromReqNameLength;
+                                            values_map["@RequestFunctionFromName@"] = fromReqName;
+                                            values_map["@RequestFunctionFromNameLength@"] = fromReqNameLength;
                                             values_map["@FromRequestName@"] = sprintfTarget;
-                                            values_map["@RequestFormatArgsUsage@"] = requestFunctionParamsDecl;
+                                            values_map["@RequestLocalHostVarName@"] = requestLocalHostVarName;
                                             values_map["@RequestExecSql@"] = requestExecSql;
+                                            values_map["@ExecSqlDeclareSection@"] = requestExecSqlDeclareSection;
                                             values_map["@GenerationDateTime@"] = generationDateTime;
 				    
                                             //outs() << "*>>> do header generation !\n";
