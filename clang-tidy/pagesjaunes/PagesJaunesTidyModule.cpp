@@ -143,11 +143,13 @@ namespace clang
            */
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generate-requests-sources"] = "1";
-          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-directory"] = ".";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-directory"] = "./";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generate-requests-allow-overwrite"] = "1";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_create_temporary.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_create_temporary.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-do-report-modification-in-PC"] = "1";
+          Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-report-modification-in-dir"] = "./";
           Opts["pagesjaunes-exec-sql-lob-create-temporary-to-function-call.Generation-keep-commented-out-exec-sql-in-PC"] = "0";
 
           /*

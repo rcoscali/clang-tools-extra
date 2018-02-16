@@ -1259,7 +1259,9 @@ namespace clang
 	     *   - RequestExecSql
 	     */
 	    std::string requestFunctionName;
+	    std::string requestFunctionFromName;
 	    std::string requestFunctionArgs;
+	    std::string requestFormatArgsUsage;
 	    std::string requestExecSqlDeclareSection;
 	    std::string requestFunctionParamsDef;
 	    std::string requestFunctionParamsDecl;
@@ -1346,13 +1348,11 @@ namespace clang
                     //   EXEC SQL prepape aRequest from :req;
                     // Let's try to find a '<something> = <request>' statement;
 
-                    requestLocalHostVarName.assign(hvm["hostvar"]);
-
                     // Display matcher string in order to try with clang-query 
-                    llvm::outs() << "binaryOperator(hasOperatorName(\"=\"), " <<
-                      "hasLHS(declRefExpr(hasDeclaration(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\")))).bind(\"lhs\")), " <<
-                      "hasRHS(hasDescendant(declRefExpr().bind(\"rhs\"))), " <<
-                      "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"binop\")\n";
+                    // llvm::outs() << "binaryOperator(hasOperatorName(\"=\"), " <<
+                    //   "hasLHS(declRefExpr(hasDeclaration(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\")))).bind(\"lhs\")), " <<
+                    //   "hasRHS(hasDescendant(declRefExpr().bind(\"rhs\"))), " <<
+                    //   "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"binop\")\n";
 		
                     // Statement matcher for a binary operator = 
                     StatementMatcher m_matcher
@@ -1384,12 +1384,16 @@ namespace clang
                     std::string requestFunctionParamsDef, requestFunctionParamsDecl;
                     std::string requestCallArgsUsage;
                     std::string requestLiteralDefName, requestLiteralDefValue;
-                    std::string sprintfTarget, requestInterName;
                     std::string requestExecSqlDeclareSection;
 				
                     // The collected records
                     struct AssignmentRecord *lastRecord = (struct AssignmentRecord *)nullptr;
 
+                    // A set for enforcing uniqueness of args for function args definition/declaration
+                    std::set<std::string> args_set;
+                    emplace_ret_t emplace_ret;
+                    args_set.clear();
+                                    
                     // If we found something, 
                     if (!m_req_assign_collector.empty())
                       {
@@ -1419,8 +1423,9 @@ namespace clang
                             // outs() << "Found assignment at line #" << lastRecord->binop_linenum
                             //        << ": '" << lastRecord->lhs->getFoundDecl()->getNameAsString()
                             //        << " = " << lastRecord->rhs->getFoundDecl()->getNameAsString() << "'\n";
-                            sprintfTarget.assign(lastRecord->rhs->getFoundDecl()->getNameAsString());
-                            requestInterName.assign(lastRecord->lhs->getFoundDecl()->getNameAsString());
+                            requestFunctionFromName.assign(lastRecord->rhs->getFoundDecl()->getNameAsString());
+                            requestLocalHostVarName.assign(lastRecord->lhs->getFoundDecl()->getNameAsString());
+                    
 
                             /*
                              * Get the sprintf call defining the request
@@ -1428,14 +1433,14 @@ namespace clang
 
                             llvm::outs() << "callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName(\"sprintf\"))))), " <<
                               "hasArgument(0, " <<
-                                          "declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << sprintfTarget.c_str() << "\"))))).bind(\"arg0\")), " <<
+                                          "declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << requestFunctionFromName.c_str() << "\"))))).bind(\"arg0\")), " <<
                               "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"callExpr\")\n";
                             
                             // Declaration matcher for the request string literal
                             StatementMatcher m_matcher2
                               = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
                                          hasArgument(0,
-                                                     declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(sprintfTarget.c_str()))))).bind("arg0")),
+                                                     declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(requestFunctionFromName.c_str()))))).bind("arg0")),
                                          hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
 		    
 
@@ -1474,20 +1479,26 @@ namespace clang
                                     outs() << "Found sprintf formater at line #" << lastFmtRecord->callexpr_linenum << "\n";
                                     unsigned int num_args = lastFmtRecord->callExpr->getNumArgs();
                                     outs() << "    Formater has " << num_args << " args \n";
-
-                                    // A set for enforcing uniqueness of args for function args definition/declaration
-                                    std::set<std::string> args_set;
-                                    args_set.clear();
-                                    emplace_ret_t emplace_ret;
                                     const CallExpr *callExpr = lastFmtRecord->callExpr;
+                                    loc_start = callExpr->getLocStart();
+
+                                    //const Expr *callExprExpr = dynamic_cast<const Expr *>(callExpr);
+
+                                    // Display ExprBits of the callExpr
+                                    // llvm::outs() << "isValueDependent: " << (callExprExpr->isValueDependent() ? "True" : "False") << "\n";
+                                    // llvm::outs() << "isTypeDependent: " << (callExprExpr->isTypeDependent() ? "True" : "False") << "\n";
+                                    // llvm::outs() << "isInstanciationDependent: " << (callExprExpr->isInstantiationDependent() ? "True" : "False") << "\n";
+                                    // llvm::outs() << "containsUnexpandedParameterPack: " << (callExprExpr->containsUnexpandedParameterPack() ? "True" : "False") << "\n";
 
                                     // Local vars for args processing
-                                    unsigned int num_arg = 0;
-                                    std::vector<Expr *> argumentsVector;
-                                    //const Expr *stringLiteralArg = nullptr;
+                                    unsigned int num_arg = callExpr->getNumArgs();
+                                    ArrayRef<Stmt *> rawArgs = const_cast<CallExpr *>(callExpr)->getRawSubExprs();
+
+                                    std::vector<Stmt *> argumentsVector;
                                     argumentsVector.clear();
                                     
-                                    // Iterate on all args after the second one (args index start at 0) and store
+                                    // Iterate on all args after the second one (args index start at 0) and store each arg
+                                    //const FunctionDecl *sprintfDecl = callExpr->getDirectCallee();
                                     num_arg = 0;
                                     for (unsigned int n = 0;
                                          n < callExpr->getNumArgs(); 
@@ -1496,10 +1507,15 @@ namespace clang
                                         // Standard arg
                                         if (n > 1)
                                           {
-                                            outs() << "Storing arg #" << n << "\n";
-                                            if (isa<const Expr>(*(callExpr->getArg(n))))
+                                            llvm::outs() << "Storing arg #" << n << "\n";
+                                            Stmt *theArg = rawArgs[n];
+
+                                            // Display StmtClassName
+                                            llvm::outs() << "Stmt class: " << theArg->getStmtClassName() << "\n";
+
+                                            if (theArg->getStmtClassName() != nullptr && isa<const Expr>(*theArg))
                                               {
-                                                Expr *localArg = const_cast<Expr *>(callExpr->getArg(n));
+                                                Expr *localArg = reinterpret_cast<Expr *>(theArg);
                                                 if (localArg)
                                                   argumentsVector.push_back(localArg);
                                               }
@@ -1507,12 +1523,16 @@ namespace clang
                                               {
                                                 llvm::errs() << "Error: Invalid arg type!\n";
                                                 llvm::outs() << "Error: Invalid arg type! Trying to dump ...\n";
-                                                callExpr->getArg(n)->dump();
                                               }
                                           }
                                       }
                                     
+                                    args_set.clear();
+                                    
                                     // Iterate on all args after the second one (args index start at 0)
+                                    // sprintf has a variable number of arguments, and AST contains only
+                                    // the number of args that have a correcponding %<?> in format string.
+                                    // Then the real number of arguments is equal to the number of '%s'
                                     for (auto avit = argumentsVector.begin();
                                          avit != argumentsVector.end();
                                          avit++,
@@ -1521,225 +1541,214 @@ namespace clang
                                         outs() << "Processing arg #" << num_arg << "\n";
                                         // Let's get arg
                                         Expr *arg; 
-                                        Expr *upper_arg = *avit;
+                                        Expr *upper_arg = reinterpret_cast<Expr *>(*avit);
                                         // Check if arg is null
-                                        if (upper_arg != nullptr)
+                                        if (upper_arg != nullptr && (arg = upper_arg->IgnoreImpCasts()))
                                           {
-                                            // Avoid implicit casts
-                                            if ((arg = upper_arg->IgnoreImpCasts()))
+                                            if (arg && isa<DeclRefExpr>(*arg))
                                               {
-                                                if (arg && isa<DeclRefExpr>(*arg))
+                                                // Get the decl ref expr
+                                                const DeclRefExpr &argExpr = llvm::cast<DeclRefExpr>(*arg);
+                                                DeclarationNameInfo dni = argExpr.getNameInfo();
+                                                DeclarationName declNameObj = dni.getName();
+                                                IdentifierInfo *idinfo = declNameObj.getAsIdentifierInfo();
+                                                std::string declName = idinfo->getName().str();
+
+                                                // Get the qualified type for this arg
+                                                QualType qargt = argExpr.getDecl()->getType();
+                                                SplitQualType qt_split = qargt.split();
+                                                std::string fieldTypeName = QualType::getAsString(qt_split);
+                                                // And the type pointer
+                                                const Type *argt = qargt.getTypePtr();
+                                                // outs() << "arg type = " << argt << "\n";
+
+                                                // Check uniqueness of arg for def/decl by adding name to prefix "a_"
+                                                std::string paramName("a_");
+                                                paramName.append(declName);
+                                                if (generation_simplify_function_args)
+                                                  emplace_ret = args_set.emplace(declName);
+						
+                                                //outs() << "emplace in set = "
+                                                //       << (emplace_ret.second ? "SUCCESS" : "FAILURE") << "\n";
+						
+                                                // If could emplace it, it means it don't already exists in args list
+                                                if (!generation_simplify_function_args || emplace_ret.second)
                                                   {
-                                                    // Get the decl ref expr
-                                                    const DeclRefExpr &argExpr = llvm::cast<DeclRefExpr>(*arg);
-                                                    //outs() << "dump of argExpr:";
-                                                    //argExpr.dump();
-                                                    //outs() << "\n";
-                                                    // argExpr.viewAST();
-                                                    DeclarationNameInfo dni = argExpr.getNameInfo();
-                                                    DeclarationName declNameObj = dni.getName();
-                                                    IdentifierInfo *idinfo = declNameObj.getAsIdentifierInfo();
-                                                    std::string declName = idinfo->getName().str();
-
-                                                    // Append arg name
-                                                    requestFunctionParamsDecl.append(declName);
-                                                    // Get the qualified type for this arg
-                                                    QualType qargt = argExpr.getDecl()->getType();
-                                                    SplitQualType qt_split = qargt.split();
-                                                    std::string fieldTypeName = QualType::getAsString(qt_split);
-                                                    // And the type pointer
-                                                    const Type *argt = qargt.getTypePtr();
-
-                                                    outs() << "arg type = " << argt << "\n";
-
-                                                    // Check uniqueness of arg for def/decl by adding name to
-                                                    // the dedicated set (only if required through dedicated option)
-                                                    if (generation_simplify_function_args)
-                                                      emplace_ret = args_set.emplace(declName);
-                                                    std::string paramName = "a_";
-                                                    paramName.append(declName);
-						
-                                                    //outs() << "emplace in set = "
-                                                    //       << (emplace_ret.second ? "SUCCESS" : "FAILURE") << "\n";
-						
-                                                    // If could emplace it, it means it don't already exists in args list
-                                                    if (!generation_simplify_function_args || emplace_ret.second)
-                                                      {
-                                                        std::string elementType, elementSize;
+                                                    std::string elementType, elementSize;
                                                         
-                                                        // If arg is an array
-                                                        if (argt->isArrayType())
-                                                          {
-                                                            // Get the ConstantArrayType for it (it is mandatory a
-                                                            // constant array type in our case, remember it is provided
-                                                            // to sprintf format string)
-                                                            // TODO: Perhaps we should check this
-                                                            const ConstantArrayType *arrt =
-                                                              argExpr.getDecl()->getASTContext()
-                                                              .getAsConstantArrayType(qargt);
-                                                            elementType = arrt->getElementType().getAsString();
-                                                            elementSize = arrt->getSize().toString(10, false);
-                                                          }
-                                                            
-                                                        requestFunctionParamsDef.append(createParamsDef(fieldTypeName,
-                                                                                                        elementType,
-                                                                                                        elementSize,
-                                                                                                        paramName));
-                                                        requestExecSqlDeclareSection.append(createParamsDeclareSection(fieldTypeName,
-                                                                                                                       elementType,
-                                                                                                                       elementSize,
-                                                                                                                       declName,
-                                                                                                                       paramName));
-                                                        requestFunctionParamsDecl.append(fieldTypeName,
-                                                                                         elementType,
-                                                                                         elementSize);
-                                                        requestCallArgsUsage.append(createParamsCall(declName));
-                                                        newHostVarList.append(createHostVarList(declName));
+                                                    // If arg is an array
+                                                    if (argt->isArrayType())
+                                                      {
+                                                        // Get the ConstantArrayType for it (it is mandatory a
+                                                        // constant array type in our case, remember it is provided
+                                                        // to sprintf format string)
+                                                        // TODO: Perhaps we should check this
+                                                        const ConstantArrayType *arrt =
+                                                          argExpr.getDecl()->getASTContext()
+                                                          .getAsConstantArrayType(qargt);
+                                                        elementType = arrt->getElementType().getAsString();
+                                                        elementSize = arrt->getSize().toString(10, false);
                                                       }
+                                                            
+                                                    requestFunctionParamsDecl.append(createParamsDecl(fieldTypeName,
+                                                                                                      elementType,
+                                                                                                      elementSize));
+                                                    requestFunctionParamsDef.append(createParamsDef(fieldTypeName,
+                                                                                                    elementType,
+                                                                                                    elementSize,
+                                                                                                    paramName));
+                                                    requestExecSqlDeclareSection.append(createParamsDeclareSection(fieldTypeName,
+                                                                                                                   elementType,
+                                                                                                                   elementSize,
+                                                                                                                   declName,
+                                                                                                                   paramName));
+                                                    requestCallArgsUsage.append(createParamsCall(declName));
+                                                    requestFormatArgsUsage.append(createParamsCall(paramName));
+                                                    newHostVarList.append(createHostVarList(declName));
                                                   }
                                               }
                                             else
                                               {
                                                 // TODO: emit standard error. This should not occurs
-                                                errs() << "ERROR !! Arg is not castable in DeclRefExpr\n";
+                                                errs() << "ERROR !! Cannot get arg without implicit casts \n";
                                               }
                                           }
-				    
                                         else
                                           // Something failed about getting argument !!
                                           // TODO: emit standard error. This should not occurs
                                           //       understand this weird case !!!
-                                          errs() << "*** ERROR !!! Cannot generate arg #" << num_arg << " of request " << sprintfTarget << "\n";
+                                          errs() << "*** ERROR !!! Cannot generate arg #" << num_arg << " of request " << requestFunctionFromName << "\n";
                                       }
-
-                                    if (!findMacroStringLiteralAtLine(srcMgr,
-                                                                      lastFmtRecord->callexpr_linenum,
-                                                                      requestLiteralDefName, requestLiteralDefValue,
-                                                                      nullptr))
-                                      {
-                                        errs() << "ERROR !! Didn't found back macro expansion for "
-                                               << "the string literal used at line number " << lastFmtRecord->callexpr_linenum << "\n";
-                                      }
-                                    // We got all we need! let's go on generation
+				    
+                                  }
+                                
+                                if (!findMacroStringLiteralAtLine(srcMgr,
+                                                                  lastFmtRecord->callexpr_linenum,
+                                                                  requestLiteralDefName, requestLiteralDefValue,
+                                                                  nullptr))
+                                  {
+                                    errs() << "ERROR !! Didn't found back macro expansion for "
+                                           << "the string literal used at line number " << lastFmtRecord->callexpr_linenum << "\n";
+                                  }
+                                // We got all we need! let's go on generation
+                                else
+                                  {
+                                    // Remove last commas + space
+                                    if (requestFunctionParamsDef.length() > 2)
+                                      requestFunctionParamsDef.erase(requestFunctionParamsDef.length() -2, std::string::npos);
                                     else
+                                      requestFunctionParamsDef.assign("void");
+                                    
+                                    // Remove last commas + space
+                                    if (requestFunctionParamsDecl.length() > 2)
+                                      requestFunctionParamsDecl.erase(requestFunctionParamsDecl.length() -2, std::string::npos);
+                                    else
+                                      requestFunctionParamsDecl.assign("void");
+                                    
+                                    // Remove last commas + space
+                                    if (requestCallArgsUsage.length() > 2)
+                                      requestCallArgsUsage.erase(requestCallArgsUsage.length() -2, std::string::npos);
+                                    
+                                    // Remove last CR
+                                    if (requestExecSqlDeclareSection.length() > 2)
                                       {
-                                        // Remove last commas + space
-                                        if (requestFunctionParamsDef.length() > 2)
-                                          requestFunctionParamsDef.erase(requestFunctionParamsDef.length() -2, std::string::npos);
-                                        else
-                                          requestFunctionParamsDef.assign("void");
+                                        requestExecSqlDeclareSection.insert(0, "    EXEC SQL BEGIN DECLARE SECTION;\n");
+                                        requestExecSqlDeclareSection.append("    EXEC SQL END DECLARE SECTION;\n");
+                                      }
+                                    else
+                                      requestExecSqlDeclareSection.assign("    // No declare section");
+                                    
+                                    // Remove last comma + space
+                                    if (requestFormatArgsUsage.length() > 2)
+                                      requestFormatArgsUsage.erase(requestFormatArgsUsage.length() -2, std::string::npos);
+                                    
+                                    // Remove last comma + space
+                                    if (newHostVarList.length() > 2)
+                                      newHostVarList.erase(newHostVarList.length() -2, std::string::npos);
+                                    
+                                    args_set.clear();
+                                    
+                                    // Compute function name
+                                    requestFunctionName.assign("prepare");
+                                    // Get match in rest string
+                                    std::string rest(reqName);
+                                    // Capitalize it
+                                    rest[0] &= ~0x20;
+                                    // And append to function name
+                                    requestFunctionName.append(rest);
+                                    
+                                    // 'EXEC SQL' statement computation
+                                    // => prepare reqName from :fromReqName
+                                    std::string requestExecSql;
+                                    requestExecSql.assign(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_REQ_RE_REQ_PREPARE]);
+                                    requestExecSql.append(reqName);
+                                    requestExecSql.append(" ");
+                                    requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_REQ_RE_REQ_FROM]);
+                                    requestExecSql.append(" ");
+                                    requestExecSql.append(fromReqName);
+                                    
+                                    if (generation_do_report_modification_in_pc)
+                                      {
+                                        rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
+                                        rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
+                                      }
+                                    
+                                    auto now_time = system_clock::to_time_t(system_clock::now());
+                                    generationDateTime = std::ctime(&now_time);
+                                    
+                                    // If header generation was requested
+                                    if (generate_req_headers)
+                                      {
+                                        // Build the map
+                                        string2_map values_map;
+                                        values_map["@RequestFunctionName@"] = requestFunctionName;
+                                        values_map["@RequestFunctionParamsDecl@"] = requestFunctionParamsDecl;
+                                        values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                                        values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                                        values_map["@GenerationDateTime@"] = generationDateTime;
                                         
-                                        // Remove last commas + space
-                                        if (requestFunctionParamsDecl.length() > 2)
-                                          requestFunctionParamsDecl.erase(requestFunctionParamsDecl.length() -2, std::string::npos);
-                                        else
-                                          requestFunctionParamsDecl.assign("void");
+                                        // And provide it to the templating engine
+                                        doRequestHeaderGeneration(diagEngine,
+                                                                  generation_header_template,
+                                                                  values_map);
+                                      }
+                                    
+                                    // If source generation was requested
+                                    if (generate_req_sources)
+                                      {
+                                        // Build the map
+                                        string2_map values_map;
+                                        values_map["@RequestFunctionName@"] = requestFunctionName;
+                                        values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                                        values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                                        values_map["@GenerationDateTime@"] = generationDateTime;
+                                        values_map["@RequestLiteralDefName@"] = requestLiteralDefName;
+                                        values_map["@RequestLiteralDefValue@"] = requestLiteralDefValue;                                            
+                                        values_map["@RequestFunctionParamsDef@"] = requestFunctionParamsDef;
+                                        values_map["@ExecSqlDeclareSection@"] = requestExecSqlDeclareSection;
+                                        values_map["@RequestFunctionFromName@"] = requestFunctionFromName;
+                                        values_map["@RequestFunctionFromNameLength@"] = fromReqNameLength;
+                                        values_map["@RequestFormatArgsUsage@"] = requestFormatArgsUsage;
+                                        values_map["@RequestLocalHostVarName@"] = requestLocalHostVarName;
+                                        values_map["@RequestExecSql@"] = requestExecSql;
                                         
-                                        // Remove last commas + space
-                                        if (requestCallArgsUsage.length() > 2)
-                                          requestCallArgsUsage.erase(requestCallArgsUsage.length() -2, std::string::npos);
-                                        
-                                        // Remove last CR
-                                        if (requestExecSqlDeclareSection.length() > 2)
-                                          {
-                                            requestExecSqlDeclareSection.insert(0, "    EXEC SQL BEGIN DECLARE SECTION;\n");
-                                            requestExecSqlDeclareSection.append("    EXEC SQL END DECLARE SECTION;\n");
-                                          }
-                                        else
-                                          requestExecSqlDeclareSection.assign("    // No declare section");
-                                        
-                                        // Remove last comma + space
-                                        if (newHostVarList.length() > 2)
-                                          newHostVarList.erase(newHostVarList.length() -2, std::string::npos);
-                    
-                                        args_set.clear();
-
-                                        // Compute function name
-                                        requestFunctionName.assign("prepare");
-                                        // Get match in rest string
-                                        std::string rest(reqName);
-                                        // Capitalize it
-                                        rest[0] &= ~0x20;
-                                        // And append to function name
-                                        requestFunctionName.append(rest);
-				
-                                        // 'EXEC SQL' statement computation
-                                        // => prepare reqName from :fromReqName
-                                        std::string requestExecSql;
-                                        requestExecSql.assign(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_REQ_RE_REQ_PREPARE]);
-                                        requestExecSql.append(reqName);
-                                        requestExecSql.append(" ");
-                                        requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_REQ_RE_REQ_FROM]);
-                                        requestExecSql.append(" ");
-                                        requestExecSql.append(fromReqName);
-				
-                                        if (generation_do_report_modification_in_pc)
-                                          {
-                                            rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
-                                            rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
-                                          }
-
-                                        auto now_time = system_clock::to_time_t(system_clock::now());
-                                        generationDateTime = std::ctime(&now_time);
-                            
-                                        // If header generation was requested
-                                        if (generate_req_headers)
-                                          {
-                                            // Build the map
-                                            string2_map values_map;
-                                            values_map["@RequestFunctionName@"] = requestFunctionName;
-                                            values_map["@RequestFunctionParamsDecl@"] = requestFunctionParamsDecl;
-                                            values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
-                                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-                                            values_map["@GenerationDateTime@"] = generationDateTime;
-				    
-                                            //outs() << "*>>> do source generation !\n";
-				    
-                                            // And provide it to the templating engine
-                                            doRequestHeaderGeneration(diagEngine,
-                                                                      generation_header_template,
-                                                                      values_map);
-                                          }
-			    
-                                        // If source generation was requested
-                                        if (generate_req_sources)
-                                          {
-                                            // Build the map
-                                            string2_map values_map;
-                                            values_map["@RequestFunctionName@"] = requestFunctionName;
-                                            values_map["@RequestFunctionParamsDef@"] = requestFunctionParamsDef;
-                                            values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
-                                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-                                            values_map["@RequestLiteralDefName@"] = requestLiteralDefName;
-                                            values_map["@RequestLiteralDefValue@"] = requestLiteralDefValue;
-                                            values_map["@RequestInterName@"] = fromReqName;
-                                            values_map["@RequestFunctionFromName@"] = fromReqName;
-                                            values_map["@RequestFunctionFromNameLength@"] = fromReqNameLength;
-                                            values_map["@FromRequestName@"] = sprintfTarget;
-                                            values_map["@RequestLocalHostVarName@"] = requestLocalHostVarName;
-                                            values_map["@RequestExecSql@"] = requestExecSql;
-                                            values_map["@ExecSqlDeclareSection@"] = requestExecSqlDeclareSection;
-                                            values_map["@GenerationDateTime@"] = generationDateTime;
-				    
-                                            //outs() << "*>>> do header generation !\n";
-				    
-                                            // And provide it to the templating engine
-                                            doRequestSourceGeneration(diagEngine,
-                                                                      generation_source_template,
-                                                                      values_map);
-                                          }
-				
-                                        // Now, emit errors, warnings and fixes
-                                        std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName, requestCallArgsUsage);
-
-                                        if (generation_do_report_modification_in_pc)
-                                          {
-                                            rv.insert(std::pair<std::string, std::string>("rpltcode", rplt_code));
-                                            rv.insert(std::pair<std::string, std::string>("originalfile", originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1)));
-                                            std::ostringstream commentStartLineNum;
-                                            commentStartLineNum << comment << ":" << startLineNum;
-                                            replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
-                                          }
+                                        // And provide it to the templating engine
+                                        doRequestSourceGeneration(diagEngine,
+                                                                  generation_source_template,
+                                                                  values_map);
+                                      }
+                                    
+                                    // Now, emit errors, warnings and fixes
+                                    // loc_start is start of location of sprintf 
+                                    std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName, requestCallArgsUsage);
+                                    
+                                    if (generation_do_report_modification_in_pc)
+                                      {
+                                        rv.insert(std::pair<std::string, std::string>("rpltcode", rplt_code));
+                                        rv.insert(std::pair<std::string, std::string>("originalfile", originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1)));
+                                        std::ostringstream commentStartLineNum;
+                                        commentStartLineNum << comment << ":" << startLineNum;
+                                        replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
                                       }
                                   }
                               }

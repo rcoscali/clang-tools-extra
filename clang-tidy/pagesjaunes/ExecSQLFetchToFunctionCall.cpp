@@ -164,7 +164,7 @@ namespace clang
 	  /// Generate requests source files (bool)
 	  generate_req_sources(Options.get("Generate-requests-sources",
 					   0U)),
-	  /// Generate requests source files (bool)
+	  /// Allows overwrite when generate requests headers/sources files (bool)
 	  generate_req_allow_overwrite(Options.get("Generate-requests-allow-overwrite",
                                                    1U)),
 	  /// Generation directory (string)
@@ -1497,9 +1497,6 @@ namespace clang
 		requestFunctionName = "fetch";
 		reqName[0] &= ~0x20;
 		requestFunctionName.append(reqName);
-		
-		// Got it, emit changes
-		//outs() << "** Function name = " << function_name << " for proC block at line # " << startLineNum << "\n";
 		
                 if (generation_do_report_modification_in_pc)
                   {
