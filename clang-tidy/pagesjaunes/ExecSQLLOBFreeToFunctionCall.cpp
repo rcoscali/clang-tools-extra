@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 #include <set>
 #include <vector>
 #include <map>
@@ -27,6 +29,7 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
+using namespace std::chrono;
 using emplace_ret_t = std::pair<std::set<std::string>::iterator, bool>;
 
 namespace clang 
@@ -112,9 +115,9 @@ namespace clang
        *
        * @brief Constructor for the ExecSQLLOBFreeToFunctionCall rewriting check
        *
-       * The rule is freed a new check using its \c ClangTidyCheck base class.
+       * The rule is created a new check using its \c ClangTidyCheck base class.
        * Name and context are provided and stored locally.
-       * Some diag ids corresponding to errors handled by rule are freed:
+       * Some diag ids corresponding to errors handled by rule are created:
        * - unexpected_diag_id: Unexpected error
        * - no_error_diag_id: No error
        * - access_char_data_diag_id: Couldn't access memory buffer for comment (unexpected)
@@ -127,19 +130,21 @@ namespace clang
        * @param Context The ClangTidyContext allowing to access other contexts
        */
       ExecSQLLOBFreeToFunctionCall::ExecSQLLOBFreeToFunctionCall(StringRef Name,
-                                                                 ClangTidyContext *Context)
+                                                                     ClangTidyContext *Context)
         : ClangTidyCheck(Name, Context),        /** Init check (super class) */
           TidyContext(Context),                 /** Init our TidyContext instance */
-
           /*
            * Options
            */
           /// Generate requests header files (bool)
           generate_req_headers(Options.get("Generate-requests-headers",
-                                           false)),
+                                           0U)),
           /// Generate requests source files (bool)
           generate_req_sources(Options.get("Generate-requests-sources",
-                                           false)),
+                                           0U)),
+	  /// Generate requests source files (bool)
+	  generate_req_allow_overwrite(Options.get("Generate-requests-allow-overwrite",
+                                                   0U)),
           /// Generation directory (string)
           generation_directory(Options.get("Generation-directory",
                                            "./")),
@@ -155,15 +160,25 @@ namespace clang
                                                 "./request_groups.json")),
           /// Conditionnaly report modification in .pc file if this is true
           generation_do_report_modification_in_pc(Options.get("Generation-do-report-modification-in-PC",
-                                                              false)),
-          /// Directory of the original .pc file in which to report modification
+                                                              1U)),
+          /// Directory containing original .pc file in which to report processed file modifications 
           generation_report_modification_in_dir(Options.get("Generation-report-modification-in-dir",
                                                              "./")),
           /// Keep EXEC SQL comments
           generation_do_keep_commented_out_exec_sql(Options.get("Generation-keep-commented-out-exec-sql-in-PC",
-                                                                false))
+                                                                0U))
       {
-        //outs() << "Opening request group file: '" << generation_request_groups << "'\n";
+        llvm::outs() << "ExecSQLLOBFreeToFunctionCall::ExecSQLLOBFreeToFunctionCall(StringRef Name, ClangTidyContext *Context):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
 
         req_groups.clear();
         std::filebuf fb;
@@ -214,9 +229,10 @@ namespace clang
       void
       ExecSQLLOBFreeToFunctionCall::onEndOfTranslationUnit()
       {
-        clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
-                                                         generation_report_modification_in_dir,
-                                                         generation_do_keep_commented_out_exec_sql);
+        if (generation_do_report_modification_in_pc)
+          clang::tidy::pagesjaunes::onEndOfTranslationUnit(replacement_per_comment,
+                                                           generation_report_modification_in_dir,
+                                                           generation_do_keep_commented_out_exec_sql);
       }
       
       /**
@@ -237,8 +253,21 @@ namespace clang
       void
       ExecSQLLOBFreeToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
+        llvm::outs() << "ExecSQLLOBFreeToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+
         Options.store(Opts, "Generate-requests-headers", generate_req_headers);
         Options.store(Opts, "Generate-requests-sources", generate_req_sources);
+        Options.store(Opts, "Generate-requests-allow-overwrite", generate_req_allow_overwrite);
         Options.store(Opts, "Generation-directory", generation_directory);
         Options.store(Opts, "Generation-header-template", generation_header_template);
         Options.store(Opts, "Generation-source-template", generation_source_template);
@@ -264,6 +293,9 @@ namespace clang
       void 
       ExecSQLLOBFreeToFunctionCall::registerMatchers(MatchFinder *Finder) 
       {
+        if (!getLangOpts().CPlusPlus)
+          return;
+
         /* Add a matcher for finding compound statements starting */
         /* with a sqlstm variable declaration */
         Finder->addMatcher(varDecl(
@@ -311,7 +343,8 @@ namespace clang
       std::string
       ExecSQLLOBFreeToFunctionCall::emitDiagAndFix(const SourceLocation& loc_start,
                                                      const SourceLocation& loc_end,
-                                                     const std::string& function_name)
+                                                     const std::string& function_name,
+                                                     const std::string& function_args)
       {
         /* Range of the statement to change */
         SourceRange stmt_range(loc_start, loc_end);
@@ -326,7 +359,9 @@ namespace clang
 
         /* Replacement code built */
         std::string replt_code = function_name;
-        replt_code.append(std::string("();"));
+        replt_code.append(std::string("("));
+        replt_code.append(std::string(function_args));
+        replt_code.append(std::string(");"));
 
         /* Emit the replacement over the found statement range */
         mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
@@ -344,7 +379,7 @@ namespace clang
        * @param[in] fname       Output file pathname
        * @param[in] values_map  Map containing values to be replaced
        *
-       * @retval true   if template was processed and file was freed
+       * @retval true   if template was processed and file was created
        * @retval false  if something wrong occurs
        */
       bool
@@ -442,22 +477,41 @@ namespace clang
         SourceLocation dummy;
         struct stat buffer;   
 
-        // Compute output file pathname
-        std::string fileName = values_map["@RequestFunctionName@"];
-        fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
+	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
+	std::string fileName = values_map["@RequestFunctionName@"];
+
+        // Replace %B with original file basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+        dirName.append("/");
         fileName.insert(0, "/");
-        fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+        fileName.insert(0, dirName);
+	fileName.append(GENERATION_SOURCE_FILENAME_EXTENSION);
+
+        if (mkdret == -1 && errno != EEXIST)
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+		    &fileName);          
+        else if (!generate_req_allow_overwrite &&
+                 (stat (fileName.c_str(), &buffer) == 0))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 		    &fileName);
-        // Process template for creating source file
-        else if (!processTemplate(tmpl, fileName, values_map))
-          emitError(diag_engine,
-                    dummy,
-                    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
-                    &fileName);
+	// Process template for creating source file
+	else if (!processTemplate(tmpl, fileName, values_map))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_GENERATION,
+		    &fileName);
       }
       
       /**
@@ -481,22 +535,41 @@ namespace clang
         SourceLocation dummy;
         struct stat buffer;   
 
-        // Compute output file pathname
-        std::string fileName = values_map["@RequestFunctionName@"];
-        fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
+	// Compute output file pathname
+        std::string dirName = generation_directory;
+	std::string fileName = values_map["@RequestFunctionName@"];
+	std::string fileBasename = values_map["@OriginalSourceFileBasename@"];
+
+        // Replace %B with original .pc file Basename
+        size_t percent_pos = std::string::npos;
+        if ((percent_pos = dirName.find("%B")) != std::string::npos)
+          dirName.replace(percent_pos, 2, fileBasename);
+
+        // Handling dir creation errors
+        int mkdret = mkdir(dirName.c_str(),
+                           S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+	dirName.append("/");
         fileName.insert(0, "/");
-        fileName.insert(0, generation_directory);
-        if ((stat (fileName.c_str(), &buffer) == 0))
+        fileName.insert(0, dirName);
+	fileName.append(GENERATION_HEADER_FILENAME_EXTENSION);
+
+        if (mkdret == -1 && errno != EEXIST)
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+		    &fileName);          
+        else if (!generate_req_allow_overwrite &&
+                 (stat (fileName.c_str(), &buffer) == 0))
+	  emitError(diag_engine,
+		    dummy,
+		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
+		    &fileName);
+	// Process template for creating header file
+	else if (!processTemplate(tmpl, fileName, values_map))
 	  emitError(diag_engine,
 		    dummy,
 		    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
 		    &fileName);
-        // Process template for creating header file
-        else if (!processTemplate(tmpl, fileName, values_map))
-          emitError(diag_engine,
-                    dummy,
-                    ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_GENERATION,
-                    &fileName);
       }
         
 
@@ -507,7 +580,7 @@ namespace clang
        * @brief Manage error conditions by emiting an error
        *
        * This method manage any error condition by emitting a specific error message
-       * to the LLVM/Clang DiagnosticsEngine. It uses diag ids that were freed 
+       * to the LLVM/Clang DiagnosticsEngine. It uses diag ids that were created 
        * in constructor.
        *
        * @param diag_engine     LLVM/Clang DiagnosticsEngine instance
@@ -590,22 +663,345 @@ namespace clang
             /** Cannot generate request source file (already exists) */
           case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
+              getCustomDiagID(DiagnosticsEngine::Warning,
                               "Source file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
-            /** Cannot generate request header file (no location) */
+            /** Cannot generate request header file (already exists) */
           case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS:
             diag_id = TidyContext->getASTContext()->getDiagnostics().
-              getCustomDiagID(DiagnosticsEngine::Error,
+              getCustomDiagID(DiagnosticsEngine::Warning,
                               "Header file '%0' already exists: will not overwrite!");
             diag_engine.Report(diag_id).AddString(msg);
             break;
 
+            /** Cannot generate request source file (create dir) */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Cannot generate request header file (create dir) */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Couldn't create directory for '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+
+            /** Unsupported String Literal charset */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Token for weird charset string (%0) found!");
+            diag_engine.Report(diag_id).AddString(msg);
+           break;
+
+            /** Invalid groups file error */
+          case ExecSQLLOBFreeToFunctionCall::EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Cannot parse invalid groups file '%0'!");
+            diag_engine.Report(diag_id).AddString(msg);
+            break;
+            
           }
       }
       
+      /**
+       * ExecSQLLOBFreeToFunctionCall::findMacroStringLiteralDefAtLine
+       *
+       * @brief find a macro expansion for a string literal used for a request
+       *
+       * Search the set of macro expansion collected from Pre Processor work.
+       * This set contains string literals and macro names used for request formatting.
+       * String literals values preserve the original source indentation.
+       *
+       * @param[in]    src_mgr	the source manager for translating locations 
+       *                        in line nums
+       * @param[in]    ln	the origin location line number for which we 
+       *                        want string literal
+       * @param[inout] name	the name of the macro
+       * @param[inout] val	the value of the string literal
+       * @param[out]   record	the pointer to the found record is one was found.
+       *                        if no record were found a null is returned
+       *
+       */
+      bool
+      ExecSQLLOBFreeToFunctionCall::findMacroStringLiteralDefAtLine(SourceManager &src_mgr,
+								    unsigned ln,
+								    std::string& name, std::string& val,
+								    SourceRangeForStringLiterals **record = nullptr)
+      {
+	bool ret = false;
+	if (record)
+	  *record = nullptr;
+	for (auto it = m_macrosStringLiterals.begin();
+	     it != m_macrosStringLiterals.end();
+	     ++it)
+	  {
+	    auto sr = (*it);
+	    SourceLocation sl = sr.m_macro_range.getBegin();
+	    unsigned sln = src_mgr.getSpellingLineNumber(sl);
+	    //outs() << "Macro def at line#" << sln << " versus searching line#" << ln << " or line #" << ln+1 << "\n";
+	    if (sln == ln || sln + 1 == ln)
+	      {
+		name = sr.m_macro_name.str();
+		if (record)
+		  *record = new SourceRangeForStringLiterals(sr);
+		unsigned ldl =
+		  src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getEnd()))
+		  - src_mgr.getFileOffset(src_mgr.getFileLoc(sr.m_macro_range.getBegin()));
+		StringRef lstr(src_mgr.getCharacterData(src_mgr.getFileLoc(sr.m_macro_range.getBegin())),
+			       ldl);
+		val = lstr.str();
+		ret = true;
+		break;
+	      }
+	  }
+
+	return ret;
+      }
+
+      /*
+       * ExecSQLLOBFreeToFunctionCall::createParamsDef
+       *
+       * @brief Format a string for providing params definition
+       *
+       * This method allows to format a string containing one parameter
+       * definition.
+       *
+       * @param[in] type	the type of the parameter
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       * @param[in] name	the name of the parameter
+       *
+       * @return the string formatted for providing params definition
+       */
+      std::string
+      ExecSQLLOBFreeToFunctionCall::createParamsDef(const std::string& type,
+                                                 const std::string& elemtype,
+                                                 const std::string& size,
+                                                 const std::string& name)
+      {
+        return clang::tidy::pagesjaunes::createParamsDef(type, elemtype, size, name);
+      }
+
+      /*
+       * ExecSQLLOBFreeToFunctionCall::createParamsDeclareSection
+       *
+       * @brief Format a string for providing the declare section
+       *
+       * This method allows to format a string containing one parameter
+       * and one host variable in a declare section
+       *
+       * @param[in] type	the type of the parameter/host variable
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       * @param[in] name	the name of the host variable
+       * @param[in] paramname	the name of the parameter
+       *
+       * @return the string formatted for providing params/host vars
+       *         declare section
+       */
+      std::string
+      ExecSQLLOBFreeToFunctionCall::createParamsDeclareSection(const std::string& type,
+                                                            const std::string& elemtype,
+                                                            const std::string& size,
+                                                            const std::string& name,
+                                                            const std::string& paramname)
+      {
+        return clang::tidy::pagesjaunes::createParamsDeclareSection(type, elemtype, size, name, paramname);
+      }
+
+      /*
+       * ExecSQLLOBFreeToFunctionCall::createParamsDecl
+       *
+       * @brief Format a string for providing params declaration
+       *
+       * This method allows to format a string containing one parameter
+       * declaration.
+       *
+       * @param[in] type	the type of the parameter
+       * @param[in] elemtype	the element type in case of contant array
+       * @param[in] size	the size of the constant array
+       *
+       * @return the string formatted for providing params declaration
+       */
+      std::string
+      ExecSQLLOBFreeToFunctionCall::createParamsDecl(const std::string& type,
+                                                  const std::string& elemtype,
+                                                  const std::string& size)
+      {
+        return clang::tidy::pagesjaunes::createParamsDecl(type, elemtype, size);
+      }
+      
+      /*
+       * ExecSQLLOBFreeToFunctionCall::createParamsCall
+       *
+       * @brief Format a string for providing function call arguments
+       *
+       * This method allows to format a string containing one parameter
+       * for function call.
+       *
+       * @param[in] name	the name of the parameter
+       *
+       * @return the string formatted for providing params declaration
+       */
+      std::string
+      ExecSQLLOBFreeToFunctionCall::createParamsCall(const std::string& name)
+      {
+        return clang::tidy::pagesjaunes::createParamsCall(name);
+      }
+      
+      /*
+       * ExecSQLLOBFreeToFunctionCall::createHostVarList
+       *
+       * @brief Format a string for providing host var list for the request
+       *
+       * This method allows to format a string containing one host variable
+       * for the request.
+       *
+       * @param[in] name	the name of the host variable
+       *
+       * @return the string formatted for providing host variable list for
+       *         the request
+       */
+      std::string
+      ExecSQLLOBFreeToFunctionCall::createHostVarList(const std::string& name, bool isIndicator = false)
+      {
+        return clang::tidy::pagesjaunes::createHostVarList(name, isIndicator);
+      }
+      
+      /**
+       * ExecSQLLOBFreeToFunctionCall::findSymbolInFunction
+       *
+       * @brief Find a symbol, its definition and line number in the current function
+       *
+       * This method search the AST from the current function for a given symbol. When
+       * found it return a record struct having pointer to AST nodes of interrest.
+       *
+       * @param[in] tool	The clang::tooling::Tool instance
+       * @param[in] varName	The name of the symbol to find
+       * @param[in] func	The AST node of the function to search into
+       *
+       * @return The pointer to the varDecl node instance for the searched symbol
+       */
+      const VarDecl *
+      ExecSQLLOBFreeToFunctionCall::findSymbolInFunction(std::string& varName, const FunctionDecl *func)
+      {
+        VarDeclMatcher vdMatcher(this);
+        return clang::tidy::pagesjaunes::findSymbolInFunction(vdMatcher,
+                                                              TidyContext->getToolPtr(),
+                                                              varName,
+                                                              func,
+                                                              m_req_var_decl_collector);
+      }
+
+      /**
+       * ExecSQLLOBFreeToFunctionCall::findDeclInFunction
+       *
+       * @brief Find a declaration of a symbol in the context of a function by using the function
+       * DeclContext iterators until the symbol is found.
+       * This method do not update AST. It only browse known declarations in the context of a function.
+       * On successfull completion the map will contain:
+       * - a key "symName" with the symbol name provided
+       * - a key "typeName" with the symbol type name found
+       * - a key "elementType" with the type of the element if the type
+       *   found is a constant array type
+       * - a key "elemntSize" with the number of element if the type
+       *   found is a constant array type
+       *
+       * @param[in] func 	the function of browse for finding the symbol
+       * @param[in] symName 	the name of the symbol to find
+       *
+       * @return the map containing informations on the found symbol. The map is empty is no symbol
+       *         with the same name were found.
+       */
+      string2_map
+      ExecSQLLOBFreeToFunctionCall::findDeclInFunction(const FunctionDecl *func, const std::string& symName)
+      {
+        return clang::tidy::pagesjaunes::findDeclInFunction(func, symName);
+      }
+
+      /**
+       * ExecSQLLOBFreeToFunctionCall::findCXXRecordMemberInTranslationUnit
+       *
+       * @brief This function will browse a translation unit and search for a specific 
+       *        named CXXRecord and a named member of it
+       * 
+       * @param[in]	the translation unit declaration context to browse for the record
+       * @param[in] 	the struct/union/class name to find in the context of the translation
+       *                unit
+       * @param[in] 	the member name to find in the class/struct
+       *
+       * @return a map containing informations about the found member. if no record/member were 
+       *         found, the returned map is empty
+       */
+      string2_map
+      ExecSQLLOBFreeToFunctionCall::findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *transUnit,
+                                                                      const std::string& cxxRecordName,
+                                                                      const std::string& memberName)
+      {
+        return clang::tidy::pagesjaunes::findCXXRecordMemberInTranslationUnit(transUnit, cxxRecordName, memberName);
+      }
+
+      /**
+       * ExecSQLLOBFreeToFunctionCall::decodeHostVars
+       *
+       * This function decode an input string of host variables (and indicators). It
+       * parse the string and return a data structure made of maps containing host
+       * variables. 
+       * It supports pointers and struct dereferencing and returns values of record 
+       * or struct variables, members, indicators.
+       * It trims record and member values.
+       * The first level of map contains the number of the host variable as key and a map
+       * for the host variable description.
+       *
+       *  #1 -> map host var #1
+       *  #2 -> map host var #2
+       *  #3 -> map host var #3
+       *  ...
+       *  #n -> map host var #n
+       *
+       * Each host var map contains some string keys for each variable component.
+       * They are:
+       *  - "full": the full match for this host variable (contains spaces and is the exact value matched)
+       *  - "hostvar": the complete host var referencing expr (spaces were trimmed)
+       *  - "hostrecord": the value of the host variable record/struct variable value.
+       *  - "hostmember": the value of the record/struct member for this host variable expr.
+       *  - "deref": Dereferencing operator for this host variable. Empty if not a dereferencing expr.  
+       * 
+       * For indicators the same field/keys are available with an 'i' appended for 'indicators'.
+       * Unitary tests are availables in test/decode_host_vars.cpp
+       * For example: the expr ':var1:Ivar1, :var2:Ivar2'
+       * returns the following maps
+       *
+       * var #1                          var #2
+       *     full = ':var1'                 full = ':var2'
+       *     fulli = ':Ivar1, '             fulli = ':Ivar2'      
+       *     hostvar = 'var1'               hostvar = 'var2'         
+       *     hostvari = 'Ivar1'             hostvari = 'Ivar2'          
+       *     hostrecord = 'var1'            hostrecord = 'var2'            
+       *     hostrecordi = 'Ivar1'          hostrecordi = 'Ivar2'             
+       *     hostmember = 'var1'            hostmember = 'var2'         
+       *     hostmemberi = 'Ivar1'          hostmemberi = 'Ivar2'              
+       *     deref = ''                     deref = ''      
+       *     derefi = ''                    derefi = ''         
+       *                             
+       * @param[in]  hostVarList the host vars expr to parse/decode
+       *
+       * @return a map containing the host parsed variables expr
+       */
+      map_host_vars
+      ExecSQLLOBFreeToFunctionCall::decodeHostVars(const std::string &hostVarsList)
+      {
+        return clang::tidy::pagesjaunes::decodeHostVars(hostVarsList);
+      }
+
       /**
        * check
        *
@@ -623,64 +1019,74 @@ namespace clang
       void
       ExecSQLLOBFreeToFunctionCall::check(const MatchFinder::MatchResult &result) 
       {
+        outs() << "void ExecSQLLOBFreeToFunctionCall::check(const MatchFinder::MatchResult &result): ENTRY!\n";
         map_replacement_values rv;
         
         // Get the source manager
+        //ASTContext* astCtxt = result.Context;
         SourceManager &srcMgr = result.Context->getSourceManager();
         DiagnosticsEngine &diagEngine = result.Context->getDiagnostics();
 
-        /*
-         * Init check context
-         * ------------------
-         */
-        
-        // Get the compound statement AST node as the bounded var 'proCBlock'
-        const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
+	/*
+	 * Init check context
+	 * ------------------
+	 */
+	
+	// Get the compound statement AST node as the bounded var 'proCBlock'
+	const CompoundStmt *stmt = result.Nodes.getNodeAs<CompoundStmt>("proCBlock");
+	const FunctionDecl *curFunc = result.Nodes.getNodeAs<FunctionDecl>("function");
 
-        // Get start/end locations for the statement
-        SourceLocation loc_start = stmt->getLocStart();
-        SourceLocation loc_end = stmt->getLocEnd();
+	// Get start/end locations for the statement
+	SourceLocation loc_start = stmt->getLocStart();
+	SourceLocation loc_end = stmt->getLocEnd();
 
-        // Get file ID in src mgr
-        FileID startFid = srcMgr.getFileID(loc_start);
+	// Get file ID in src mgr
+	FileID startFid = srcMgr.getFileID(loc_start);
 	// Get compound statement start line num
 	unsigned startLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(loc_start));
 	std::stringbuf slnbuffer;
 	std::ostream slnos (&slnbuffer);
 	slnos << startLineNum;
+	std::string originalSourceFileBasename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str();
+        // If original file name is a path, keep only basename
+        // (erase all before / and all after .)
+        if (originalSourceFileBasename.rfind("/") != std::string::npos)
+          originalSourceFileBasename.erase(0, originalSourceFileBasename.rfind("/")+1);
+        originalSourceFileBasename.erase(originalSourceFileBasename.rfind("."), std::string::npos);
 	std::string originalSourceFilename = srcMgr.getFileEntryForID(srcMgr.getMainFileID())->getName().str().append(slnbuffer.str().insert(0, "#"));
 
-        //outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
-        
-        /*
-         * Find the comment for the EXEC SQL statement
-         * -------------------------------------------
-         *
-         * Iterate from line -2 to line -5 until finding the whole EXEC SQL comment
-         * comments are MAX_NUMBER_OF_LINE_TO_SEARCH lines max
-         */
-        
-        // Current line number
-        size_t lineNum = startLineNum-2;
-        
-        // Get end comment loc
-        SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
-        SourceLocation comment_loc_start;
-        
-        // Does error occured while doing getCharacterData 
-        bool errOccured = false;
-        
-        // Get comment C string from the file memory buffer
-        const char *commentCStr = srcMgr.getCharacterData(comment_loc_end, &errOccured);
-        
-        // The line data & comment
-        std::string lineData;
+	//outs() << "Found one result at line " << startLineNum << " of file '" << originalSourceFilename << "\n";
+
+	/*
+	 * Find the comment for the EXEC SQL statement
+	 * -------------------------------------------
+	 *
+	 * Iterate from line +2 until finding the whole EXEC SQL comment
+	 * Line +2 because line+1, when line numbers are generated by ProC, contains start of EXEC SQL
+	 */
+	
+	// Current line number
+	size_t lineNum = startLineNum+2;
+	
+	// Get end comment loc
+	SourceLocation comment_loc_end = srcMgr.translateLineCol(startFid, lineNum, 1);
+	SourceLocation comment_loc_start;
+	
+	// Does error occured while doing getCharacterData 
+	bool errOccured = false;
+	
+	// Get comment C string from the file memory buffer
+	const char *commentCStr = srcMgr.getCharacterData(comment_loc_end, &errOccured);
+	
+	// The line data & comment
+	std::string lineData;
 
         // Offset of comment start in file
         size_t commentStart = 0;
         
         // If #line is available keep line number and filename of the .pc file
-        unsigned int pcLineNum = 0;
+        unsigned int pcLineNumStart = 0;
+        unsigned int pcLineNumEnd = 0;
         std::string pcFilename;
         bool found_line_info = false;
         
@@ -716,7 +1122,10 @@ namespace clang
                         std::istringstream isstr;
                         std::stringbuf *pbuf = isstr.rdbuf();
                         pbuf->str(lineMatches[1]);
-                        isstr >> pcLineNum;
+                        if (pcLineNumStart)
+                          isstr >> pcLineNumEnd;
+                        else
+                          isstr >> pcLineNumStart;
                         pcFilename = lineMatches[2];
                       }
                     else
@@ -744,35 +1153,52 @@ namespace clang
         // Try again
         while (lineNum > 0);
 
-        /*
-         * Comment found
-         */
-        std::string comment;
-        std::string function_name;
+	/*
+	 * Comment found
+	 */
+	std::string comment;
 
-        // If found comment start & no error occured
-        if (lineNum > 0 && !errOccured)
-          {
-            // Assign comment char data in the comnt string
-            comment = std::string(commentCStr);
+	// If found comment start & no error occured
+	if (lineNum > 0 && !errOccured)
+	  {
+	    // Assign comment char data in the comnt string
+	    comment = std::string(commentCStr);
 
-            /*
-             * Erase from end of comment to end of data
-             */
+	    /*
+	     * Erase from end of comment to end of data
+	     */
 
-            // Find end of comment
-            size_t endCommentPos = comment.find("*/", 1);
-            
-            // Erase until end of character data
-            comment.erase (endCommentPos +2, std::string::npos);
+	    // Find end of comment
+	    size_t endCommentPos = comment.find("*/", 1);
+	    
+	    // Erase until end of character data
+	    comment.erase (endCommentPos +2, std::string::npos);
 
-            /*
-             * Remove all \n from comment
-             */
-            
-            // Find CR from start in comment
-            size_t crpos = comment.find("\n", 0);
+	    /*
+	     * Remove all \n from comment
+	     */
+	    
+	    // Find CR from start in comment
+	    size_t crpos = comment.find("\n", 0);
             bool had_cr = false;
+
+	    // Iterate
+	    do
+	      {
+		// If one has been found
+		if (crpos != std::string::npos)
+		  {
+		    // Erase CR
+		    comment.erase(crpos, 1);
+                    had_cr = true;
+		  }
+		// Find again CR
+		crpos = comment.find("\n", 0);
+	      }
+	    // Until no more is found
+	    while (crpos != std::string::npos);
+
+	    outs() << "comment found for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
             // Iterate
             do
@@ -793,7 +1219,7 @@ namespace clang
             //outs() << "comment for compound statement at line #" << startLineNum << ": '" << comment << "'\n";
 
             /*
-             * Free function call for the request
+             * Create function call for the request
              */
 
             // Regex for processing comment for all remaining requests
@@ -802,25 +1228,116 @@ namespace clang
             // Returned matches
             SmallVector<StringRef, 8> matches;
 
+	    /* Templating engines vars
+	     *   - RequestFunctionName
+	     *   - RequestFunctionArgs
+	     *   - RequestFunctionParamDef
+	     *   - RequestFunctionParamDecl
+	     *   - RequestExecSql
+	     */
+	    std::string requestFunctionName;
+	    std::string requestFunctionCallArgs;
+	    std::string requestFunctionParamsDecl;
+	    std::string requestFunctionParamsDef;
+	    std::string requestExecSql;
+	    std::string generationDateTime;
+	    std::string hostVarName;
+
+	    std::string requestInto;
+	    std::string requestArgs;
+            
             /*
              * Now we match against a more permissive regex for all other (simpler) requests
              * =============================================================================
              */
             if (lobFreeReqRe.match(comment, &matches))
               {
-                std::string reqAllocName = matches[4];
-                std::string requestExecSql = "LOB FREE TEMPORARY :";
-                requestExecSql.append(reqAllocName);
+                std::string reqAllocName = matches[PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_HOSTVARS];
+                std::string requestExecSql = matches[PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_LOB];
+
+                // Let's iterate over each host variable (at most one is used for prepare)
+                map_host_vars mhv = decodeHostVars(reqAllocName);
+                auto mhvit = mhv.begin();
+                auto hvm = mhvit->second;
+                hostVarName = hvm["hostvar"];
+
+                // Find the corresponding declaration in the function
+                string2_map hostVarMap = findDeclInFunction(curFunc, hvm["hostrecord"]);
+                // We have one host variable only for LOB FREE TEMPORARY but it could be pointer/member
+                if (!hvm["deref"].empty())
+                  {
+                    // Find the struct definition for getting the field
+                    string2_map memberVarMap = findCXXRecordMemberInTranslationUnit(result.Context->getTranslationUnitDecl(),
+                                                                                    hostVarMap["typeName"],
+                                                                                    hvm["hostmember"]);
+                    // Let's rename the parameter by prepending 'a_'
+                    // FIXME: handle potential collisions on param names
+                    std::string paramName = "";
+                    paramName.append(memberVarMap["fieldName"]);
+                    
+                    // Format the various usage we make of it
+                    requestFunctionParamsDef.append(createParamsDef(memberVarMap["fieldTypeName"],
+                                                                    memberVarMap["elementType"],
+                                                                    memberVarMap["elementSize"],
+                                                                    paramName));
+                    requestFunctionParamsDecl.append(createParamsDecl(memberVarMap["fieldTypeName"],
+                                                                      memberVarMap["elementType"],
+                                                                      memberVarMap["elementSize"]));
+                    requestFunctionCallArgs.append(createParamsCall(hvm["hostvar"]));
+                  }
+                else
+                  {
+                    // Let's rename the parameter by prepending 'a_'
+                    // FIXME: handle potential collisions on param names
+                    std::string paramName = "";
+                    paramName.append(hostVarMap["symName"]);
+                    
+                    // Format the various usage we make of it
+                    requestFunctionParamsDef.append(createParamsDef(hostVarMap["typeName"],
+                                                                    hostVarMap["elementType"],
+                                                                    hostVarMap["elementSize"],
+                                                                    paramName));
+                    requestFunctionParamsDecl.append(createParamsDecl(hostVarMap["typeName"],
+                                                                      hostVarMap["elementType"],
+                                                                      hostVarMap["elementSize"]));
+                    requestFunctionCallArgs.append(createParamsCall(hostVarMap["symName"]));
+                  }
+                
+                // Remove last commas + space
+                if (requestFunctionParamsDef.length() > 2)
+                  requestFunctionParamsDef.erase(requestFunctionParamsDef.length() -2, std::string::npos);
+                else
+                  requestFunctionParamsDef.assign("void");
+                
+                // Remove last commas + space
+                if (requestFunctionParamsDecl.length() > 2)
+                  requestFunctionParamsDecl.erase(requestFunctionParamsDecl.length() -2, std::string::npos);
+                else
+                  requestFunctionParamsDecl.assign("void");
+                
+                // Remove last commas + space
+                if (requestFunctionCallArgs.length() > 2)
+                  requestFunctionCallArgs.erase(requestFunctionCallArgs.length() -2, std::string::npos);
+                else
+                  requestFunctionCallArgs.assign("void");
+                
+                
+                requestExecSql.append(" ");
+                requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_FREE]);
+                requestExecSql.append(" ");
+                requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_TEMPORARY]);
+                requestExecSql.append(" :");
+                requestExecSql.append(hostVarName);
                 
                 // Append first match (action) to function name
-                function_name.append("lobFreeTemporary");
+                requestFunctionName.assign("lobFreeTemporary");
 
                 // Get match in rest string
-                std::string rest(reqAllocName);
+                std::string rest(hostVarName);
                 // Capitalize it
                 rest[0] &= ~0x20;
                 // And append to function name
-                function_name.append(rest);
+                requestFunctionName.append(rest);
 
                 if (generation_do_report_modification_in_pc)
                   {
@@ -829,25 +1346,38 @@ namespace clang
                     rv.insert(std::pair<std::string, std::string>("had_cr", had_cr_strstream.str()));
                     rv.insert(std::pair<std::string, std::string>("fullcomment", comment));
                     rv.insert(std::pair<std::string, std::string>("reqname", reqAllocName));
-                    rv.insert(std::pair<std::string, std::string>("funcname", function_name));
+                    rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
                     rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
                     if (found_line_info)
                       {
-                        std::ostringstream pc_line_num;
-                        pc_line_num << pcLineNum;
-                        rv.insert(std::pair<std::string, std::string>("pclinenum", pc_line_num.str()));
                         rv.insert(std::pair<std::string, std::string>("pcfilename", pcFilename));
-                        outs() << "Found #line for comment: parsed line num = " << pcLineNum << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL Start line
+                        std::ostringstream pc_line_num_start;
+                        pc_line_num_start << pcLineNumStart;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumstart", pc_line_num_start.str()));
+                        outs() << "Found #line for comment: parsed line num start = " << pcLineNumStart << " from file: '" << pcFilename << "'\n";
+                        // Exec SQL End line
+                        std::ostringstream pc_line_num_end;
+                        pc_line_num_end << pcLineNumEnd;
+                        rv.insert(std::pair<std::string, std::string>("pclinenumend", pc_line_num_end.str()));
+                        outs() << "Found #line for comment: parsed line num end = " << pcLineNumEnd << " from file: '" << pcFilename << "'\n";
                       }
                   }
+
+                auto now_time = system_clock::to_time_t(system_clock::now());
+                generationDateTime = std::ctime(&now_time);
 
                 // If headers generation was requested
                 if (generate_req_headers)
                   {
                     // Build the map for templating engine
                     string2_map values_map;
-                    values_map["@RequestFunctionName@"] = function_name;
+                    values_map["@RequestFunctionName@"] = requestFunctionName;
+                    values_map["@RequestFunctionParamsDecl@"] = requestFunctionParamsDecl;
                     values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                    values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                    values_map["@GenerationDateTime@"] = generationDateTime; 
+
                     // And call it
                     doRequestHeaderGeneration(diagEngine,
                                               generation_header_template,
@@ -859,9 +1389,12 @@ namespace clang
                   {
                     // Build the map for templating engine
                     string2_map values_map;
-                    values_map["@RequestFunctionName@"] = function_name;
+                    values_map["@RequestFunctionName@"] = requestFunctionName;
+                    values_map["@RequestFunctionParamsDef@"] = requestFunctionParamsDef;
                     values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                    values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
                     values_map["@RequestExecSql@"] = requestExecSql;
+                    values_map["@GenerationDateTime@"] = generationDateTime;
                     // And call it
                     doRequestSourceGeneration(diagEngine,
                                               generation_source_template,
@@ -869,7 +1402,7 @@ namespace clang
                   }
 
                 // Emit errors, warnings and fixes
-                std::string rplt_code = emitDiagAndFix(loc_start, loc_end, function_name);
+                std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName, requestFunctionCallArgs);
 
                 if (generation_do_report_modification_in_pc)
                   {

@@ -158,6 +158,7 @@ namespace clang
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generate-requests-headers"] = "1";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generate-requests-sources"] = "1";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-directory"] = ".";
+          Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generate-requests-allow-overwrite"] = "1";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-header-template"] = "./pagesjaunes_lob_free_temporary.h.tmpl";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-source-template"] = "./pagesjaunes_lob_free_temporary.pc.tmpl";
           Opts["pagesjaunes-exec-sql-lob-free-temporary-to-function-call.Generation-request-groups"] = "request_groups.json";

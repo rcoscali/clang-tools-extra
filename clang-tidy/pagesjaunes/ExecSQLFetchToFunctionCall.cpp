@@ -290,6 +290,18 @@ namespace clang
       void
       ExecSQLFetchToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
+        llvm::outs() << "ExecSQLFetchToFunctionCall::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";
+        llvm::outs() << "    generate_req_headers = " << (generate_req_headers?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_sources = " << (generate_req_sources?"True":"False") << "\n";
+        llvm::outs() << "    generate_req_allow_overwrite = " << (generate_req_allow_overwrite?"True":"False") << "\n";
+        llvm::outs() << "    generation_directory = '" << generation_directory << "'\n";
+        llvm::outs() << "    generation_header_template = '" << generation_header_template << "'\n";
+        llvm::outs() << "    generation_source_template = '" << generation_source_template << "'\n";
+        llvm::outs() << "    generation_request_groups = '" << generation_request_groups << "'\n";
+        llvm::outs() << "    generation_do_report_modification_in_pc = " << (generation_do_report_modification_in_pc?"True":"False") << "\n";
+        llvm::outs() << "    generation_report_modification_in_dir = '" << generation_report_modification_in_dir << "'\n";
+        llvm::outs() << "    generation_do_keep_commented_out_exec_sql = " << (generation_do_keep_commented_out_exec_sql?"True":"False") << "\n";
+
 	Options.store(Opts, "Generate-requests-headers", generate_req_headers);
 	Options.store(Opts, "Generate-requests-sources", generate_req_sources);
 	Options.store(Opts, "Generate-requests-allow-overwrite", generate_req_allow_overwrite);
@@ -338,8 +350,8 @@ namespace clang
 	/* Add a matcher for finding compound statements starting */
 	/* with a sqlstm variable declaration */
         Finder->addMatcher(varDecl(
-		      hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl().bind("function"))).bind("proCBlock")))),
-		      hasName("sqlstm"))
+                                   hasAncestor(declStmt(hasAncestor(compoundStmt(hasAncestor(functionDecl().bind("function"))).bind("proCBlock")))),
+                                   hasName("sqlstm"))
 			   , this);
       }
 

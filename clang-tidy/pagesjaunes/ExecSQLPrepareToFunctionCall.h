@@ -268,20 +268,24 @@ namespace clang
 	  run(const MatchFinder::MatchResult &result)
 	  {
 	    struct AssignmentRecord *record = new(struct AssignmentRecord);
-	    record->lhs = result.Nodes.getNodeAs<DeclRefExpr>("lhs");
-	    record->lhsVar = result.Nodes.getNodeAs<VarDecl>("lhsVar");
+	    record->lhs = result.Nodes.getNodeAs<DeclRefExpr>("lhsDeclRefExpr");
+            llvm::outs() << "lhs = " <<  record->lhs << "\n";
+	    record->lhsVar = result.Nodes.getNodeAs<VarDecl>("lhsVarDecl");
+            llvm::outs() << "lhsvar = " <<  record->lhsVar << "\n";
 	    record->lhsVar_linenum =
 	      result.Context->getSourceManager()
 	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->lhsVar->getLocStart()));
-	    record->rhs = result.Nodes.getNodeAs<DeclRefExpr>("rhs");
-	    record->rhsVar = result.Nodes.getNodeAs<VarDecl>("rhsVar");
+	    record->rhsVar = result.Nodes.getNodeAs<VarDecl>("rhsVarDecl");
+            llvm::outs() << "rhsvar = " <<  record->rhsVar << "\n";
 	    record->rhsVar_linenum =
 	      result.Context->getSourceManager()
 	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->rhsVar->getLocStart()));
 	    record->binop = result.Nodes.getNodeAs<BinaryOperator>("binop");
+            llvm::outs() << "binop = " <<  record->binop << "\n";
 	    record->binop_linenum =
 	      result.Context->getSourceManager()
 	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->binop->getLocStart()));
+            llvm::outs() << "binop_linenum = " <<  record->binop_linenum << "\n";
 	    m_parent->m_req_assign_collector.push_back(record);
 	  }
 

@@ -39,9 +39,17 @@
 
 #define PAGESJAUNES_REGEX_EXEC_SQL_LOB_CREATE_REQ_RE                   \
   "EXEC[[:space:]]+SQL[[:space:]]+([Ll][Oo][Bb])[[:space:]]+([Cc][Rr][Ee][Aa][Tt][Ee])[[:space:]]+([Tt][Ee][Mm][Pp][Oo][Rr][Aa][Rr][Yy])[[:space:]]*(.*)[[:space:]]*;"
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_CREATE_REQ_RE_LOB 1
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_CREATE_REQ_RE_CREATE 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_CREATE_REQ_RE_TEMPORARY 3
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_CREATE_REQ_RE_HOSTVARS 4
 
 #define PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE                   \
   "EXEC[[:space:]]+SQL[[:space:]]+([Ll][Oo][Bb])[[:space:]]+([Ff][Rr][Ee][Ee])[[:space:]]+([Tt][Ee][Mm][Pp][Oo][Rr][Aa][Rr][Yy])[[:space:]]*(.*)[[:space:]]*;"
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_LOB 1
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_FREE 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_TEMPORARY 3
+#define PAGESJAUNES_REGEX_EXEC_SQL_LOB_FREE_REQ_RE_HOSTVARS 4
 
 #define PAGESJAUNES_REGEX_EXEC_SQL_LOB_OPEN_REQ_RE                   \
   "EXEC[[:space:]]+SQL[[:space:]]+([Ll][Oo][bB])[[:space:]]+([Oo][Pp][Ee][Nn])[[:space:]]+:([A-Za-z0-9]+)[[:space:]]*([Rr][Ee][Aa][Dd] [Oo][Nn][Ll][Yy])?[[:space:]]*;"

@@ -211,27 +211,6 @@ namespace clang
         // Override to be called at end of translation unit
         virtual void onEndOfTranslationUnit();
 
-	// Process a template file with values in map
-	bool processTemplate(const std::string&,
-			     const std::string&,
-			     string2_map&);
-	
-	// Generate source file for request
-	void doRequestSourceGeneration(DiagnosticsEngine&,
-				       const std::string&,
-				       string2_map&);
-
-	// Generate header file for request
-	void doRequestHeaderGeneration(DiagnosticsEngine&,
-				       const std::string&,
-				       string2_map&);
-	
-	// Find a macro string literal defined at a line
-	bool findMacroStringLiteralDefAtLine(SourceManager &,
-					     unsigned,
-					     std::string&, std::string&,
-					     SourceRangeForStringLiterals **);
-
         // Format a string for dumping a params definition
         std::string
         createParamsDef(const std::string&,
@@ -275,6 +254,27 @@ namespace clang
 	  
         // Replace the EXEC SQL statement by the function call in the .pc file
         map_host_vars decodeHostVars(const std::string &);
+
+	// Process a template file with values in map
+	bool processTemplate(const std::string&,
+			     const std::string&,
+			     string2_map&);
+	
+	// Generate source file for request
+	void doRequestSourceGeneration(DiagnosticsEngine&,
+				       const std::string&,
+				       string2_map&);
+
+	// Generate header file for request
+	void doRequestHeaderGeneration(DiagnosticsEngine&,
+				       const std::string&,
+				       string2_map&);
+	
+	// Find a macro string literal defined at a line
+	bool findMacroStringLiteralDefAtLine(SourceManager &,
+					     unsigned,
+					     std::string&, std::string&,
+					     SourceRangeForStringLiterals **);
 
         // Json for request grouping
         nlohmann::json request_groups;

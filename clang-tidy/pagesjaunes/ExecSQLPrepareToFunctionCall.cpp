@@ -26,6 +26,9 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "llvm/Support/Regex.h"
 
+// Dump matchers with clang-query syntax
+#define DUMP_CLANG_QUERY_MATCHERS
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -1256,6 +1259,9 @@ namespace clang
 
 	    std::string requestUsing;
 	    std::string requestArgs;
+            std::string requestDefineValue;
+            std::string requestDefineName;
+            std::string fromReqNameLength;
 
 	    /*
 	     * First let's try to match comment against a regex designed for prepape requests
@@ -1295,160 +1301,220 @@ namespace clang
                       }
                   }
 
-		//outs() << "!!!*** Prepare request comment match: from request name is '" << fromReqName
-		//       << "' and request name is '"<< reqName << "'\n";
-
-                // Let's iterate over each host variable (at most one is used for prepare)
+                // let's use the host variable
                 map_host_vars mhv = decodeHostVars(fromReqName);
                 auto mhvit = mhv.begin();
                 auto hvm = mhvit->second;
                 if (!hvm["hostvar"].empty())
                   {
-                    llvm::outs() << "callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName(\"sprintf\")))))," <<
-                                             "hasArgument(0," <<
-                                                         "declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\"))).bind(\"vardecl\"))))," <<
-                                             "hasArgument(1," <<
-                                                         "stringLiteral().bind(\"reqLiteral\"))," <<
-                                              "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"callExpr\")\n";
-                    
+                    outs() << "!!!*** Prepare request comment match:\n"
+                           << "   request name is         : '"<< reqName << "'\n"
+                           << "   request host var name is: '" << hvm["hostvar"] << "'\n";;
+
                     /*
-                     * First let's try to find a request that is initialized from a 
-                     * string literal (constant string) with sprintf
-                     * The next statement matcher find such requests
+                     * We found an EXEC SQL PREPARE.
+                     * Let's try to find the following code construct for initialising the SQL request at server side from client side.
+                     *
+                     *   > sprintf(reqLocalHostVar, StringLiteralFmt, requestArg1, requestArg2, ..., requestArgN);
+                     *   > ...
+                     *   > reqHostVar = reqLocalHostVar;
+                     *   > ...
+                     * F=> EXEC SQL PREPARE requestName FROM :reqHostVar;
+                     *
+                     * Let's display the matcher with clang-query syntax for testing finder.
                      */
-                    StatementMatcher m_matcher
-                      // find a sprintf call expr
-                      = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
-                                 // with arg 0 being the symbol specified in the ProC request (target decl bound to vardecl)
-                                 hasArgument(0,
-                                             declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(hvm["hostvar"].c_str()))).bind("vardecl")))),
-                                 // and with arg1 being the searched literal (literal bound to reqLiteral)
-                                 hasArgument(1,
-                                             stringLiteral().bind("reqLiteral")),
-                                 // and this call is in the current function (call bound to callExpr))
-                                 hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
-                    
-                    // Prepare matcher finder for our customized matcher
-                    CopyRequestMatcher crMatcher(this);
+#ifdef DUMP_CLANG_QUERY_MATCHERS
+                    llvm::outs()
+                      << "binaryOperator(hasOperatorName(\"=\"),"
+                      << "hasLHS(declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\"))).bind(\"lhsVarDecl\"))).bind(\"lhsDeclRefExpr\")),"
+                      << "hasRHS(hasDescendant(declRefExpr(hasDeclaration(varDecl(namedDecl()).bind(\"rhsVarDecl\"))).bind(\"lhsDeclRefExpr\"))),"
+                      << "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"binop\")\n";
+#endif
+                    // Didn't found anything with sprintf
+                    // Perhaps there is an affectation in between, then find an affectation operator with lhs being the host var
+                    StatementMatcher m_affmatcher
+                      // Find an affectation statement (binary operator = )
+                      = binaryOperator(hasOperatorName("="),
+                                       // The left hand side expr is an expression with the host var name
+                                       hasLHS(declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(hvm["hostvar"].c_str()))).bind("lhsVarDecl"))).bind("lhsDeclRefExpr")),
+                                       // The right hand side is a local variable we get the declaration for
+                                       hasRHS(hasDescendant(declRefExpr(hasDeclaration(varDecl(namedDecl()).bind("rhsVarDecl"))).bind("lhsDeclRefExpr"))),
+                                       // and the whole in our current function
+                                       hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))
+                                       ).bind("binop");
+                    // Prepare the matcher finder for our affectation matcher
+                    FindAssignMatcher afMatcher(this);
                     // The matcher implementing visitor pattern
-                    MatchFinder finder;
-                    // Add our matcher to our processing class
-                    finder.addMatcher(m_matcher, &crMatcher);
-                    // Clear collector vector (the result filled with found patterns)
-                    m_req_copy_collector.clear();
-                    // Run the visitor pattern for collecting matches
-                    tool->run(newFrontendActionFactory(&finder).get());
-
+                    MatchFinder afFinder;
+                    // Add our matcher to the finder (that will process it at run)
+                    afFinder.addMatcher(m_affmatcher, &afMatcher);
+                    // Clear the collector vector
+                    m_req_assign_collector.clear();
+                    // Then run the visitor for collecting the matches (instantiate a FrontendAction with our finder)
+                    tool->run(newFrontendActionFactory(&afFinder).get());
+                    
                     // Display number of matches
-                    outs() << "Found " << m_req_copy_collector.size() << " sprintf calls for host var '" << hvm["hostvar"].c_str() << "' in function "
-                           << curFunc->getNameAsString().insert(0, "::") << "\n";
+                    outs() << "Found " << m_req_assign_collector.size() << " host var '" << hvm["hostvar"].c_str()
+                           << "' assignments statements in function " << curFunc->getNameAsString().insert(0, "::") << "\n";
+                    
+                    // The collected record (finding the one with the higher line num just before request)
+                    struct AssignmentRecord *lastAfRecord = (struct AssignmentRecord *)nullptr;
 
-                    // Some result that will be passed to the templating engine
-                    std::string requestDefineValue;
-                    std::string requestDefineName;
-                    std::string fromReqNameLength;
-
-                    if (m_req_copy_collector.empty())
+                    // Did we found the assignment statement
+                    if (!m_req_assign_collector.empty())
                       {
-                        llvm::outs() << "binaryOperator(hasOperatorName(\"=\")," <<
-                          "hasLHS(declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\"))).bind(\"lhsVarDecl\"))).bind(\"lhsDeclRefExpr\"))," <<
-                          "hasRHS(hasDescendant(declRefExpr(hasDeclaration(varDecl(namedDecl()).bind(\"rhsVarDecl\"))).bind(\"lhsDeclRefExpr\")))," <<
-                          "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\"))))\n";
-                        
-                        // Didn't found anything with sprintf
-                        // Perhaps there is an affectation in between, then find an affectation operator with lhs being the host var
-                        StatementMatcher m_affmatcher
-                          // Find an affectation statement (binary operator = )
-                          = binaryOperator(hasOperatorName("="),
-                                           // The left hand side expr is an expression with the host var name
-                                           hasLHS(declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(hvm["hostvar"].c_str()))).bind("lhsVarDecl"))).bind("lhsDeclRefExpr")),
-                                           // The right hand side is a local variable we get the declaration for
-                                           hasRHS(hasDescendant(declRefExpr(hasDeclaration(varDecl(namedDecl()).bind("rhsVarDecl"))).bind("lhsDeclRefExpr"))),
-                                           // and the whole in our current function
-                                           hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))
-                                           );
-                        // Prepare the matcher finder for our affectation matcher
-                        FindAssignMatcher afMatcher(this);
-                        // The matcher implementing visitor pattern
-                        MatchFinder afFinder;
-                        // Add our matcher to the finder (that will process it at run)
-                        finder.addMatcher(m_affmatcher, &afMatcher);
-                        // Clear the collector vector
-                        m_req_assign_collector.clear();
-                        // Then run the visitor for collecting the matches (instantiate a FrontendAction with our finder)
-                        tool->run(newFrontendActionFactory(&afFinder).get());
-                        
-                        // Display number of matches
-                        outs() << "Found " << m_req_assign_collector.size() << " host var '" << hvm["hostvar"].c_str()
-                               << "' assignments statements in function " << curFunc->getNameAsString().insert(0, "::") << "\n";
-                        
-                        // The collected record (finding the one with the higher line num just before request)
-                        struct AssignmentRecord *lastAfRecord = (struct AssignmentRecord *)nullptr;
-
-                        if (!m_req_assign_collector.empty())
+                        // Let's iterate over all collected matches
+                        for (auto it = m_req_assign_collector.begin();
+                             it != m_req_assign_collector.end();
+                             ++it)
                           {
-                            // Let's iterate over all collected matches
-                            for (auto it = m_req_assign_collector.begin();
-                                 it != m_req_assign_collector.end();
-                                 ++it)
+                            // And find the one just before the ProC statement
+                            struct AssignmentRecord *record = (*it);
+                            llvm::outs() << "binop location ptr: " << record->binop << "\n";
+                            SourceLocation binopLocation = record->lhs->getLocStart();
+                            llvm::outs() << "binop location: ";
+                            binopLocation.print(llvm::outs(), srcMgr);
+                            llvm::outs() << "loc_start location: ";
+                            loc_start.print(llvm::outs(), srcMgr);
+                            unsigned binopLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(binopLocation));
+                            if (binopLineNum > startLineNum)
+                              break;
+                            // Didn't find yet, so keep current as the last one
+                            lastAfRecord = record;
+                          }
+                        
+                        // Found the last match record collected just before the ProC statement
+                        if (lastAfRecord != nullptr)
+                          {
+                            std::string otherVarName;
+                            const VarDecl *rhsVarDecl = lastAfRecord->rhsVar;
+                            
+                            // Let's get the variable name the host var is affected with
+                            if (isa<NamedDecl>(*rhsVarDecl))
                               {
-                                // And find the one just before the ProC statement
-                                struct AssignmentRecord *record = (*it);
-                                if (record->binop_linenum > startLineNum)
-                                  break;
-                                // Didn't find yet, so keep current as the last one
-                                lastAfRecord = record;
+                                const NamedDecl *namedDecl = dyn_cast<NamedDecl>(rhsVarDecl);
+                                otherVarName = namedDecl->getNameAsString();
+                              }
+                            else
+                              {
+                                // FIXME: Handle this case. Should never occur
+                                assert(false);
                               }
                             
-                            // Found the last match record collected just before the ProC statement
-                            if (lastAfRecord != nullptr)
-                              {
-                                std::string otherVarName;
-                                const VarDecl *rhsVarDecl = lastAfRecord->rhsVar;
-                                
-                                // Let's get the variable name the host var is affected with
-                                if (isa<NamedDecl>(*rhsVarDecl))
-                                  {
-                                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(rhsVarDecl);
-                                    otherVarName = namedDecl->getNameAsString();
-                                  }
-                                else
-                                  {
-                                    // FIXME: Handle this case. Should never occur
-                                    assert(false);
-                                  }
-                                
-                                // We now search again for a sprintf with the new var name
-                                StatementMatcher m_nextMatcher
-                                  // find a sprintf call expr
-                                  = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
-                                             // with arg 0 being the symbol specified in the ProC request (target decl bound to vardecl)
-                                             hasArgument(0,
-                                                         declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(otherVarName.c_str()))).bind("vardecl")))),
-                                             // and with arg1 being the searched literal (literal bound to reqLiteral)
-                                             hasArgument(1,
-                                                         stringLiteral().bind("reqLiteral")),
-                                             // and this call is in the current function (call bound to callExpr))
-                                             hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
-                                
-                                // Prepare matcher finder for our customized matcher
-                                CopyRequestMatcher nextCrMatcher(this);
-                                // The matcher implementing visitor pattern
-                                MatchFinder nextCrFinder;
-                                // Add our matcher to our processing class
-                                nextCrFinder.addMatcher(m_nextMatcher, &nextCrMatcher);
-                                // Clear collector vector (the result filled with found patterns)
-                                m_req_copy_collector.clear();
-                                // Run the visitor pattern for collecting matches
-                                tool->run(newFrontendActionFactory(&nextCrFinder).get());
-                                
-                                // Display number of matches
-                                outs() << "Found " << m_req_copy_collector.size() << " sprintf calls\n";
-                              }
-                          }
+                            /*
+                             * We found the EXEC SQL PREPARE and the assignment.
+                             * Let's try to find the sprintf
+                             *
+                             *   > sprintf(reqLocalHostVar, StringLiteralFmt, requestArg1, requestArg2, ..., requestArgN);
+                             *   > ...
+                             * F=> reqHostVar = reqLocalHostVar;
+                             *   > ...
+                             * F=> EXEC SQL PREPARE requestName FROM :reqHostVar;
+                             *
+                             * Let's display the matcher with clang-query syntax for testing finder.
+                             */
+#ifdef DUMP_CLANG_QUERY_MATCHERS
+                            llvm::outs()
+                              << "callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName(\"sprintf\"))))),"
+                              << "hasArgument(0,"
+                              <<              "declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << otherVarName.c_str() << "\"))).bind(\"vardecl\")))),"
+                              << "hasArgument(1,"
+                              <<              "stringLiteral().bind(\"reqLiteral\")),"
+                              << "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\")))).bind(\"callExpr\")\n";
+#endif
+                            // We now search again for a sprintf with the new var name
+                            StatementMatcher m_nextMatcher
+                              // find a sprintf call expr
+                              = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
+                                         // with arg 0 being the symbol specified in the ProC request (target decl bound to vardecl)
+                                         hasArgument(0,
+                                                     declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(otherVarName.c_str()))).bind("vardecl")))),
+                                         // and with arg1 being the searched literal (literal bound to reqLiteral)
+                                         hasArgument(1,
+                                                     stringLiteral().bind("reqLiteral")),
+                                         // and this call is in the current function (call bound to callExpr))
+                                         hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
+                            
+                            // Prepare matcher finder for our customized matcher
+                            CopyRequestMatcher nextCrMatcher(this);
+                            // The matcher implementing visitor pattern
+                            MatchFinder nextCrFinder;
+                            // Add our matcher to our processing class
+                            nextCrFinder.addMatcher(m_nextMatcher, &nextCrMatcher);
+                            // Clear collector vector (the result filled with found patterns)
+                            m_req_copy_collector.clear();
+                            // Run the visitor pattern for collecting matches
+                            tool->run(newFrontendActionFactory(&nextCrFinder).get());
+                            
+                            // Display number of matches
+                            outs() << "Found " << m_req_copy_collector.size() << " sprintf calls\n";
+                          }                        
+                      } // ! (!m_req_assign_collector.empty())                
+                    else
+                      {
+                        /*
+                         * We didn't found a code structure like:
+                         *
+                         *   > sprintf(reqLocalHostVar, StringLiteralFmt, requestArg1, requestArg2, ..., requestArgN);
+                         *   > ...
+                         *   > reqHostVar = reqLocalHostVar;
+                         *   > ...
+                         *   > EXEC SQL PREPARE requestName FROM :reqHostVar;
+                         *
+                         * First let's try to find a request that is initialized from a 
+                         * string literal (constant string) with sprintf like:
+                         *
+                         *   > sprintf(reqHostVar, StringLiteralFmt);
+                         *   > ...
+                         * F=> EXEC SQL PREPARE requestName FROM :reqHostVar;
+                         *
+                         * The next statement matcher find such requests
+                         */
+#ifdef DUMP_CLANG_QUERY_MATCHERS
+                        llvm::outs()
+                          << "callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName(\"sprintf\"))))),"
+                          << "argumentCountIs(2),"
+                          << "hasArgument(0,"
+                          << "declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(\"" << hvm["hostvar"].c_str() << "\"))).bind(\"vardecl\")))),"
+                          << "hasArgument(1,"
+                          << "stringLiteral().bind(\"reqLiteral\")),"
+                          << "hasAncestor(functionDecl(hasName(\"" << curFunc->getNameAsString().insert(0, "::") << "\"))))"
+                          << ".bind(\"callExpr\")\n";
+#endif
+                        
+                        StatementMatcher m_matcher
+                          // find a sprintf call expr
+                          = callExpr(hasDescendant(declRefExpr(hasDeclaration(namedDecl(hasName("sprintf"))))),
+                                     // This fprintf is used for copying request string value from a
+                                     // string literal to the host variable. Then sprintf argument count
+                                     // must be 2 (target variable and value string literal)
+                                     argumentCountIs(2),
+                                     // with arg 0 being the symbol specified in the ProC request (target decl bound to vardecl)
+                                     hasArgument(0,
+                                                 declRefExpr(hasDeclaration(varDecl(namedDecl(hasName(hvm["hostvar"].c_str()))).bind("vardecl")))),
+                                     // and with arg1 being the searched literal (literal bound to reqLiteral)
+                                     hasArgument(1,
+                                                 stringLiteral().bind("reqLiteral")),
+                                     // and this call is in the current function (call bound to callExpr))
+                                     hasAncestor(functionDecl(hasName(curFunc->getNameAsString().insert(0, "::"))))).bind("callExpr");
+                        
+                        // Prepare matcher finder for our customized matcher
+                        CopyRequestMatcher crMatcher(this);
+                        // The matcher implementing visitor pattern
+                        MatchFinder finder;
+                        // Add our matcher to our processing class
+                        finder.addMatcher(m_matcher, &crMatcher);
+                        // Clear collector vector (the result filled with found patterns)
+                        m_req_copy_collector.clear();
+                        // Run the visitor pattern for collecting matches
+                        tool->run(newFrontendActionFactory(&finder).get());
+                        
+                        // Display number of matches
+                        outs() << "Found " << m_req_copy_collector.size() << " sprintf calls for host var '" << hvm["hostvar"].c_str() << "' in function "
+                               << curFunc->getNameAsString().insert(0, "::") << "\n";
                       }
-                    
-                    if (!m_req_copy_collector.empty())
+                        
+                    if (!(m_req_copy_collector.empty()))
                       {		
                         // If result is not an empty set
                         // We found a request of type:
@@ -1467,7 +1533,13 @@ namespace clang
                           {
                             // And find the one just before the ProC statement
                             struct StringLiteralRecord *record = (*it);
-                            if (record->call_linenum > startLineNum)
+                            SourceLocation callLocation = record->callExpr->getLocStart();
+                            llvm::outs() << "call location: ";
+                            callLocation.print(llvm::outs(), srcMgr);
+                            llvm::outs() << "loc_start location: ";
+                            loc_start.print(llvm::outs(), srcMgr);
+                            unsigned callLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(callLocation));
+                            if (callLineNum > startLineNum)
                               break;
                             // Didn't find yet, so keep current as the last one
                             lastRecord = record;
@@ -1476,6 +1548,8 @@ namespace clang
                         // Found the last record collected just before the ProC statement
                         if (lastRecord != nullptr)
                           {
+                            SourceLocation varDeclLocation = lastRecord->varDecl->getLocStart();
+                            unsigned recordLineNum = srcMgr.getLineNumber(startFid, srcMgr.getFileOffset(varDeclLocation));;
                             // Get the qualified type for the sprintf target variable
                             QualType fromType = lastRecord->varDecl->getType().withConst();
                             // We need the size of the char table
@@ -1488,122 +1562,163 @@ namespace clang
                             bos << fromReqNameLengthSize;
                             fromReqNameLength = buffer.str();
                             
-                            SourceRangeForStringLiterals *sr;
-                            
-                            if (findMacroStringLiteralDefAtLine(srcMgr,
-                                                                lastRecord->linenum,
-                                                                requestDefineName, requestDefineValue,
-                                                                &sr))
+                            // Let's get the original define from the file, as indentation must be kept
+                            SourceRangeForStringLiterals *sr;                            
+                            if (!findMacroStringLiteralDefAtLine(srcMgr,
+                                                                 recordLineNum,
+                                                                 requestDefineName, requestDefineValue, // <= target variables for the macro name & value
+                                                                 &sr)
+                                )
                               {
-                                //unsigned literalStartLineNumber = srcMgr.getSpellingLineNumber(sr->m_macro_range.getBegin());
-                                //unsigned literalEndLineNumber = srcMgr.getSpellingLineNumber(sr->m_macro_range.getEnd());
-                                // outs() << "*>*>*> Request Literal '" << requestDefineName << "'from line #"
-                                // 	   << literalStartLineNumber << " to line #" << literalEndLineNumber << "\n";
-                                // outs() << "\"" << requestDefineValue <<"\"\n";
-                                
-                                
+                                llvm::errs() << "ERROR !! Didn't found back macro expansion for "
+                                             << "the string literal used at line number " << recordLineNum << "\n";
                               }
-                            
-                            else
-                              errs() << "ERROR !! Didn't found back macro expansion for "
-                                     << "the string literal used at line number " << lastRecord->vardecl_linenum << "\n";
-                            
-                            // Compute function name
-                            requestFunctionName.assign("prepare");
-                            // Get match in rest string
-                            std::string rest(reqName);
-                            // Capitalize it
-                            rest[0] &= ~0x20;
-                            // And append to function name
-                            requestFunctionName.append(rest);
-                            
-                            // 'EXEC SQL' statement
-                            std::string requestExecSql(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_FMTD_REQ_RE_PREPARE]);
-                            requestExecSql.append(reqName);
-                            requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_FMTD_REQ_RE_FROM]);
-                            requestExecSql.append(fromReqName);
-                            
-                            if (generation_do_report_modification_in_pc)
-                              {
-                                rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
-                                rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
-                              }
-
-                            auto now_time = system_clock::to_time_t(system_clock::now());
-                            generationDateTime = std::ctime(&now_time);
-                            
-                            if (generate_req_headers)
-                              {
-                                string2_map values_map;
-                                values_map["@RequestFunctionName@"] = requestFunctionName;
-                                values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
-                                values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-                                values_map["@GenerationDateTime@"] = generationDateTime;
-                                doRequestHeaderGeneration(diagEngine,
-                                                          generation_header_template,
-                                                          values_map);
-                              }
-                            
-                            if (generate_req_sources)
-                              {
-                                string2_map values_map;
-                                values_map["@RequestFunctionName@"] = requestFunctionName;
-                                values_map["@FromRequestName@"] = fromReqName;
-                                values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
-                                values_map["@FromRequestNameLength@"] = fromReqNameLength;
-                                values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
-                                values_map["@RequestDefineName@"] = requestDefineName;
-                                values_map["@RequestDefineValue@"] = requestDefineValue;
-                                values_map["@RequestExecSql@"] = requestExecSql;
-                                values_map["@GenerationDateTime@"] = generationDateTime;
-                                doRequestSourceGeneration(diagEngine,
-                                                          generation_source_template,
-                                                          values_map);
-                                
-                              }
-                            
-                            // Now, emit errors, warnings and fixes
-                            std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName);			
-                            
-                            if (generation_do_report_modification_in_pc)
-                              {
-                                rv.insert(std::pair<std::string, std::string>("rpltcode", rplt_code));
-                                rv.insert(std::pair<std::string, std::string>("originalfile", originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1)));
-                                std::ostringstream commentStartLineNum;
-                                commentStartLineNum << comment << ":" << startLineNum;
-                                replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
-                              } 
                           }
+                        else
+                          {
+                            // Display error: should not occur
+                          }
+                        
+                        //
+                        // Compute function name
+                        //
+                        requestFunctionName.assign("prepare");
+                        // Get match in rest string
+                        std::string rest(reqName);
+                        // Capitalize it
+                        rest[0] &= ~0x20;
+                        // And append to function name
+                        requestFunctionName.append(rest);
+                        
+                        // Rebuild 'EXEC SQL' statement
+                        std::string requestExecSql(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_FMTD_REQ_RE_PREPARE]);
+                        requestExecSql.append(reqName);
+                        requestExecSql.append(matches[PAGESJAUNES_REGEX_EXEC_SQL_PREPARE_FMTD_REQ_RE_FROM]);
+                        requestExecSql.append(hvm["hostvar"]);
+                        fromReqName.assign(hvm["hostvar"]);
+                        
+                        // If reporting of file modifications in original .pc file is requested
+                        if (generation_do_report_modification_in_pc)
+                          {
+                            // Add values for .pc file modifications
+                            rv.insert(std::pair<std::string, std::string>("funcname", requestFunctionName));
+                            rv.insert(std::pair<std::string, std::string>("execsql", requestExecSql));
+                          }
+                        
+                        // Compute timestamps
+                        auto now_time = system_clock::to_time_t(system_clock::now());
+                        generationDateTime = std::ctime(&now_time);
+                        
+                        /// @todo 
+                        ///       Create the AST for the new code if header or source
+                        ///       generation is requested.
+                        /// @note
+                        ///       The AST part could be done later.
+                        
+                        // If headers generation requested
+                        if (generate_req_headers)
+                          {
+                            /// @todo 
+                            ///       Instead of using a templating engine:
+                            ///       - implement creation of a new header file (add it to FileManager)
+                            ///       - if fixes are requested (-fix command line option provided), also add it to the SourceManager 
+                            /// @note
+                            ///       The AST part could be done later.
+                            
+                            // Init header values map
+                            string2_map values_map;
+                            values_map["@RequestFunctionName@"] = requestFunctionName;
+                            values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                            values_map["@GenerationDateTime@"] = generationDateTime;
+                            // Generate header
+                            doRequestHeaderGeneration(diagEngine,
+                                                      generation_header_template,
+                                                      values_map);
+                          }
+                        
+                        // If sources generation requested
+                        if (generate_req_sources)
+                          {
+                            /// @todo
+                            ///       Instead of using a templating engine:
+                            ///       - implement creation of a new source file (add it to FileManager as a virtual faile)
+                            ///       - add the new source file in source manager
+                            ///       - create AST for this new file
+                            ///       - add dump of the new AST if fix requested
+                            /// @note
+                            ///       The AST part could be done later.
+                            
+                            // Init source values map
+                            string2_map values_map;
+                            values_map["@RequestFunctionName@"] = requestFunctionName;
+                            values_map["@FromRequestName@"] = fromReqName;
+                            values_map["@OriginalSourceFilename@"] = originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1);
+                            values_map["@FromRequestNameLength@"] = fromReqNameLength;
+                            values_map["@OriginalSourceFileBasename@"] = originalSourceFileBasename;
+                            values_map["@RequestDefineName@"] = requestDefineName;
+                            values_map["@RequestDefineValue@"] = requestDefineValue;
+                            values_map["@RequestExecSql@"] = requestExecSql;
+                            values_map["@GenerationDateTime@"] = generationDateTime;
+                            // Generate source
+                            doRequestSourceGeneration(diagEngine,
+                                                      generation_source_template,
+                                                      values_map);
+                            
+                          }
+                        
+                        // Now, emit errors, warnings and fixes, and get back the generated code for
+                        // sending it to the original .pc file
+                        std::string rplt_code = emitDiagAndFix(loc_start, loc_end, requestFunctionName);			
+                        
+                        // If modification of original .pc file requested
+                        if (generation_do_report_modification_in_pc)
+                          {
+                            // Add new code in original .pc file values map
+                            rv.insert(std::pair<std::string, std::string>("rpltcode", rplt_code));
+                            rv.insert(std::pair<std::string, std::string>("originalfile", originalSourceFilename.substr(originalSourceFilename.find_last_of("/")+1)));
+                            std::ostringstream commentStartLineNum;
+                            commentStartLineNum << comment << ":" << startLineNum;
+                            // Add the values map in replacement map with the raw comment as key
+                            replacement_per_comment.insert(std::pair<std::string, std::map<std::string, std::string>>(commentStartLineNum.str(), rv));
+                          } 
+                      }
+                    else // ! (!m_req_copy_collector.empty())
+                      {
+                        llvm::errs() << "Error: was found a sprintf copy statement for the request \n";
+                        goto didntmatch;
                       }
                   }
-
                 else // ! (!hvm["hostvar"].empty())
-                  // Didn't decode a host var for request
-                  // FIXME: Add error for decodeHostVar didn't return a decoded host var
-                  emitError(diagEngine,
-                            comment_loc_start,
-                            ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+                  {
+                    llvm::errs() << "Error: was not able to decode the FROM host variables\n";
+                    goto didntmatch;
+                  }
               }
-	    else
-	      // Didn't match comment at all!
-	      emitError(diagEngine,
-			comment_loc_start,
-			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
-	  }
-	else
-	  {
-	    if (errOccured)
-	      // An error occured while accessing memory buffer for sources
-	      emitError(diagEngine,
-			loc_start,
-			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
-
-	    else
-	      // We didn't found the comment start ???
-	      emitError(diagEngine,
-			comment_loc_end,
-			ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
-	  }
+            else // ! ((reqRePrep.match(comment, &matches)))
+              {
+                llvm::errs() << "Error: was not able to match a ProC* EXEC SQL comment\n";
+              didntmatch:
+                // Didn't match comment at all!
+                emitError(diagEngine,
+                          comment_loc_start,
+                          ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_COMMENT_DONT_MATCH);
+              }
+          }
+        else
+          {
+            if (errOccured)
+              // An error occured while accessing memory buffer for sources
+              emitError(diagEngine,
+                        loc_start,
+                        ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_ACCESS_CHAR_DATA);
+            
+            else
+              // We didn't found the comment start ???
+              emitError(diagEngine,
+                        comment_loc_end,
+                        ExecSQLPrepareToFunctionCall::EXEC_SQL_2_FUNC_ERROR_CANT_FIND_COMMENT_START);
+          }
       }
     } // namespace pagesjaunes
   } // namespace tidy

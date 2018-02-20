@@ -231,8 +231,7 @@ namespace clang
 	{
 	  const CallExpr *callExpr;
 	  const DeclRefExpr *arg0;
-	  unsigned callexpr_linenum;
-          
+	  unsigned callexpr_linenum;          
 	};
 
 	// Collector for possible assignments

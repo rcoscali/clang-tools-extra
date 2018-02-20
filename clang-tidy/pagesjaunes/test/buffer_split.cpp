@@ -222,7 +222,6 @@ namespace clang
 
         TEST_F(BufferSplitTest, ReadWriteSplittedBuffer)
         {
-          std::streambuf *pbuf;
           std::string pathname(m_clang_root_directory->c_str());
           pathname.append("/");
           pathname.append(CLANG_TIDY_TEST_FILE_RELATIVE_PATH);
