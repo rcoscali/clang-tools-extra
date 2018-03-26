@@ -148,6 +148,23 @@ namespace clang
               EXPECT_STREQ(matches3[3].str().c_str(), "emp_cv");
             }
 
+#define REQWEIRD_4                                                            \
+          "EXEC SQL \n  ALlOCATE: emp_cv ;"
+          
+          llvm::StringRef reqweird4(REQWEIRD_3);
+          SmallVector<StringRef, 8> matches4;
+          bool retbool4 = get_allocate_re().match(reqweird4, &matches4);
+          EXPECT_TRUE(retbool4);
+          int retsize4 = matches4.size();
+          EXPECT_EQ(retsize4, 4);
+          if (retbool4 && retsize4 == 4)
+            {
+              EXPECT_STREQ(matches4[0].str().c_str(), "EXEC SQL \n  ALlOCATE: emp_cv ;");
+              EXPECT_STREQ(matches4[1].str().c_str(), "ALlOCATE");
+              EXPECT_STREQ(matches4[2].str().c_str(), ": emp_cv");
+              EXPECT_STREQ(matches4[3].str().c_str(), "emp_cv");
+            }
+
         }
 
       } // ! namespace test

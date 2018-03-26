@@ -16,6 +16,12 @@
 #include "clang/Tooling/CompilationDatabase.h"
 #include "llvm/Support/Regex.h"
 
+#ifndef ACTIVATE_TRACES_DEFINED
+// These are usefull only for unitary tests
+//#define ACTIVATE_TRACES 
+#define ACTIVATE_RESULT_TRACES 
+#endif // !ACTIVATE_TRACES_DEFINED
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -56,11 +62,13 @@ namespace clang
        * @param Context The ClangTidyContext allowing to access other contexts
        */
       DeIncludePreProC::DeIncludePreProC(StringRef Name,
-						   ClangTidyContext *Context)
+                                         ClangTidyContext *Context)
 	: ClangTidyCheck(Name, Context),	/** Init check (super class) */
 	  TidyContext(Context),			/** Init our TidyContext instance */
 	  /** Check option for comment regex */
-	  comment_regex(Options.get("Comment-regex", "^.*EXEC SQL[ \t]+include[ \t]+\"?([-0-9A-Za-z._]*)\"?.*$")),
+	  comment_regex(Options.get("Comment-regex", "EXEC[[:space:]]+SQL[[:space:]]+([Ii][Nn][Cc][Ll][Uu][Dd][Ee])[[:space:]]+\"?([^\"]*)\"?;")),
+          /** Check option for comment regex group for include name */
+          comment_regex_group_for_include_name(Options.get("Comment-regex-group-for-include-name", 2U)),
 	  /** Check option for setting a restriction list of headers to process */
 	  headers_to_include_in(Options.get("Headers-to-include-in", "")),
 	  /** Check option for setting a header exclusion list */
@@ -68,6 +76,13 @@ namespace clang
 	  /** Check option for setting a list include directories */
 	  headers_directories(Options.get("Headers-directories", ""))
       {
+        llvm::outs() << "DeIncludePreProC::DeIncludePreProC(StringRef Name, ClangTidyContext *Context)\n";
+        llvm::outs() << "Comment-regex = '" << comment_regex << "'\n";
+        llvm::outs() << "Comment-regex-group-for-include-name = " << comment_regex_group_for_include_name << "\n";
+        llvm::outs() << "Headers-to-include-in = '" << headers_to_include_in << "'\n";
+        llvm::outs() << "Headers-to-exclude-from = '" << headers_to_exclude_from << "'\n";
+        llvm::outs() << "Headers-directories = '" << headers_directories << "'\n";
+
 	// Init toIncludein value from the tokenization of the
 	// headers_to_include_in option value
 	if (!headers_to_include_in.empty())
@@ -101,9 +116,17 @@ namespace clang
       DeIncludePreProC::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Comment-regex", comment_regex);
+	Options.store(Opts, "Comment-regex-group-for-include-name", comment_regex);
 	Options.store(Opts, "Headers-to-include-in", headers_to_include_in);
 	Options.store(Opts, "Headers-to-exclude-from", headers_to_exclude_from);
 	Options.store(Opts, "Headers-directories", headers_directories);
+
+        llvm::outs() << "DeIncludePreProC::storeOptions(ClangTidyOptions::OptionMap &Opts)\n";
+        llvm::outs() << "Comment-regex = '" << comment_regex << "'\n";
+        llvm::outs() << "Comment-regex-group-for-include-name = '" << comment_regex_group_for_include_name << "'\n";
+        llvm::outs() << "Headers-to-include-in = '" << headers_to_include_in << "'\n";
+        llvm::outs() << "Headers-to-exclude-from = '" << headers_to_exclude_from << "'\n";
+        llvm::outs() << "Headers-directories = '" << headers_directories << "'\n";
       }
 
       /**
@@ -126,8 +149,8 @@ namespace clang
 	/* This is just a trick to be called once per file */
 	/* The translation unit is also available through ASTContext */
 	/* Rest of processing is based on a custom navigation through comments */
-        Finder->addMatcher(translationUnitDecl().bind("translation_unit")
-			   , this);
+        Finder->addMatcher(translationUnitDecl().bind("translation_unit"),
+			   this);
       }
       
       /**
@@ -159,14 +182,13 @@ namespace clang
 	/* Default is a warning, and it is emitted */
 	/* as soon as the diag builder is destroyed */
 	DiagnosticBuilder mydiag = diag(loc_end,
-					"Header file '%0' replaced by a "
-					" standard include")
+					"EXEC SQL include for '%0' replaced by a standard '#include' directive")
 	  << hdr_filename;
 
 	/* Replacement code built */
 	std::string replt_code = "#include \"";
 	replt_code.append(hdr_filename);
-	replt_code.append("\"");
+	replt_code.append("\"\n");
 
 	/* Emit the replacement over the found statement range */
 	mydiag << FixItHint::CreateReplacement(stmt_range, replt_code);
@@ -303,7 +325,7 @@ namespace clang
        *  key: 
        *    pagesjaunes-de-include-preproc.Comment-regex, 
        *  value: 
-       *    '^.*EXEC SQL[ \t]+include[ \t]+\"([_A-Za-z.]+)\".*$'
+       *    EXEC[[:space:]]+SQL[[:space:]]+([Ii][Nn][Cc][Ll][Uu][Dd][Ee])[[:space:]]+"([[:alnum:]]+)"
        * }
        * 
        *
@@ -340,23 +362,35 @@ namespace clang
 		std::string raw_text = (*cit)->getRawText(ast_ctxt.getSourceManager()).str();
 		// Raw comment
 		RawComment *raw_comment = (*cit);
-		// Location of the comment start
+
+#ifdef ACTIVATE_TRACES
+                llvm::outs() << "** Comment (first line): '" << raw_text.substr(0, raw_text.find("\n", 0)) << "...'\n";
+#endif /* !ACTIVATE_TRACES */
+                
+		// Locations of the comment
 		SourceLocation comment_start_loc = raw_comment->getLocStart();
+		SourceLocation comment_end_loc = raw_comment->getLocEnd();
 
 		// If comment matches
 		if (comment_re.match(raw_text, &matches))
 		  {
 		    // Header file name
-		    std::string header_name = matches[1].str();
+		    std::string header_name = matches[comment_regex_group_for_include_name].str();
 
+                    llvm::outs() << "** EXEC SQL include for: " << header_name << "\n";
+                    
 		    if ((toIncludeIn.empty() ||
 			 contain(toIncludeIn, header_name)) &&
 			(toExcludeFrom.empty() ||
 			 !contain(toExcludeFrom, header_name)))
 		      {
-			std::string raw_txt = raw_comment->getRawText(ast_ctxt.getSourceManager()).str();
-			raw_text.erase(raw_text.find("*/")+2,std::string::npos);
-			unsigned raw_text_len = raw_text.length();
+#ifdef ACTIVATE_RESULT_TRACES
+                        llvm::outs() << "** Processing this include: " << header_name << "\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
+                        
+			//std::string raw_txt = raw_comment->getRawText(ast_ctxt.getSourceManager()).str();
+			//raw_text.erase(raw_text.find("*/")+2,std::string::npos);
+			//unsigned raw_text_len = raw_text.length();
 
 			SourceManager &src_mgr = ast_ctxt.getSourceManager();
 			FileManager &file_mgr = src_mgr.getFileManager();
@@ -367,27 +401,52 @@ namespace clang
 			     it != headersDirectories.end();
 			     ++it)
 			  {
-			    std::string hdr_dir = (*it).append("/");
-			    hdr_fentry = file_mgr.getFile(hdr_dir.append(header_name), true);
+			    std::string hdr_dir = (*it);
+                            if (hdr_dir.rfind("/") < hdr_dir.length() -1)
+                              hdr_dir.append("/");
+                            std::string include_file = hdr_dir;
+                            include_file.append(header_name);
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "** Searching include file '" << include_file << "' in: " << hdr_dir << "\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
+
+			    hdr_fentry = file_mgr.getFile(include_file, true);
 			    if (hdr_fentry)
 			      break;
 			  }
 			// Found hdr file included here
 			if (hdr_fentry)
 			  {
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "**!! FOUND include file\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
 			    auto buf = src_mgr.getMemoryBufferForFile(hdr_fentry);
 			    const char *pbuf = buf->getBufferStart();
 			    std::string pbufstr = std::string(pbuf);
 
-			    unsigned int hdr_lines = count_buffer_chars_number(pbufstr, "\n");
+                            // Number of lines is number of \n + 1
+			    unsigned int hdr_lines = count_buffer_chars_number(pbufstr, "\n") +1;
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "=== Include file has " << hdr_lines << " lines\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
 			    // Get location of start of included hdr file
 			    unsigned comment_start_file_offset = src_mgr.getFileOffset(comment_start_loc);
-			    unsigned comment_end_file_offset = comment_start_file_offset + raw_text_len -1;
-			    unsigned comment_end_line_number = src_mgr.getLineNumber(fid, comment_end_file_offset+1);
+			    unsigned comment_end_file_offset = src_mgr.getFileOffset(comment_end_loc);
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "=== Comment start file offset = " << comment_start_file_offset << " bytes\n";
+                            llvm::outs() << "=== Comment end file offset = " << comment_end_file_offset << " bytes\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
+			    unsigned comment_end_line_number = src_mgr.getLineNumber(fid, comment_end_file_offset);
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "=== Comment end line number = " << comment_end_line_number << "\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
 			    unsigned hdr_start_line_number = comment_end_line_number +1;
 			    unsigned hdr_end_line_number = hdr_start_line_number + hdr_lines;
-			    // outs() << "Hdr start line number = " << hdr_start_line_number << "\n";
-			    // outs() << "Hdr end line number = " << hdr_end_line_number << "\n";
+#ifdef ACTIVATE_RESULT_TRACES
+                            llvm::outs() << "=== Hdr start line number = " << hdr_start_line_number << "\n";
+                            llvm::outs() << "=== Hdr end line number = " << hdr_end_line_number << "\n";
+#endif /* !ACTIVATE_RESULT_TRACES */
+
 			    SourceLocation hdr_start = src_mgr.translateLineCol(fid, hdr_start_line_number, 1);
 			    SourceLocation hdr_end = src_mgr.translateLineCol(fid, hdr_end_line_number, 1);
 
@@ -395,8 +454,16 @@ namespace clang
 					   header_name);
 			  }
 		      }
+
+#ifdef ACTIVATE_RESULT_TRACES
+                    /*! ((toIncludeIn.empty() ||
+			  contain(toIncludeIn, header_name)) &&
+			 (toExcludeFrom.empty() ||
+                         !contain(toExcludeFrom, header_name))) */
+                    else 
+                        llvm::outs() << "** Include processing discarded: " << header_name << "\n";                        
+#endif /* !ACTIVATE_RESULT_TRACES */
 		  }
-		    
 	      }
 	  }
       }

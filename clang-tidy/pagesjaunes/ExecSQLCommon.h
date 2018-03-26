@@ -24,11 +24,15 @@
 // Regex values
 #define PAGESJAUNES_REGEX_EXEC_SQL_ALLOCATE_REQ_RE                         \
 "EXEC[[:space:]]+SQL[[:space:]]+([Aa][Ll][Ll][Oo][Cc][Aa][Tt][Ee])[[:space:]]*(:[[:space:]]*([_A-Za-z][_A-Za-z0-9]+))[[:space:]]*;"
-#define PAGESJAUNES_REGEX_EXEC_SQL_ALLOCATE_REQ_RE_REQNAME 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALLOCATE_REQ_RE_ALLOCATE 1
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALLOCATE_REQ_RE_HOSTVAR 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_ALLOCATE_REQ_RE_NAME 3
 
 #define PAGESJAUNES_REGEX_EXEC_SQL_FREE_REQ_RE                         \
 "EXEC[[:space:]]+SQL[[:space:]]+([Ff][Rr][Ee][Ee])[[:space:]]*(:[[:space:]]*([_A-Za-z][_A-Za-z0-9]+))[[:space:]]*;"
-#define PAGESJAUNES_REGEX_EXEC_SQL_FREE_REQ_RE_CURSORNAME 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_FREE_REQ_RE_FREE 1
+#define PAGESJAUNES_REGEX_EXEC_SQL_FREE_REQ_RE_HOSTVAR 2
+#define PAGESJAUNES_REGEX_EXEC_SQL_FREE_REQ_RE_NAME 3
 
 #define PAGESJAUNES_REGEX_EXEC_SQL_FETCH_REQ_RE                         \
   "EXEC[[:space:]]+SQL[[:space:]]+([Ff][Ee][Tt][Cc][Hh])[[:space:]]*(:?[[:space:]]*[_A-Za-z][A-Za-z0-9_]+)[[:space:]]+([Ii][Nn][Tt][Oo])?[[:space:]]*(.*)[[:space:]]*;"

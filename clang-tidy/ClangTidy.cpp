@@ -341,6 +341,7 @@ namespace clang {
       Context.setSourceManager(&Compiler.getSourceManager());
       Context.setCurrentFile(File);
       Context.setASTContext(&Compiler.getASTContext());
+      Context.setCompilerInstance(Compiler);
 
       auto WorkingDir = Compiler.getSourceManager()
         .getFileManager()

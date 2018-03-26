@@ -16,6 +16,7 @@
 #include "clang/Tooling/Core/Diagnostic.h"
 #include "clang/Tooling/Refactoring.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Support/Regex.h"
@@ -134,6 +135,18 @@ public:
   /// \brief Sets ASTContext for the current translation unit.
   void setASTContext(ASTContext *Context);
 
+  /// \brief Sets ASTContext for the current translation unit.
+  void setCompilerInstance(CompilerInstance& Compiler)
+  {
+    TheCompilerInstance = &Compiler;
+  }
+
+  /// \brief Sets ASTContext for the current translation unit.
+  CompilerInstance* getCompilerInstance(void)
+  {
+    return TheCompilerInstance;
+  }
+
   /// \brief Sets the tool ptr (only valid during run)
   void setToolPtr(ClangTool *tool);
 
@@ -239,6 +252,7 @@ private:
   ProfileData *Profile;
   ASTContext *AstContext;
   ClangTool *m_tool;
+  CompilerInstance* TheCompilerInstance;
 };
 
 /// \brief A diagnostic consumer that turns each \c Diagnostic into a

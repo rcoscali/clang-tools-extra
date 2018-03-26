@@ -55,6 +55,7 @@ namespace clang
           TidyContext(Context),
 	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
 	  handle_strcpy(Options.get("Handle-strcpy", 1U)),
+	  handle_strcat(Options.get("Handle-strcat", 1U)),
 	  handle_strlen(Options.get("Handle-strlen", 1U))
       {
       }
@@ -67,6 +68,7 @@ namespace clang
        * This check support three options for enabling/disabling each
        * call processing:
        * - Handle-strcpy: allowsto enable/disable processing of strcpy
+       * - Handle-strcat: allowsto enable/disable processing of strcat
        * - Handle-strcmp: allowsto enable/disable processing of strcmp
        * - Handle-strlen: allowsto enable/disable processing of strlen
        *
@@ -76,6 +78,7 @@ namespace clang
       CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
 	Options.store(Opts, "Handle-strcpy", handle_strcpy);
+	Options.store(Opts, "Handle-strcat", handle_strcat);
 	Options.store(Opts, "Handle-strcmp", handle_strcmp);
 	Options.store(Opts, "Handle-strlen", handle_strlen);
       }
@@ -106,12 +109,40 @@ namespace clang
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strcmp_call")
                            , this);
+        // Bind a strncmp call with a constant char array
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncmp"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+                                    ).bind("strncmp_call")
+                           , this);
         // Bind a strcpy call with a constant char array
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcpy"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strcpy_call")
+                           , this);
+        // Bind a strncpy call with a constant char array
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncpy"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+                                    ).bind("strncpy_call")
+                           , this);
+        // Bind a strcat call with a constant char array
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcat"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+                                    ).bind("strcat_call")
+                           , this);
+        // Bind a strncat call with a constant char array
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncat"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+                                    ).bind("strncat_call")
                            , this);
         // Bind a strlen call with a constant char array
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strlen"))),
@@ -144,6 +175,7 @@ namespace clang
        * @param function_name   The function name that is called, that we need to rewrite
        * @param member_tokens   The first member tokens
        * @param member2_tokens  The second member tokens (can be empty for strlen)
+       * @param member3_tokens  The third member tokens (contain size for strncpy and strncmp)
        * @param def_start       The member definition start
        * @param def_end         The member definition end
        * @param member_name     The member name we will change the stype (using std::string)
@@ -157,6 +189,7 @@ namespace clang
                                        enum CCharToCXXStringCallKind function_kind,
                                        std::string& member_tokens,
                                        std::string& member2_tokens,
+                                       std::string& member3_tokens,
                                        const SourceLocation& def_start, const SourceLocation& def_end,
                                        std::string& member_name, std::string& object_name,
                                        std::string& field_name, std::string& field_tokens)
@@ -178,10 +211,34 @@ namespace clang
 	    function_name.assign("strcmp");
 	    break;
 
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP:
+	    // Write new code for strcmp: member_tokens + ".compare(member2)"
+	    replt_4call = formatv("{0}.compare(0, std::string::npos, {1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+	    function_name.assign("strncmp");
+	    break;
+
 	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY:
 	    // Write new code for strcpy: member_tokens + ".assign(member2)"
 	    replt_4call = formatv("{0}.assign({1})", member_tokens, member2_tokens).str();
 	    function_name.assign("strcpy");
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY:
+	    // Write new code for strcpy: member_tokens + ".assign(member2)"
+	    replt_4call = formatv("{0}.assign({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+	    function_name.assign("strncpy");
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT:
+	    // Write new code for strcpy: member_tokens + ".append(member2)"
+	    replt_4call = formatv("{0}.append({1})", member_tokens, member2_tokens).str();
+	    function_name.assign("strcat");
+	    break;
+
+	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT:
+	    // Write new code for strcpy: member_tokens + ".append(member2)"
+	    replt_4call = formatv("{0}.append({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+	    function_name.assign("strncat");
 	    break;
 
 	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN:
@@ -373,6 +430,8 @@ namespace clang
                 break;
               }
 
+            unsigned int numArgs = strcmp_call->getNumArgs();
+
             const Expr *arg1 = strcmp_call->getArg(0);
             SourceLocation member_start = arg1->getLocStart();
             SourceLocation member_end = arg1->getLocEnd();
@@ -394,6 +453,16 @@ namespace clang
             SourceLocation member2_loc;
             DeclarationNameLoc member2_decl_name_loc;
       
+            const Expr *arg3 = nullptr;
+            SourceLocation member3_start;
+            SourceLocation member3_end;
+            if (numArgs == 3)
+              {
+                arg3 = strcmp_call->getArg(2);
+                member3_start = arg3->getLocStart();
+                member3_end = arg3->getLocEnd();
+              }
+                
             Expr *base = member_expr->getBase();
             QualType base_type = base->getType();
             std::string object_name = base_type.getAsString();
@@ -427,24 +496,28 @@ namespace clang
                         SourceRange member_expr_range(member_expr_start, member_expr_end);
                         SourceRange member_range(member_start, member_end);
                         SourceRange member2_range(member2_start, member2_end);
+                        SourceRange member3_range(member3_start, member3_end);
                         SourceRange field_range(field_begin_loc, field_end_loc);
                         std::string member_expr_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member_expr_range), src_mgr, LangOptions(), 0);
                         std::string member_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member_range), src_mgr, LangOptions(), 0);
                         std::string member2_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member2_range), src_mgr, LangOptions(), 0);
+                        std::string member3_tokens;
+                        if (numArgs == 3)
+                          member3_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member3_range), src_mgr, LangOptions(), 0);
                         std::string field_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(field_range), src_mgr, LangOptions(), 0);
 
 			if (!arg1_is_literal)
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
-					 member_tokens, member2_tokens, 
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
+					 member_tokens, member2_tokens, member3_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
 			else
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
-					 member2_tokens, member_tokens, 
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP,
+					 member2_tokens, member_tokens, member3_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
                       }
@@ -532,6 +605,8 @@ namespace clang
                 break;
               }
 
+            unsigned int numArgs = strcpy_call->getNumArgs();
+
             const Expr *arg1 = strcpy_call->getArg(0);
             SourceLocation member_start = arg1->getLocStart();
             SourceLocation member_end = arg1->getLocEnd();
@@ -541,6 +616,16 @@ namespace clang
             const Expr *arg2 = strcpy_call->getArg(1);
             SourceLocation member2_start = arg2->getLocStart();
             SourceLocation member2_end = arg2->getLocEnd();
+
+            const Expr *arg3 = nullptr;
+            SourceLocation member3_start;
+            SourceLocation member3_end;
+            if (numArgs == 3)
+              {
+                arg3 = strcpy_call->getArg(2);
+                member3_start = arg3->getLocStart();
+                member3_end = arg3->getLocEnd();
+              }
                 
             std::string member_name;
             SourceLocation member_loc;
@@ -549,6 +634,10 @@ namespace clang
             std::string member2_name;
             SourceLocation member2_loc;
             DeclarationNameLoc member2_decl_name_loc;
+                
+            std::string member3_name;
+            SourceLocation member3_loc;
+            DeclarationNameLoc member3_decl_name_loc;
                 
             const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
                     
@@ -582,23 +671,201 @@ namespace clang
 
                         SourceRange member_range(member_start, member_end);
                         SourceRange member2_range(member2_start, member2_end);
+                        SourceRange member3_range(member3_start, member3_end);
                         SourceRange field_range(field_begin_loc, field_end_loc);
                         std::string member_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member_range), src_mgr, LangOptions(), 0);
                         std::string member2_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member2_range), src_mgr, LangOptions(), 0);
+                        std::string member3_tokens;
+                        if (numArgs == 3)
+                          member3_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member3_range), src_mgr, LangOptions(), 0);
                         std::string field_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(field_range), src_mgr, LangOptions(), 0);
                             
 			if (!arg1_is_literal)
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
-					 member_tokens, member2_tokens, 
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
+					 member_tokens, member2_tokens, member3_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
 			else
 			  emitDiagAndFix(diag_engine,
 					 call_start, call_end,
-					 CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
-					 member2_tokens, member_tokens, 
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY,
+					 member2_tokens, member_tokens, member3_tokens, 
+					 field_begin_loc, field_end_loc,
+					 member_name, object_name, field_name, field_tokens);
+                      }
+                  }
+              }
+            else
+              {
+                emitError(diag_engine,
+                          call_start,
+                          CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_UNEXPECTED_AST_NODE_KIND,
+                          &obj_decl_kind);
+                break;
+              }
+          }
+        while (0);
+      }      
+
+      /**
+       * checkStrcat
+       *
+       * @brief check the strcat call is ok to be processed
+       *
+       * Find the member definition and check if it can be replaced by
+       * a string.
+       *
+       * @param src_mgr		Source manager
+       * @param diag_engine	Diagnostics engine
+       * @param call_kind	The kind of the called function ("strcat")
+       * @param strcat_call	The CallExpr AST node for strcat call
+       * @param result		The matched result
+       */
+      void
+      CCharToCXXString::checkStrcat(SourceManager &src_mgr,
+                                    DiagnosticsEngine &diag_engine,
+                                    CallExpr* strcat_call,
+                                    const MatchFinder::MatchResult &result)
+      {
+        do
+          {
+            const ConstantArrayType *arraytype = result.Nodes.getNodeAs<ConstantArrayType>("arraytype");
+            const CXXRecordDecl *obj_decl = result.Nodes.getNodeAs<CXXRecordDecl>("obj_decl");
+            const MemberExpr *member_expr = result.Nodes.getNodeAs<MemberExpr>("member_expr");
+                
+            // Get start/end locations for the statement
+            SourceLocation call_start = strcat_call->getLocStart();
+            SourceLocation call_end = strcat_call->getLocEnd();
+
+            /* 
+             * Handle unexpected cases
+             */
+
+            // Missing constant array type AST nodes
+            if (!arraytype)
+              {
+                emitError(diag_engine,
+                          call_start,
+                          CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_ARRAY_TYPE_NOT_FOUND);
+                break;
+              }
+
+            // Missing constant array member
+            if (!obj_decl)
+              {
+                emitError(diag_engine,
+                          call_start,
+                          CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_RECORD_DECL_NOT_FOUND);
+                break;
+              }
+
+            // Missing structure owning constant array 
+            if (!obj_decl->hasDefinition())
+              {
+                emitError(diag_engine,
+                          call_start,
+                          CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_HAS_NO_DEF);
+                break;
+              }
+
+            // Missing constant constant array member expr
+            if (!member_expr)
+              {
+                emitError(diag_engine,
+                          call_start,
+                          CCharToCXXString::CCHAR_2_CXXSTRING_ERROR_MEMBER_NOT_FOUND);
+                break;
+              }
+
+            unsigned int numArgs = strcat_call->getNumArgs();
+
+            const Expr *arg1 = strcat_call->getArg(0);
+            SourceLocation member_start = arg1->getLocStart();
+            SourceLocation member_end = arg1->getLocEnd();
+
+	    bool arg1_is_literal = isa<StringLiteral>(arg1->IgnoreImpCasts());
+
+            const Expr *arg2 = strcat_call->getArg(1);
+            SourceLocation member2_start = arg2->getLocStart();
+            SourceLocation member2_end = arg2->getLocEnd();
+
+            const Expr *arg3 = nullptr;
+            SourceLocation member3_start;
+            SourceLocation member3_end;
+            if (numArgs == 3)
+              {
+                arg3 = strcat_call->getArg(2);
+                member3_start = arg3->getLocStart();
+                member3_end = arg3->getLocEnd();
+              }
+                
+            std::string member_name;
+            SourceLocation member_loc;
+            DeclarationNameLoc member_decl_name_loc;
+
+            std::string member2_name;
+            SourceLocation member2_loc;
+            DeclarationNameLoc member2_decl_name_loc;
+                
+            std::string member3_name;
+            SourceLocation member3_loc;
+            DeclarationNameLoc member3_decl_name_loc;
+                
+            const DeclarationNameInfo& info = member_expr->getMemberNameInfo();
+                    
+            member_name = info.getName().getAsString();
+            member_loc = info.getLoc();
+            member_decl_name_loc = info.getInfo();
+
+            Expr *base = member_expr->getBase();
+            QualType base_type = base->getType();
+            std::string object_name = base_type.getAsString();
+
+            DeclContext *decl_ctxt = dynamic_cast<DeclContext*>(obj_decl->getDefinition());
+            std::string obj_decl_kind = decl_ctxt->getDeclKindName();
+
+            if (!obj_decl_kind.compare("CXXRecord"))
+              {
+                RecordDecl *definition = (RecordDecl *)obj_decl->getDefinition();
+
+                // Get compound statement start line num
+                for (RecordDecl::field_iterator fit = definition->field_begin();
+                     fit != definition->field_end();
+                     fit++)
+                  {
+                    FieldDecl *field_decl = *fit;
+                    std::string field_name = field_decl->getNameAsString();
+                    if (!member_name.compare(field_name))
+                      {
+                        SourceRange field_src_range = field_decl->getSourceRange();
+                        SourceLocation field_begin_loc = field_src_range.getBegin();
+                        SourceLocation field_end_loc = field_src_range.getEnd();
+
+                        SourceRange member_range(member_start, member_end);
+                        SourceRange member2_range(member2_start, member2_end);
+                        SourceRange member3_range(member3_start, member3_end);
+                        SourceRange field_range(field_begin_loc, field_end_loc);
+                        std::string member_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member_range), src_mgr, LangOptions(), 0);
+                        std::string member2_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member2_range), src_mgr, LangOptions(), 0);
+                        std::string member3_tokens;
+                        if (numArgs == 3)
+                          member3_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member3_range), src_mgr, LangOptions(), 0);
+                        std::string field_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(field_range), src_mgr, LangOptions(), 0);
+                            
+			if (!arg1_is_literal)
+			  emitDiagAndFix(diag_engine,
+					 call_start, call_end,
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT,
+					 member_tokens, member2_tokens, member3_tokens, 
+					 field_begin_loc, field_end_loc,
+					 member_name, object_name, field_name, field_tokens);
+			else
+			  emitDiagAndFix(diag_engine,
+					 call_start, call_end,
+					 numArgs == 3 ? CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT : CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT,
+					 member2_tokens, member_tokens, member3_tokens, 
 					 field_begin_loc, field_end_loc,
 					 member_name, object_name, field_name, field_tokens);
                       }
@@ -744,8 +1011,9 @@ namespace clang
                         SourceRange field_range(field_begin_loc, field_end_loc);
 			// Get tokens for member expr in strlen
                         std::string member_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(member_range), src_mgr, LangOptions(), 0);
-			// No second member (empty)
+			// No second & third members (empty)
                         std::string member2_tokens;
+                        std::string member3_tokens;
 			// And the field one
                         std::string field_tokens = Lexer::getSourceText(CharSourceRange::getTokenRange(field_range), src_mgr, LangOptions(), 0);
 
@@ -753,7 +1021,7 @@ namespace clang
                         emitDiagAndFix(diag_engine,
                                        call_start, call_end,
 				       CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN,
-                                       member_tokens, member2_tokens, 
+                                       member_tokens, member2_tokens, member3_tokens, 
                                        field_begin_loc, field_end_loc,
                                        member_name, object_name, field_name, field_tokens);
                       }
@@ -795,7 +1063,11 @@ namespace clang
       {
         // Get root bounded variables
         CallExpr *strcmp_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcmp_call");
+        CallExpr *strncmp_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncmp_call");
         CallExpr *strcpy_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcpy_call");
+        CallExpr *strncpy_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncpy_call");
+        CallExpr *strcat_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcpat_call");
+        CallExpr *strncat_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncat_call");
         CallExpr *strlen_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strlen_call");
 
         // Get the source manager
@@ -812,6 +1084,12 @@ namespace clang
 		      strcmp_call,
 		      result);
 
+        else if (handle_strcmp && strncmp_call)
+	  checkStrcmp(src_mgr,
+		      diag_engine,
+		      strncmp_call,
+		      result);
+
         /*
          * Handle strcpy calls
          */
@@ -819,6 +1097,27 @@ namespace clang
 	  checkStrcpy(src_mgr,
 		      diag_engine,
 		      strcpy_call,
+		      result);
+
+        else if (handle_strcpy && strncpy_call)
+	  checkStrcpy(src_mgr,
+		      diag_engine,
+		      strncpy_call,
+		      result);
+
+        /*
+         * Handle strcat calls
+         */
+        else if (handle_strcat && strcat_call)
+	  checkStrcat(src_mgr,
+		      diag_engine,
+		      strcat_call,
+		      result);
+
+        else if (handle_strcat && strncat_call)
+	  checkStrcat(src_mgr,
+		      diag_engine,
+		      strncat_call,
 		      result);
 
         /*

@@ -1,0 +1,1455 @@
+//===--- CCharList.cpp - clang-tidy ----------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <map>
+
+#include "CCharList.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "llvm/Support/Regex.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/Support/DataTypes.h"
+#include "llvm/Support/Format.h"
+#include "llvm/Support/FormatVariadic.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/raw_ostream.h"
+
+using namespace clang;
+using namespace clang::ast_matchers;
+using namespace llvm;
+
+using empret_t = std::pair<std::map<std::string, std::map<std::string, std::string>>::iterator, bool>;
+
+namespace clang 
+{
+  namespace tidy 
+  {
+    namespace pagesjaunes
+    {
+      int CCharList::vardecl_num = 0;
+      int CCharList::arrayvardecl_num = 0;
+      int CCharList::ptrvardecl_num = 0;
+      int CCharList::fielddecl_num = 0;
+      int CCharList::arrayfielddecl_num = 0;
+      int CCharList::ptrfielddecl_num = 0;
+      int CCharList::parmdecl_num = 0;
+      int CCharList::arrayparmdecl_num = 0;
+      int CCharList::ptrparmdecl_num = 0;
+      
+      declmap_t CCharList::vardecl_map;
+      declocc_t CCharList::vardecl_occmap;
+      declmap_t CCharList::arrayvardecl_map;
+      declocc_t CCharList::arrayvardecl_occmap;
+      declmap_t CCharList::ptrvardecl_map;
+      declocc_t CCharList::ptrvardecl_occmap;
+      declmap_t CCharList::fielddecl_map;
+      declocc_t CCharList::fielddecl_occmap;
+      declmap_t CCharList::arrayfielddecl_map;
+      declocc_t CCharList::arrayfielddecl_occmap;
+      declmap_t CCharList::ptrfielddecl_map;
+      declocc_t CCharList::ptrfielddecl_occmap;
+      declmap_t CCharList::parmdecl_map;
+      declocc_t CCharList::parmdecl_occmap;
+      declmap_t CCharList::arrayparmdecl_map;
+      declocc_t CCharList::arrayparmdecl_occmap;
+      declmap_t CCharList::ptrparmdecl_map;
+      declocc_t CCharList::ptrparmdecl_occmap;
+      
+      /**
+       * CCharList constructor
+       *
+       * @brief Constructor for the CCharList rewriting ClangTidyCheck
+       *
+       * The rule is created a new check using its \c ClangTidyCheck base class.
+       * Name and context are provided and stored locally.
+       * Some diag ids corresponding to errors handled by rule are created:
+       * - no_error_diag_id: No error
+       * - array_type_not_found_diag_id: Didn't found a constant array type
+       * - record_decl_not_found_diag_id: Didn't found a RecordDecl (this is a req)
+       * - member_has_no_def_diag_id: Didn't found the definition for our type changed member
+       * - member_not_found_diag_id: Didn't found the member (unexpected)
+       * - member2_not_found_diag_id: Didn't found the second member (unexpected)
+       * - unexpected_ast_node_kind_diag_id: Bad node kind detected (unexpected)
+       *
+       * @param Name    A StringRef for the new check name
+       * @param Context The ClangTidyContext allowing to access other contexts
+       */
+      CCharList::CCharList(StringRef Name,
+                           ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context),
+          TidyContext(Context),
+          file_inclusion_regex(Options.get("File-inclusion-regex", ".*")),
+          handle_var_decl(Options.get("Handle-variable-declarations", 1U)),
+          handle_field_decl(Options.get("Handle-field-declarations", 0U)),
+          handle_parm_decl(Options.get("Handle-parameter-declarations", 0U)),
+          handle_char_decl(Options.get("Handle-char-declarations", 0U)),
+          handle_char_array_decl(Options.get("Handle-char-array-declarations", 1U)),
+          handle_char_ptr_decl(Options.get("Handle-char-pointer-declarations", 1U)),
+          output_csv_file_pathname(Options.get("Result-CSV-file-pathname", "results.csv"))
+      {
+        llvm::outs() << "CCharList::CCharList(StringRef Name, ClangTidyContext *Context)\n";
+        llvm::outs() << "File-inclusion-regex = '" << file_inclusion_regex << "'\n";
+        llvm::outs() << "Handle-variable-declarations = " << handle_var_decl << "\n";
+        llvm::outs() << "Handle-field-declarations = " << handle_field_decl << "\n";
+        llvm::outs() << "Handle-parameter-declarations = " << handle_parm_decl << "\n";
+        llvm::outs() << "Handle-char-declarations = " << handle_char_decl << "\n";
+        llvm::outs() << "Handle-char-array-declarations = " << handle_char_array_decl << "\n";
+        llvm::outs() << "Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
+        llvm::outs() << "Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+      }
+
+      /**
+       * onStartOfTranslationUnit
+       *
+       * @brief called at start of processing of translation unit
+       *
+       * Override to be called at start of translation unit
+       */
+      void
+      CCharList::onStartOfTranslationUnit()
+      {
+        CCharList::vardecl_num = 0;
+        CCharList::arrayvardecl_num = 0;
+        CCharList::ptrvardecl_num = 0;
+        CCharList::fielddecl_num = 0;
+        CCharList::arrayfielddecl_num = 0;
+        CCharList::ptrfielddecl_num = 0;
+        CCharList::parmdecl_num = 0;
+        CCharList::arrayparmdecl_num = 0;
+        CCharList::ptrparmdecl_num = 0;
+        CCharList::vardecl_map.clear();
+        CCharList::vardecl_occmap.clear();
+        CCharList::arrayvardecl_map.clear();
+        CCharList::arrayvardecl_occmap.clear();
+        CCharList::ptrvardecl_map.clear();
+        CCharList::ptrvardecl_occmap.clear();
+        CCharList::fielddecl_map.clear();
+        CCharList::fielddecl_occmap.clear();
+        CCharList::arrayfielddecl_map.clear();
+        CCharList::arrayfielddecl_occmap.clear();
+        CCharList::ptrfielddecl_map.clear();
+        CCharList::ptrfielddecl_occmap.clear();
+        CCharList::parmdecl_map.clear();
+        CCharList::parmdecl_occmap.clear();
+        CCharList::arrayparmdecl_map.clear();
+        CCharList::arrayparmdecl_occmap.clear();
+        CCharList::ptrparmdecl_map.clear();
+        CCharList::ptrparmdecl_occmap.clear();
+      }
+      
+      /**
+       * onEndOfTranslationUnit
+       *
+       * @brief called at end of processing of translation unit
+       *
+       * Override to be called at end of translation unit
+       */
+      void
+      CCharList::onEndOfTranslationUnit()
+      {
+        unsigned vardecl_numocc = 0;
+        unsigned arrayvardecl_numocc = 0;
+        unsigned ptrvardecl_numocc = 0;
+        unsigned fielddecl_numocc = 0;
+        unsigned arrayfielddecl_numocc = 0;
+        unsigned ptrfielddecl_numocc = 0;
+        unsigned parmdecl_numocc = 0;
+        unsigned arrayparmdecl_numocc = 0;
+        unsigned ptrparmdecl_numocc = 0;
+        
+        TranslationUnitDecl *tru = TidyContext->getASTContext()->getTranslationUnitDecl();
+        const SourceManager& srcMgr = TidyContext->getASTContext()->getSourceManager();
+        std::string filename = srcMgr.getFilename(srcMgr.getSpellingLoc(tru->getLocStart())).str();
+        std::filebuf fbo;
+
+        do
+          {
+            if (!fbo.open(output_csv_file_pathname, std::ios::out))
+              break;
+
+	    std::ostream os(&fbo);
+
+            if (handle_var_decl && handle_char_decl)
+              for (auto it = CCharList::vardecl_map.begin(); it != CCharList::vardecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = vardecl_occmap[key];
+                  vardecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_var_decl && handle_char_array_decl)
+              for (auto it = CCharList::arrayvardecl_map.begin(); it != CCharList::arrayvardecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = arrayvardecl_occmap[key];
+                  arrayvardecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_var_decl && handle_char_ptr_decl)
+              for (auto it = CCharList::ptrvardecl_map.begin(); it != CCharList::ptrvardecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = ptrvardecl_occmap[key];
+                  ptrvardecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_field_decl && handle_char_decl)
+              for (auto it = CCharList::fielddecl_map.begin(); it != CCharList::fielddecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = fielddecl_occmap[key];
+                  fielddecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_field_decl && handle_char_array_decl)
+              for (auto it = CCharList::arrayfielddecl_map.begin(); it != CCharList::arrayfielddecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = arrayfielddecl_occmap[key];
+                  arrayfielddecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_field_decl && handle_char_ptr_decl)
+              for (auto it = CCharList::ptrfielddecl_map.begin(); it != CCharList::ptrfielddecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = ptrfielddecl_occmap[key];
+                  ptrfielddecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_parm_decl && handle_char_decl)
+              for (auto it = CCharList::parmdecl_map.begin(); it != CCharList::parmdecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = parmdecl_occmap[key];
+                  parmdecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_parm_decl && handle_char_array_decl)
+              for (auto it = CCharList::arrayparmdecl_map.begin(); it != CCharList::arrayparmdecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = arrayparmdecl_occmap[key];
+                  arrayparmdecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+            if (handle_parm_decl && handle_char_ptr_decl)
+              for (auto it = CCharList::ptrparmdecl_map.begin(); it != CCharList::ptrparmdecl_map.end(); it++)
+                {
+                  auto key = it->first;
+                  auto declmap = it->second;
+                  os << "=======================================================\n" 
+                     << declmap["kind"] << ","
+                     << declmap["typeName"] << "," 
+                     << declmap["varName"] << "," 
+                     << declmap["fileName"] << "," 
+                     << declmap["line"] << "," 
+                     << declmap["column"] << "\n";
+                  auto occ = ptrparmdecl_occmap[key];
+                  ptrparmdecl_numocc += occ.size();
+                  os << "Occurences," << occ.size() << "\n";
+                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
+                    {
+                      os << (*itv)["filename"] << ","
+                         << (*itv)["code"] << ","
+                         << (*itv)["line"] << ","
+                         << (*itv)["column"]
+                         << "\n";
+                    }
+                }
+
+            fbo.close();
+        
+            llvm::outs() << "CCharList::onEndOfTranslationUnit(): dump statistics for " << filename << "\n";
+            if (handle_var_decl && handle_char_decl)
+              llvm::outs() << " ** Number of char variable declarations: " << vardecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  vardecl_numocc
+                           << "\n";
+            if (handle_var_decl && handle_char_array_decl)
+              llvm::outs() << " ** Number of char[] variable declarations: " << arrayvardecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  arrayvardecl_numocc
+                           << "\n";
+            if (handle_var_decl && handle_char_ptr_decl)
+              llvm::outs() << " ** Number of char * variable declarations: " << ptrvardecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  ptrvardecl_numocc
+                           << "\n";
+            if (handle_field_decl && handle_char_decl)
+              llvm::outs() << " ** Number of char field declarations: " << fielddecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  fielddecl_numocc
+                           << "\n";
+            if (handle_field_decl && handle_char_array_decl)
+              llvm::outs() << " ** Number of char[] field declarations: " << arrayfielddecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  arrayfielddecl_numocc
+                           << "\n";
+            if (handle_field_decl && handle_char_ptr_decl)
+              llvm::outs() << " ** Number of char * field declarations: " << ptrfielddecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  ptrfielddecl_numocc
+                           << "\n";
+            if (handle_parm_decl && handle_char_decl)
+              llvm::outs() << " ** Number of char parameter declarations: " << parmdecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  parmdecl_numocc
+                           << "\n";
+            if (handle_parm_decl && handle_char_array_decl)
+              llvm::outs() << " ** Number of char[] parameter declarations: " << arrayparmdecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  arrayparmdecl_numocc
+                           << "\n";
+            if (handle_parm_decl && handle_char_ptr_decl)
+              llvm::outs() << " ** Number of char * parameter declarations: " << ptrparmdecl_map.size()
+                           << "\n"
+                           << "     => occurences : " <<  ptrparmdecl_numocc
+                           << "\n";
+          }
+        while (0);
+      }
+      
+      /**
+       * storeOptions
+       *
+       * @brief Store options for this check
+       *
+       * This check support three options for enabling/disabling each
+       * call processing:
+       *
+       * @param Opts    The option map in which to store supported options
+       */
+      void
+      CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)
+      {
+        Options.store(Opts, "File-inclusion-regex", file_inclusion_regex);
+        Options.store(Opts, "Handle-variable-declarations", handle_var_decl);
+        Options.store(Opts, "Handle-field-declarations", handle_field_decl);
+        Options.store(Opts, "Handle-parameter-declarations", handle_parm_decl);
+        Options.store(Opts, "Handle-char-declarations", handle_char_decl);
+        Options.store(Opts, "Handle-char-array-declarations", handle_char_array_decl);
+        Options.store(Opts, "Handle-char-pointer-declarations", handle_char_ptr_decl);
+        Options.store(Opts, "Result-CSV-file-pathname", output_csv_file_pathname);
+
+        llvm::outs() << "CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)\n";
+        llvm::outs() << "File-inclusion-regex = '" << file_inclusion_regex << "'\n";        
+        llvm::outs() << "Handle-variable-declarations = " << handle_var_decl << "\n";
+        llvm::outs() << "Handle-field-declarations = " << handle_field_decl << "\n";
+        llvm::outs() << "Handle-parameter-declarations = " << handle_parm_decl << "\n";
+        llvm::outs() << "Handle-char-declarations = " << handle_char_decl << "\n";
+        llvm::outs() << "Handle-char-array-declarations = " << handle_char_array_decl << "\n";
+        llvm::outs() << "Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
+        llvm::outs() << "Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+      }
+
+      /**
+       * registerMatchers
+       *
+       * @brief Register the ASTMatchers that will found nodes we are interested in
+       *
+       * This method register 3 matchers for each string manipulation calls we want 
+       * to rewrite. These three calls are:
+       * - strcmp
+       * - strcpy
+       * - strlen
+       * The matchers bind elements we will use, for detecting we want to rewrite the
+       * foudn statement, and for writing new code.
+       *
+       * @param Finder  the recursive visitor that will use our matcher for sending 
+       *                us AST node.
+       */
+      void 
+      CCharList::registerMatchers(MatchFinder *Finder) 
+      {
+        // VarDecl, FieldDecl, ParmVarDecl (FIXME: TypedefDecl??, FunctionDecl ??)
+        Finder->addMatcher(varDecl(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                            isAnyCharacter())))).bind("charArrayVarDecl"), this);
+        Finder->addMatcher(varDecl(hasType(isAnyCharacter())).bind("charVarDecl"), this);
+        Finder->addMatcher(varDecl(hasType(pointerType(pointee(isAnyCharacter())))).bind("charPtrVarDecl"), this);
+
+        Finder->addMatcher(fieldDecl(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                              isAnyCharacter())))).bind("charArrayFieldDecl"), this);
+        Finder->addMatcher(fieldDecl(hasType(isAnyCharacter())).bind("charFieldDecl"), this);
+        Finder->addMatcher(fieldDecl(hasType(pointerType(pointee(isAnyCharacter())))).bind("charPtrFieldDecl"), this);
+
+        Finder->addMatcher(parmVarDecl(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                isAnyCharacter())))).bind("charArrayParmVarDecl"), this);
+        Finder->addMatcher(parmVarDecl(hasType(isAnyCharacter())).bind("charParmVarDecl"), this);                                    
+        Finder->addMatcher(parmVarDecl(hasType(pointerType(pointee(isAnyCharacter())))).bind("charPtrParmVarDecl"), this);
+
+      }
+
+      /*
+       * emitDiagAndFix
+       *
+       * @brief Emit a diagnostic message and possible replacement fix for each
+       *        statement we will be notified with.
+       *
+       * This method is called each time a statement to handle (rewrite) is found.
+       * Two replacement will be emited for each node found:
+       * - one for the method call statement (CallExpr)
+       * - one for the member definition (changed type to std::string)
+       *
+       * It is passed all necessary arguments for:
+       * - creating a comprehensive diagnostic message
+       * - computing the locations of code we will replace
+       * - computing the new code that will replace old one
+       *
+       * @param src_mgr         The source manager
+       * @param call_start      The CallExpr start location
+       * @param call_end        The CallExpr end location
+       * @param function_name   The function name that is called, that we need to rewrite
+       * @param member_tokens   The first member tokens
+       * @param member2_tokens  The second member tokens (can be empty for strlen)
+       * @param member3_tokens  The third member tokens (contain size for strncpy and strncmp)
+       * @param def_start       The member definition start
+       * @param def_end         The member definition end
+       * @param member_name     The member name we will change the stype (using std::string)
+       * @param object_name     The object name holding the member we will change type
+       * @param field_name      The structure (object) field name
+       * @param field_tokens    The structure (object) field tokens
+       */
+      void
+      CCharList::emitDiagAndFix(DiagnosticsEngine &diag_engine,
+                                const SourceLocation& decl_loc,
+                                std::string& name)
+      {
+        // Name of the function
+        std::string function_name;
+        
+        // Write new code for definition: std::string + member tokens
+        std::string replt_4def = formatv("std::string {0}", name).str();
+
+        /* 
+         * !!{ ============================================================ }
+         * !!{ I put the diagnostic builder in its own block because actual }
+         * !!{ report is launched at destruction. As the destructor is not  }
+         * !!{ available (= delete), this is the only way to achieve this.  }
+         * !!{ ============================================================ }
+         */
+
+        // First report
+        {
+          // Create diag msg for the call expr rewrite
+          DiagnosticBuilder mydiag = diag(decl_loc,
+                                          "This call to '%0' shall be replaced with std::string '%1' equivalent")
+            << function_name << replt_4def;
+          // Emit replacement for call expr
+          mydiag << FixItHint::CreateReplacement(decl_loc, replt_4def);
+        }
+      }
+
+      /**
+       * emitError
+       *
+       * @brief Manage error conditions by emiting an error
+       *
+       * This method manage any error condition by emitting a specific error message
+       * to the LLVM/Clang DiagnosticsEngine. It uses diag ids that were created 
+       * in constructor.
+       *
+       * @param diag_engine     LLVM/Clang DiagnosticsEngine instance
+       * @param err_loc         Error location
+       * @param kind            Kind of error to report
+       * @param msg             Additional message for error positional params
+       */
+      void
+      CCharList::emitError(DiagnosticsEngine &diag_engine,
+                           const SourceLocation& err_loc,
+                           enum CCharListErrorKind kind,
+                           std::string *msg)
+      {
+        // According to the kind of error
+        unsigned diag_id;
+        switch (kind)
+          {
+          default:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Warning,
+                              "Unexpected error occured?!");
+            break;
+
+          case CCharList::CCHAR_LIST_ERROR_NO_ERROR:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Ignored,
+                              "No error");
+            break;
+
+          case CCharList::CCHAR_LIST_ERROR_ARRAY_TYPE_NOT_FOUND:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Constant Array type was not found!");
+            break;
+            
+          case CCharList::CCHAR_LIST_ERROR_RECORD_DECL_NOT_FOUND:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Could not bind the Structure Access expression!");
+            break;
+
+          case CCharList::CCHAR_LIST_ERROR_MEMBER_HAS_NO_DEF:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Member has no definition!");
+            break;
+
+          case CCharList::CCHAR_LIST_ERROR_MEMBER_NOT_FOUND:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Could not bind the member expression!");
+            break;
+
+          case CCharList::CCHAR_LIST_ERROR_MEMBER2_NOT_FOUND:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Could not bind the second member expression!");
+            break;
+            
+          case CCharList::CCHAR_LIST_ERROR_UNEXPECTED_AST_NODE_KIND:
+            diag_id = TidyContext->getASTContext()->getDiagnostics().
+              getCustomDiagID(DiagnosticsEngine::Error,
+                              "Could not process member owning record kind!");
+            break;
+          }
+        // Alloc the diag builder
+        DiagnosticBuilder diag = diag_engine.Report(err_loc, diag_id);
+        // If an extra message was provided, add it to diag id message
+        if (msg && !msg->empty())
+          diag.AddString(*msg);
+      }
+
+      /**
+       *
+       */
+      occmap_t
+      CCharList::searchOccurencesVarDecl(SourceManager &src_mgr, std::string& name)
+      {
+        occmap_t res;
+        ClangTool *tool = TidyContext->getToolPtr();
+        StatementMatcher decloccMatcher =
+          declRefExpr(hasDeclaration(varDecl(hasType(isAnyCharacter()),hasName(name.c_str())).bind("vardecl"))).bind("declref");
+        CCharList::FindDeclOccurenceMatcher fdoMatcher(this);
+        MatchFinder finder;
+        finder.addMatcher(decloccMatcher, &fdoMatcher);
+        m_varDeclOccCollector.clear();
+        tool->run(newFrontendActionFactory(&finder).get());
+        if (!m_varDeclOccCollector.empty())
+          {
+            for (auto it = m_varDeclOccCollector.begin(); it != m_varDeclOccCollector.end(); it++)
+              {
+                std::map<std::string, std::string> entry;
+                struct VarDeclOccurence *record = *it;
+                SourceLocation locbegin = src_mgr.getSpellingLoc(record->codeRange->getBegin());
+                SourceLocation locend = src_mgr.getSpellingLoc(record->codeRange->getEnd());
+                char * start = const_cast<char *>(src_mgr.getCharacterData(locbegin));
+                char * linestart = nullptr;
+                if (start)
+                  {
+                    char *p = start;
+                    // let's take start just after previous end of line
+                    while (p && *p != '\n')
+                      p--;
+                    linestart = ++p;
+                  }
+                char * end = const_cast<char *>(src_mgr.getCharacterData(locend));
+                if (start == end)
+                  {
+                    char *p = end;
+                    // let's take end just before first end of line
+                    while (p && *p != '\n')
+                      p++;
+                    end = p;
+                  }
+                std::string code(linestart, end - linestart);
+                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string filename = src_mgr.getFilename(locbegin).str();
+                unsigned foff = src_mgr.getFileOffset(locbegin);
+                FileID fid = src_mgr.getFileID(locbegin);
+                std::stringbuf lnbuffer;
+                std::stringbuf cnbuffer;
+                std::ostream lnos (&lnbuffer);
+                std::ostream cnos (&cnbuffer);
+                unsigned linenum = src_mgr.getLineNumber(fid, foff);
+                unsigned colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                cnos << colnum;
+                entry.emplace("code", code);
+                entry.emplace("filename", src_mgr.getFilename(locbegin).str());
+                entry.emplace("line", lnbuffer.str());
+                entry.emplace("column", cnbuffer.str());
+                res.push_back(entry);
+              }
+          }
+        return res;
+      }
+
+      /**
+       *
+       */
+      occmap_t
+      CCharList::searchOccurencesArrayVarDecl(SourceManager &src_mgr, std::string& name)
+      {
+        occmap_t res;
+        ClangTool *tool = TidyContext->getToolPtr();
+        StatementMatcher decloccMatcher =
+          declRefExpr(hasDeclaration(varDecl(hasType(constantArrayType(hasElementType(builtinType(),isAnyCharacter()))),hasName(name.c_str())).bind("vardecl"))).bind("declref");
+        FindDeclOccurenceMatcher fdoMatcher(this);
+        MatchFinder finder;
+        finder.addMatcher(decloccMatcher, &fdoMatcher);
+        m_varDeclOccCollector.clear();
+        tool->run(newFrontendActionFactory(&finder).get());
+        if (!m_varDeclOccCollector.empty())
+          {
+            for (auto it = m_varDeclOccCollector.begin(); it != m_varDeclOccCollector.end(); it++)
+              {
+                std::map<std::string, std::string> entry;
+                struct VarDeclOccurence *record = *it;
+                SourceLocation locbegin = src_mgr.getSpellingLoc(record->codeRange->getBegin());
+                SourceLocation locend = src_mgr.getSpellingLoc(record->codeRange->getEnd());
+                char * start = const_cast<char *>(src_mgr.getCharacterData(locbegin)); 
+                char * linestart = nullptr;
+                if (start)
+                  {
+                    char *p = start;
+                    // let's take start just after previous end of line
+                    while (p && *p != '\n')
+                      p--;
+                    linestart = ++p;
+                  }
+                char * end = const_cast<char *>(src_mgr.getCharacterData(locend));
+                if (start == end)
+                  {
+                    char *p = end;
+                    // let's take end just before first end of line
+                    while (p && *p != '\n')
+                      p++;
+                    end = p;
+                  }
+                std::string code(linestart, end - linestart);
+                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string filename = src_mgr.getFilename(locbegin).str();
+                unsigned foff = src_mgr.getFileOffset(locbegin);
+                FileID fid = src_mgr.getFileID(locbegin);
+                std::stringbuf lnbuffer;
+                std::stringbuf cnbuffer;
+                std::ostream lnos (&lnbuffer);
+                std::ostream cnos (&cnbuffer);
+                unsigned linenum = src_mgr.getLineNumber(fid, foff);
+                unsigned colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                cnos << colnum;
+                entry.emplace("code", code);
+                entry.emplace("filename", src_mgr.getFilename(locbegin).str());
+                entry.emplace("line", lnbuffer.str());
+                entry.emplace("column", cnbuffer.str());
+                res.push_back(entry);
+              }
+          }
+        return res;
+      }
+
+      /**
+       *
+       */
+      occmap_t
+      CCharList::searchOccurencesPtrVarDecl(SourceManager &src_mgr, std::string& name)
+      {
+        occmap_t res;
+        ClangTool *tool = TidyContext->getToolPtr();
+        StatementMatcher decloccMatcher =
+          declRefExpr(hasDeclaration(varDecl(hasType(pointerType(pointee(isAnyCharacter()))),namedDecl(hasName(name.c_str()))).bind("vardecl"))).bind("declref");
+        FindDeclOccurenceMatcher fdoMatcher(this);
+        MatchFinder finder;
+        finder.addMatcher(decloccMatcher, &fdoMatcher);
+        m_varDeclOccCollector.clear();
+        tool->run(newFrontendActionFactory(&finder).get());
+        if (!m_varDeclOccCollector.empty())
+          {
+            for (auto it = m_varDeclOccCollector.begin(); it != m_varDeclOccCollector.end(); it++)
+              {
+                std::map<std::string, std::string> entry;
+                struct VarDeclOccurence *record = *it;
+                SourceLocation locbegin = src_mgr.getSpellingLoc(record->codeRange->getBegin());
+                SourceLocation locend = src_mgr.getSpellingLoc(record->codeRange->getEnd());
+                char * start = const_cast<char *>(src_mgr.getCharacterData(locbegin)); 
+                char * linestart = nullptr;
+                if (start)
+                  {
+                    char *p = start;
+                    // let's take start just after previous end of line
+                    while (p && *p != '\n')
+                      p--;
+                    linestart = ++p;
+                  }
+                char * end = const_cast<char *>(src_mgr.getCharacterData(locend));
+                if (start == end)
+                  {
+                    char *p = end;
+                    // let's take end just before first end of line
+                    while (p && *p != '\n')
+                      p++;
+                    end = p;
+                  }
+                std::string code(linestart, end - linestart);
+                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string filename = src_mgr.getFilename(locbegin).str();
+                unsigned foff = src_mgr.getFileOffset(locbegin);
+                FileID fid = src_mgr.getFileID(locbegin);
+                std::stringbuf lnbuffer;
+                std::stringbuf cnbuffer;
+                std::ostream lnos (&lnbuffer);
+                std::ostream cnos (&cnbuffer);
+                unsigned linenum = src_mgr.getLineNumber(fid, foff);
+                unsigned colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                cnos << colnum;
+                entry.emplace("code", code);
+                entry.emplace("filename", src_mgr.getFilename(locbegin).str());
+                entry.emplace("line", lnbuffer.str());
+                entry.emplace("column", cnbuffer.str());
+                res.push_back(entry);
+              }
+          }
+        return res;
+      }
+
+      /**
+       * check
+       *
+       * @brief This method is called each time a visited AST node matching our 
+       *        ASTMatcher is found.
+       * 
+       * This method will navigated and inspect the found AST nodes for:
+       * - determining if the found nodes are elligible for rewrite
+       * - extracting all necessary informations for computing rewrite 
+       *   location and code
+       * It handles rewriting three string manipulation functions:
+       * - strcmp
+       * - strcpy
+       * - strlen
+       *
+       * @param result          The match result provided by the recursive visitor
+       *                        allowing us to access AST nodes bound to variables
+       */
+      void
+      CCharList::check(const MatchFinder::MatchResult &result) 
+      {
+        // Get root bounded variables
+        const VarDecl *vardecl = (const VarDecl *) result.Nodes.getNodeAs<VarDecl>("charVarDecl");
+        const VarDecl *arrayvardecl = (const VarDecl *) result.Nodes.getNodeAs<VarDecl>("charArrayVarDecl");
+        const VarDecl *ptrvardecl = (const VarDecl *) result.Nodes.getNodeAs<VarDecl>("charPtrVarDecl");
+        const FieldDecl *fielddecl = (const FieldDecl *) result.Nodes.getNodeAs<FieldDecl>("charFieldDecl");
+        const FieldDecl *arrayfielddecl = (const FieldDecl *) result.Nodes.getNodeAs<FieldDecl>("charArrayFieldDecl");
+        const FieldDecl *ptrfielddecl = (const FieldDecl *) result.Nodes.getNodeAs<FieldDecl>("charPtrFieldDecl");
+        const ParmVarDecl *parmdecl = (const ParmVarDecl *) result.Nodes.getNodeAs<ParmVarDecl>("charParmVarDecl");
+        const ParmVarDecl *arrayparmdecl = (const ParmVarDecl *) result.Nodes.getNodeAs<ParmVarDecl>("charArrayParmVarDecl");
+        const ParmVarDecl *ptrparmdecl = (const ParmVarDecl *) result.Nodes.getNodeAs<ParmVarDecl>("charPtrParmVarDecl");
+
+        // Get the source manager
+        SourceManager &src_mgr = result.Context->getSourceManager();
+        // And diagnostics engine
+        //DiagnosticsEngine &diag_engine = result.Context->getDiagnostics();
+
+        SourceRange decl_loc_range;
+        SourceLocation decl_loc;
+        std::string typeName;
+        std::string varName;
+        QualType qtype;
+        //bool do_out = false;
+        std::string declkind;
+        
+        std::string entry_key;
+        std::string loc_name;
+        std::string filename;
+        unsigned foff;
+        FileID fid;
+        unsigned linenum;
+        unsigned colnum;
+        std::stringbuf lnbuffer;
+        std::stringbuf cnbuffer;
+        std::ostream lnos (&lnbuffer);
+        std::ostream cnos (&cnbuffer);
+        std::string linenumstr;
+        std::string colnumstr;
+        Regex file_inclusion(file_inclusion_regex);
+        SmallVector<StringRef, 8> fileInclMatches;
+
+        if (vardecl && handle_var_decl && handle_char_decl)
+          {
+            std::map<std::string, std::string> vardecl_entry;
+            
+            decl_loc_range = vardecl->getSourceRange();
+            SourceLocation tmp_decl_loc = vardecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+                
+                if (isa<VarDecl>(*vardecl))
+                  {
+                    qtype = vardecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*vardecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(vardecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+                
+                declkind = "VarDecl";
+                vardecl_entry.emplace("kind", declkind);
+                vardecl_entry.emplace("typeName", typeName);
+                vardecl_entry.emplace("varName", varName);
+                vardecl_entry.emplace("fileName", filename);
+                vardecl_entry.emplace("line", linenumstr);
+                vardecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    vardecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = vardecl_map.emplace(entry_key, vardecl_entry);
+                    if (empret.second)
+                      vardecl_num++;
+                  }
+              }
+          }
+        else if (arrayvardecl && handle_var_decl && handle_char_array_decl)
+          {
+            std::map<std::string, std::string> arrayvardecl_entry;
+            
+            decl_loc_range = arrayvardecl->getSourceRange();
+            SourceLocation tmp_decl_loc = arrayvardecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                if (isa<VarDecl>(*arrayvardecl))
+                  {
+                    qtype = arrayvardecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*arrayvardecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(arrayvardecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "ArrayVarDecl";
+                arrayvardecl_entry.emplace("kind", declkind);
+                arrayvardecl_entry.emplace("typeName", typeName);
+                arrayvardecl_entry.emplace("varName", varName);
+                arrayvardecl_entry.emplace("fileName", filename);
+                arrayvardecl_entry.emplace("line", linenumstr);
+                arrayvardecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    arrayvardecl_occmap.emplace(entry_key, searchOccurencesArrayVarDecl(src_mgr, varName));
+                    empret_t empret = arrayvardecl_map.emplace(entry_key, arrayvardecl_entry);
+                    if (empret.second)
+                      arrayvardecl_num++;
+                  }
+              }
+          }
+        else if (ptrvardecl && handle_var_decl && handle_char_ptr_decl)
+          {
+            std::map<std::string, std::string> ptrvardecl_entry;
+            
+            decl_loc_range = ptrvardecl->getSourceRange();
+            SourceLocation tmp_decl_loc = ptrvardecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                if (isa<VarDecl>(*ptrvardecl))
+                  {
+                    qtype = ptrvardecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*ptrvardecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(ptrvardecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "PtrVarDecl";
+                ptrvardecl_entry.emplace("kind", declkind);
+                ptrvardecl_entry.emplace("typeName", typeName);
+                ptrvardecl_entry.emplace("varName", varName);
+                ptrvardecl_entry.emplace("fileName", filename);
+                ptrvardecl_entry.emplace("line", linenumstr);
+                ptrvardecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    ptrvardecl_occmap.emplace(entry_key, searchOccurencesPtrVarDecl(src_mgr, varName));
+                    empret_t empret = ptrvardecl_map.emplace(entry_key, ptrvardecl_entry);
+                    if (empret.second)
+                      ptrvardecl_num++;
+                  }
+              }
+          }
+        else if (fielddecl && handle_field_decl && handle_char_decl)
+          {
+            std::map<std::string, std::string> fielddecl_entry;
+            
+            decl_loc_range = fielddecl->getSourceRange();
+            SourceLocation tmp_decl_loc = fielddecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                if (isa<ValueDecl>(*fielddecl))
+                  {
+                    const ValueDecl *valuedecl = dyn_cast<ValueDecl>(fielddecl);
+                    qtype = valuedecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*fielddecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(fielddecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "FieldDecl";
+                fielddecl_entry.emplace("kind", declkind);
+                fielddecl_entry.emplace("typeName", typeName);
+                fielddecl_entry.emplace("varName", varName);
+                fielddecl_entry.emplace("fileName", filename);
+                fielddecl_entry.emplace("line", linenumstr);
+                fielddecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    fielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = fielddecl_map.emplace(entry_key, fielddecl_entry);
+                    if (empret.second)
+                      fielddecl_num++;
+                  }
+              }
+          }
+        else if (arrayfielddecl && handle_field_decl && handle_char_array_decl)
+          {
+            std::map<std::string, std::string> arrayfielddecl_entry;
+
+            decl_loc_range = arrayfielddecl->getSourceRange();
+            SourceLocation tmp_decl_loc = arrayfielddecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                if (isa<ValueDecl>(*arrayfielddecl))
+                  {
+                    const ValueDecl *valuedecl = dyn_cast<ValueDecl>(arrayfielddecl);
+                    qtype = valuedecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*arrayfielddecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(arrayfielddecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "ArrayFieldDecl";
+                arrayfielddecl_entry.emplace("kind", declkind);
+                arrayfielddecl_entry.emplace("typeName", typeName);
+                arrayfielddecl_entry.emplace("varName", varName);
+                arrayfielddecl_entry.emplace("fileName", filename);
+                arrayfielddecl_entry.emplace("line", linenumstr);
+                arrayfielddecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    arrayfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
+                    if (empret.second)
+                      arrayfielddecl_num++;
+                  }
+              }
+          }
+        else if (ptrfielddecl && handle_field_decl && handle_char_ptr_decl)
+          {
+            std::map<std::string, std::string> ptrfielddecl_entry;
+            
+            decl_loc_range = ptrfielddecl->getSourceRange();
+            SourceLocation tmp_decl_loc = ptrfielddecl->getLocation();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                if (isa<ValueDecl>(*ptrfielddecl))
+                  {
+                    const ValueDecl *valuedecl = dyn_cast<ValueDecl>(ptrfielddecl);
+                    qtype = valuedecl->getType();
+                    SplitQualType qt_split = qtype.split();
+                    typeName = QualType::getAsString(qt_split);
+                  }
+                if (isa<NamedDecl>(*ptrfielddecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(ptrfielddecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "PtrFieldDecl";
+                ptrfielddecl_entry.emplace("kind", declkind);
+                ptrfielddecl_entry.emplace("typeName", typeName);
+                ptrfielddecl_entry.emplace("varName", varName);
+                ptrfielddecl_entry.emplace("fileName", filename);
+                ptrfielddecl_entry.emplace("line", linenumstr);
+                ptrfielddecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    ptrfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
+                    if (empret.second)
+                      ptrfielddecl_num++;
+                  }
+              }
+          }
+        else if (parmdecl && handle_parm_decl && handle_char_decl)
+          {
+            std::map<std::string, std::string> parmdecl_entry;
+            
+            decl_loc_range = parmdecl->getSourceRange();
+            SourceLocation tmp_decl_loc = parmdecl->getLocStart();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                qtype = parmdecl->getOriginalType();
+                SplitQualType qt_split = qtype.split();
+                typeName = QualType::getAsString(qt_split);
+                if (isa<NamedDecl>(*parmdecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(parmdecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "ParmDecl";
+                parmdecl_entry.emplace("kind", declkind);
+                parmdecl_entry.emplace("typeName", typeName);
+                parmdecl_entry.emplace("varName", varName);
+                parmdecl_entry.emplace("fileName", filename);
+                parmdecl_entry.emplace("line", linenumstr);
+                parmdecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    parmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = parmdecl_map.emplace(entry_key, parmdecl_entry);
+                    if (empret.second)
+                      parmdecl_num++;
+                    if (vardecl_map.find(entry_key) != vardecl_map.end())
+                      {
+                        vardecl_map.erase(entry_key);
+                        vardecl_num--;
+                      }
+                  }
+              }
+          }
+        else if (arrayparmdecl && handle_parm_decl && handle_char_array_decl)
+          {
+            std::map<std::string, std::string> arrayparmdecl_entry;
+
+            decl_loc_range = arrayparmdecl->getSourceRange();
+            SourceLocation tmp_decl_loc = arrayparmdecl->getLocStart();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                qtype = arrayparmdecl->getOriginalType();
+                SplitQualType qt_split = qtype.split();
+                typeName = QualType::getAsString(qt_split);
+                if (isa<NamedDecl>(*arrayparmdecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(arrayparmdecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "ArrayParmDecl";
+                arrayparmdecl_entry.emplace("kind", declkind);
+                arrayparmdecl_entry.emplace("typeName", typeName);
+                arrayparmdecl_entry.emplace("varName", varName);
+                arrayparmdecl_entry.emplace("fileName", filename);
+                arrayparmdecl_entry.emplace("line", linenumstr);
+                arrayparmdecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    arrayparmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = arrayparmdecl_map.emplace(entry_key, arrayparmdecl_entry);
+                    if (empret.second)
+                      arrayparmdecl_num++;
+                    if (arrayvardecl_map.find(entry_key) != arrayvardecl_map.end())
+                      {
+                        arrayvardecl_map.erase(entry_key);
+                        arrayvardecl_num--;
+                      }
+                  }
+              }
+          }
+        else if (ptrparmdecl && handle_parm_decl && handle_char_ptr_decl)
+          {
+            std::map<std::string, std::string> ptrparmdecl_entry;
+            
+            decl_loc_range = ptrparmdecl->getSourceRange();
+            SourceLocation tmp_decl_loc = ptrparmdecl->getLocStart();
+            decl_loc = src_mgr.getSpellingLoc(tmp_decl_loc);
+            loc_name = decl_loc.printToString(src_mgr);
+            filename = src_mgr.getFilename(decl_loc).str();
+            if (file_inclusion.match(filename, &fileInclMatches))
+              {
+                foff = src_mgr.getFileOffset(decl_loc);
+                fid = src_mgr.getFileID(decl_loc);
+                linenum = src_mgr.getLineNumber(fid, foff);
+                colnum = src_mgr.getColumnNumber(fid, foff);
+                lnos << linenum;
+                linenumstr = lnbuffer.str();
+                cnos << colnum;
+                colnumstr = cnbuffer.str();
+
+                qtype = ptrparmdecl->getOriginalType();
+                SplitQualType qt_split = qtype.split();
+                typeName = QualType::getAsString(qt_split);
+                if (isa<NamedDecl>(*ptrparmdecl))
+                  {
+                    const NamedDecl *namedDecl = dyn_cast<NamedDecl>(ptrparmdecl);
+                    varName = namedDecl->getNameAsString();
+                  }
+                else
+                  varName = "<unknown>";
+
+                declkind = "PtrParmDecl";
+                ptrparmdecl_entry.emplace("kind", declkind);
+                ptrparmdecl_entry.emplace("typeName", typeName);
+                ptrparmdecl_entry.emplace("varName", varName);
+                ptrparmdecl_entry.emplace("fileName", filename);
+                ptrparmdecl_entry.emplace("line", linenumstr);
+                ptrparmdecl_entry.emplace("column", colnumstr);
+                if (!varName.empty())
+                  {
+                    entry_key.assign(varName);
+                    entry_key.append("|");
+                    entry_key.append(typeName);
+                    entry_key.append("|");
+                    entry_key.append(filename);
+                    entry_key.append("|");
+                    entry_key.append(linenumstr);
+                    //do_out = true;
+                    ptrparmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    empret_t empret = ptrparmdecl_map.emplace(entry_key, ptrparmdecl_entry);
+                    if (empret.second)
+                      ptrparmdecl_num++;
+                    if (ptrvardecl_map.find(entry_key) != ptrvardecl_map.end())
+                      {
+                        ptrvardecl_map.erase(entry_key);
+                        ptrvardecl_num--;
+                      }
+                  }
+              }
+          }
+
+        //        if (0 && do_out)
+        //outs() << "==" << declkind << "," << varName << "," << typeName << "," << filename << "," << linenum << "," << colnum << "\n";
+      }
+    } // namespace pagesjaunes
+  } // namespace tidy
+} // namespace clang

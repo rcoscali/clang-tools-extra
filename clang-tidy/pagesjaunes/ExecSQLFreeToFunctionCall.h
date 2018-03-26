@@ -256,6 +256,8 @@ namespace clang
 	  ExecSQLFreeToFunctionCall *m_parent;
 	};
 
+      public:
+        
 	enum ExecSQLFreeToFunctionCallErrorKind
 	  {
 	    // Error kind for no error
@@ -274,13 +276,59 @@ namespace clang
 	    EXEC_SQL_2_FUNC_ERROR_SOURCE_EXISTS,
 	    // Error kind for header generation failure (already exists)
 	    EXEC_SQL_2_FUNC_ERROR_HEADER_EXISTS,
+	    // Error kind for source generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_SOURCE_CREATE_DIR,
+	    // Error kind for header generation failure (dir creation)
+	    EXEC_SQL_2_FUNC_ERROR_HEADER_CREATE_DIR,
+            // Unsupported charset for strings
+            EXEC_SQL_2_FUNC_ERROR_UNSUPPORTED_STRING_CHARSET,
+            // Invalid group file
+            EXEC_SQL_2_FUNC_ERROR_INVALID_GROUPS_FILE
 	  };
 
+      protected:
+
+	// Collector for possible sprintf calls. struct VarDeclMatchRecord defined in ExecSQLCommon.h
+	std::vector<struct clang::tidy::pagesjaunes::VarDeclMatchRecord *> m_req_var_decl_collector;
+	
+      private:
+
+	/**
+	 * VarDeclMatcher
+	 *
+	 */
+	class VarDeclMatcher : public MatchFinder::MatchCallback
+	{
+	public:
+	  /// Explicit constructor taking the parent instance as param
+	  explicit VarDeclMatcher(ExecSQLFreeToFunctionCall *parent)
+	    : m_parent(parent)
+	  {}
+
+	  /// The run method adding all calls in the collection vector
+	  virtual void
+	  run(const MatchFinder::MatchResult &result)
+	  {
+	    struct VarDeclMatchRecord *record = new(struct VarDeclMatchRecord);
+	    record->varDecl = result.Nodes.getNodeAs<VarDecl>("varDecl");
+	    record->linenum =
+	      result.Context->getSourceManager()
+	      .getSpellingLineNumber(result.Context->getSourceManager().getSpellingLoc(record->varDecl->getLocStart()));
+	    m_parent->m_req_var_decl_collector.push_back(record);
+	  }
+
+	private:
+	  // Parent ExecSQLFreeToFunctionCall instance
+	  ExecSQLFreeToFunctionCall *m_parent;
+	};
+	
+      public:
+
         // Override to be called at start of translation unit
-        void onStartOfTranslationUnit();
+        virtual void onStartOfTranslationUnit();
 
         // Override to be called at end of translation unit
-        void onEndOfTranslationUnit();
+        virtual void onEndOfTranslationUnit();
 
 	// Emit diagnostic and eventually fix it
         std::string emitDiagAndFix(const SourceLocation&,
@@ -308,9 +356,58 @@ namespace clang
 		       enum ExecSQLFreeToFunctionCallErrorKind,
 		       const std::string* msgptr = nullptr);
 
-        // Replace the EXEC SQL statement by the function call in the .pc file
-        void replaceExecSQLinPC(void);        
+	// Find a macro string literal defined at a line
+	bool findMacroStringLiteralDefAtLine(SourceManager &,
+					     unsigned,
+					     std::string&, std::string&,
+					     SourceRangeForStringLiterals **);
 
+        // Format a string for dumping a params definition
+        std::string
+        createParamsDef(const std::string&,
+                        const std::string&,
+                        const std::string&,
+                        const std::string&);
+
+        // Format a string for dumping a params/host vars declare section
+        std::string
+        createParamsDeclareSection(const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&,
+                                   const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsDecl(const std::string&,
+                         const std::string&,
+                         const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createParamsCall(const std::string&);
+
+        // Format a string for dumping a params declaration
+        std::string
+        createHostVarList(const std::string&, bool);
+
+        // Find a symbol definition in a function, with type, line number etc
+	const VarDecl *findSymbolInFunction(std::string&,
+					    const FunctionDecl *);
+
+        // Find a declaration for a named symbol in a function
+        string2_map findDeclInFunction(const FunctionDecl *,
+                                       const std::string&);
+        
+        string2_map findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *,
+                                                         const std::string&,
+                                                         const std::string&);
+	  
+        // Replace the EXEC SQL statement by the function call in the .pc file
+        map_host_vars decodeHostVars(const std::string &);
+
+      protected:
+        
 	// Json for request grouping
 	nlohmann::json request_groups;
 	// Group structure created from json and used for
@@ -324,6 +421,8 @@ namespace clang
 	const bool generate_req_headers;
 	// Generate sources option (default: false)
 	const bool generate_req_sources;
+	// Generate allow overwrite (default: true)
+	const bool generate_req_allow_overwrite;
 	// Generation directory (default: "./")
 	const std::string generation_directory;
 	// Request header template (default: "./pagesjaunes.h.tmpl")
@@ -340,12 +439,12 @@ namespace clang
 	const std::string generation_prepare_fmt_source_template;
 	// Request grouping
 	const std::string generation_request_groups;
-        // boolean for reporting modifications in original .pc
+        // Boolean for reporting modifications in original .pc
         const bool generation_do_report_modification_in_pc;
+        // Keep commented EXEC SQL statement
+        const bool generation_do_keep_commented_out_exec_sql;
         // Directory of the .pc file in which to report modifications
         const std::string generation_report_modification_in_dir;
-        // Keep commented out EXEC SQL statement
-        const bool generation_do_keep_commented_out_exec_sql;
 
         // Map containing comments and code to replace
         map_comment_map_replacement_values replacement_per_comment;

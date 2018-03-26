@@ -58,6 +58,11 @@ namespace clang
 			 CallExpr *,
 			 const MatchFinder::MatchResult &);
 	
+	void checkStrcat(SourceManager &,
+			 DiagnosticsEngine &,
+			 CallExpr *,
+			 const MatchFinder::MatchResult &);
+	
 	void checkStrlen(SourceManager &,
 			 DiagnosticsEngine &,
 			 CallExpr *,
@@ -66,14 +71,18 @@ namespace clang
 	enum CCharToCXXStringCallKind
 	  {
 	    CCHAR_2_CXXSTRING_CALL_STRCMP = 0,
+	    CCHAR_2_CXXSTRING_CALL_STRNCMP,
 	    CCHAR_2_CXXSTRING_CALL_STRCPY,
+	    CCHAR_2_CXXSTRING_CALL_STRNCPY,
+	    CCHAR_2_CXXSTRING_CALL_STRCAT,
+	    CCHAR_2_CXXSTRING_CALL_STRNCAT,
 	    CCHAR_2_CXXSTRING_CALL_STRLEN,
 	  };
 
         void emitDiagAndFix(DiagnosticsEngine &,
 			    const SourceLocation&, const SourceLocation&,
 			    enum CCharToCXXStringCallKind,
-			    std::string&, std::string&, 
+			    std::string&, std::string&, std::string&, 
 			    const SourceLocation&, const SourceLocation&,
 			    std::string&, std::string&, std::string&, std::string&);
 	
@@ -99,6 +108,7 @@ namespace clang
 	// Check options
 	const unsigned handle_strcmp;
 	const unsigned handle_strcpy;
+	const unsigned handle_strcat;
 	const unsigned handle_strlen;
       };
 

@@ -11,6 +11,7 @@
 #include "../ClangTidyModule.h"
 #include "../ClangTidyModuleRegistry.h"
 #include "CCharToCXXString.h"
+#include "CCharList.h"
 #include "DeIncludePreProC.h"
 #include "ExecSQLAllocateToFunctionCall.h"
 #include "ExecSQLForToFunctionCall.h"
@@ -43,7 +44,9 @@ namespace clang
         void
         addCheckFactories(ClangTidyCheckFactories &CheckFactories) override 
         {
+          CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
           CheckFactories.registerCheck<CCharToCXXString> ("pagesjaunes-C-char-to-CXX-string");
+          CheckFactories.registerCheck<CCharList> ("pagesjaunes-C-char-list");
           CheckFactories.registerCheck<ExecSQLAllocateToFunctionCall> ("pagesjaunes-exec-sql-allocate-to-function-call");
           CheckFactories.registerCheck<ExecSQLFetchToFunctionCall> ("pagesjaunes-exec-sql-fetch-to-function-call");
           CheckFactories.registerCheck<ExecSQLForToFunctionCall> ("pagesjaunes-exec-sql-for-to-function-call");
@@ -57,7 +60,6 @@ namespace clang
           CheckFactories.registerCheck<ExecSQLCloseToFunctionCall> ("pagesjaunes-exec-sql-close-to-function-call");
           CheckFactories.registerCheck<ExecSQLPrepareFmtdToFunctionCall> ("pagesjaunes-exec-sql-prepare-fmtd-to-function-call");
           CheckFactories.registerCheck<ExecSQLPrepareToFunctionCall> ("pagesjaunes-exec-sql-prepare-to-function-call");
-          CheckFactories.registerCheck<DeIncludePreProC> ("pagesjaunes-de-include-preproc");
         }
 
         /**
@@ -69,23 +71,38 @@ namespace clang
           ClangTidyOptions Options;
           auto &Opts = Options.CheckOptions;
 
+          /*
+           * Options are available in order to select processed headers
+           * and indicated their location.
+           */
+          Opts["pagesjaunes-C-char-list.File-inclusion-regex"] = ".*";
+          Opts["pagesjaunes-C-char-list.Handle-variable-declarations"] = "1";
+          Opts["pagesjaunes-C-char-list.Handle-field-declarations"] = "0";
+          Opts["pagesjaunes-C-char-list.Handle-parameter-declarations"] = "0";
+          Opts["pagesjaunes-C-char-list.Handle-char-declarations"] = "0";
+          Opts["pagesjaunes-C-char-list.Handle-char-array-declarations"] = "1";
+          Opts["pagesjaunes-C-char-list.Handle-char-pointer-declarations"] = "1";
+          Opts["pagesjaunes-C-char-list.Result-CSV-file-pathname"] = "results.csv";
+
+          /*
+           * Options are available in order to select processed headers
+           * and indicated their location.
+           */
+          Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "EXEC[[:space:]]+SQL[[:space:]]+([Ii][Nn][Cc][Ll][Uu][Dd][Ee])[[:space:]]+\"?([^\"]*)\"?;";
+          Opts["pagesjaunes-de-include-preproc.Comment-regex-group-for-include-name"] = "2";
+          Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
+          Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
+          Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
+
           /**
            * Options are available in order to enable(1)/disable(0) processing
            * of each possible string manipulation functions.
            */
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcpy"] = "1";
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
+          Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcat"] = "1";
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
           
-          /*
-           * Options are available in order to select processed headers
-           * and indicated their location.
-           */
-          Opts["pagesjaunes-de-include-preproc.Comment-regex"] = "EXEC[[:space:]]+SQL[[:space:]]+([Ii][Nn][Cc][Ll][Uu][Dd][Ee])[[:space:]]+\"([[:alnum:]]+)\"";
-          Opts["pagesjaunes-de-include-preproc.Headers-to-include-in"] = "";
-          Opts["pagesjaunes-de-include-preproc.Headers-to-exclude-from"] = "GYBstruct_Pro_C.h,GYBgestion_pro_c.h";
-          Opts["pagesjaunes-de-include-preproc.Headers-directories"] = "./Include/";
-
           /*
            * Allocate requests
            */

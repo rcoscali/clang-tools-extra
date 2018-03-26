@@ -90,6 +90,8 @@ namespace clang
 	 */
 	// The regex used for parsing 'include' comments
 	const std::string comment_regex;
+        // The include name group in the regex
+        const unsigned int comment_regex_group_for_include_name;
 	// String with names of headers to include in
 	const std::string headers_to_include_in;
 	// String with names of headers to exclude from
