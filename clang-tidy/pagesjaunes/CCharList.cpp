@@ -38,16 +38,6 @@ namespace clang
   {
     namespace pagesjaunes
     {
-      int CCharList::vardecl_num = 0;
-      int CCharList::arrayvardecl_num = 0;
-      int CCharList::ptrvardecl_num = 0;
-      int CCharList::fielddecl_num = 0;
-      int CCharList::arrayfielddecl_num = 0;
-      int CCharList::ptrfielddecl_num = 0;
-      int CCharList::parmdecl_num = 0;
-      int CCharList::arrayparmdecl_num = 0;
-      int CCharList::ptrparmdecl_num = 0;
-      
       declmap_t CCharList::vardecl_map;
       declocc_t CCharList::vardecl_occmap;
       declmap_t CCharList::arrayvardecl_map;
@@ -120,15 +110,6 @@ namespace clang
       void
       CCharList::onStartOfTranslationUnit()
       {
-        CCharList::vardecl_num = 0;
-        CCharList::arrayvardecl_num = 0;
-        CCharList::ptrvardecl_num = 0;
-        CCharList::fielddecl_num = 0;
-        CCharList::arrayfielddecl_num = 0;
-        CCharList::ptrfielddecl_num = 0;
-        CCharList::parmdecl_num = 0;
-        CCharList::arrayparmdecl_num = 0;
-        CCharList::ptrparmdecl_num = 0;
         CCharList::vardecl_map.clear();
         CCharList::vardecl_occmap.clear();
         CCharList::arrayvardecl_map.clear();
@@ -181,271 +162,84 @@ namespace clang
 
 	    std::ostream os(&fbo);
 
+#define DUMP_RECORD(condvar, condtype, declmap, occmap, numocc)                 \
+        if ((condvar) && (condtype))                                            \
+          for (auto it = (declmap).begin(); it != (declmap).end(); it++)        \
+            {                                                                   \
+              auto key = it->first;                                             \
+              auto declmap = it->second;                                        \
+              os << "=======================================================\n" \
+                 << declmap["kind"] << ","                                      \
+                 << declmap["typeName"] << ","                                  \
+                 << declmap["varName"] << ","                                   \
+                 << declmap["fileName"] << ","                                  \
+                 << declmap["line"] << ","                                      \
+                 << declmap["column"] << "\n";                                  \
+              auto occ = (occmap)[key];                                         \
+              (numocc) += occ.size();                                           \
+              os << "Occurences," << occ.size() << "\n";                        \
+              for (auto itv = occ.begin(); itv != occ.end(); itv++)             \
+                {                                                               \
+                  os << (*itv)["filename"] << ","                               \
+                     << (*itv)["code"] << ","                                   \
+                     << (*itv)["line"] << ","                                   \
+                     << (*itv)["column"] << "\n";                               \
+                }                                                               \
+            }
+            
+            DUMP_RECORD(handle_var_decl, handle_char_decl, vardecl_map, vardecl_occmap, vardecl_numocc);
+            DUMP_RECORD(handle_var_decl, handle_char_array_decl, arrayvardecl_map, arrayvardecl_occmap, arrayvardecl_numocc);
+            DUMP_RECORD(handle_var_decl, handle_char_ptr_decl, ptrvardecl_map, ptrvardecl_occmap, ptrvardecl_numocc);
+            DUMP_RECORD(handle_field_decl, handle_char_decl, fielddecl_map, fielddecl_occmap, fielddecl_numocc);
+            DUMP_RECORD(handle_field_decl, handle_char_array_decl, arrayfielddecl_map, arrayfielddecl_occmap, arrayfielddecl_numocc);
+            DUMP_RECORD(handle_field_decl, handle_char_ptr_decl, ptrfielddecl_map, ptrfielddecl_occmap, ptrfielddecl_numocc);
+            DUMP_RECORD(handle_parm_decl, handle_char_decl, parmdecl_map, parmdecl_occmap, parmdecl_numocc);
+            DUMP_RECORD(handle_parm_decl, handle_char_array_decl, arrayparmdecl_map, arrayparmdecl_occmap, arrayparmdecl_numocc);
+            DUMP_RECORD(handle_parm_decl, handle_char_ptr_decl, ptrparmdecl_map, ptrparmdecl_occmap, ptrparmdecl_numocc);
+
+#undef DUMP_RECORD
+
+            os << "******************\n"
+               << "** STATS RESUME **\n"
+               << "******************\n";
+
             if (handle_var_decl && handle_char_decl)
-              for (auto it = CCharList::vardecl_map.begin(); it != CCharList::vardecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = vardecl_occmap[key];
-                  vardecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char variable declarations: " << vardecl_map.size() << "\n"
+                 << "     => occurences : " <<  vardecl_numocc << "\n";
+            
             if (handle_var_decl && handle_char_array_decl)
-              for (auto it = CCharList::arrayvardecl_map.begin(); it != CCharList::arrayvardecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = arrayvardecl_occmap[key];
-                  arrayvardecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char[] variable declarations: " << arrayvardecl_map.size() << "\n"
+                 << "     => occurences : " <<  arrayvardecl_numocc << "\n";
+            
             if (handle_var_decl && handle_char_ptr_decl)
-              for (auto it = CCharList::ptrvardecl_map.begin(); it != CCharList::ptrvardecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = ptrvardecl_occmap[key];
-                  ptrvardecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char * variable declarations: " << ptrvardecl_map.size() << "\n"
+                 << "     => occurences : " <<  ptrvardecl_numocc << "\n";
+            
             if (handle_field_decl && handle_char_decl)
-              for (auto it = CCharList::fielddecl_map.begin(); it != CCharList::fielddecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = fielddecl_occmap[key];
-                  fielddecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char field declarations: " << fielddecl_map.size() << "\n"
+                 << "     => occurences : " <<  fielddecl_numocc << "\n";
+            
             if (handle_field_decl && handle_char_array_decl)
-              for (auto it = CCharList::arrayfielddecl_map.begin(); it != CCharList::arrayfielddecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = arrayfielddecl_occmap[key];
-                  arrayfielddecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char[] field declarations: " << arrayfielddecl_map.size() << "\n"
+                 << "     => occurences : " <<  arrayfielddecl_numocc << "\n";
+            
             if (handle_field_decl && handle_char_ptr_decl)
-              for (auto it = CCharList::ptrfielddecl_map.begin(); it != CCharList::ptrfielddecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = ptrfielddecl_occmap[key];
-                  ptrfielddecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char * field declarations: " << ptrfielddecl_map.size() << "\n"
+                 << "     => occurences : " <<  ptrfielddecl_numocc << "\n";
+            
             if (handle_parm_decl && handle_char_decl)
-              for (auto it = CCharList::parmdecl_map.begin(); it != CCharList::parmdecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = parmdecl_occmap[key];
-                  parmdecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char parameter declarations: " << parmdecl_map.size() << "\n"
+                 << "     => occurences : " <<  parmdecl_numocc << "\n";
+            
             if (handle_parm_decl && handle_char_array_decl)
-              for (auto it = CCharList::arrayparmdecl_map.begin(); it != CCharList::arrayparmdecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = arrayparmdecl_occmap[key];
-                  arrayparmdecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char[] parameter declarations: " << arrayparmdecl_map.size() << "\n"
+                 << "     => occurences : " <<  arrayparmdecl_numocc << "\n";
+            
             if (handle_parm_decl && handle_char_ptr_decl)
-              for (auto it = CCharList::ptrparmdecl_map.begin(); it != CCharList::ptrparmdecl_map.end(); it++)
-                {
-                  auto key = it->first;
-                  auto declmap = it->second;
-                  os << "=======================================================\n" 
-                     << declmap["kind"] << ","
-                     << declmap["typeName"] << "," 
-                     << declmap["varName"] << "," 
-                     << declmap["fileName"] << "," 
-                     << declmap["line"] << "," 
-                     << declmap["column"] << "\n";
-                  auto occ = ptrparmdecl_occmap[key];
-                  ptrparmdecl_numocc += occ.size();
-                  os << "Occurences," << occ.size() << "\n";
-                  for (auto itv = occ.begin(); itv != occ.end(); itv++)
-                    {
-                      os << (*itv)["filename"] << ","
-                         << (*itv)["code"] << ","
-                         << (*itv)["line"] << ","
-                         << (*itv)["column"]
-                         << "\n";
-                    }
-                }
+              os << " ** Number of char * parameter declarations: " << ptrparmdecl_map.size() << "\n"
+                 << "     => occurences : " <<  ptrparmdecl_numocc << "\n";
 
             fbo.close();
-        
-            llvm::outs() << "CCharList::onEndOfTranslationUnit(): dump statistics for " << filename << "\n";
-            if (handle_var_decl && handle_char_decl)
-              llvm::outs() << " ** Number of char variable declarations: " << vardecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  vardecl_numocc
-                           << "\n";
-            if (handle_var_decl && handle_char_array_decl)
-              llvm::outs() << " ** Number of char[] variable declarations: " << arrayvardecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  arrayvardecl_numocc
-                           << "\n";
-            if (handle_var_decl && handle_char_ptr_decl)
-              llvm::outs() << " ** Number of char * variable declarations: " << ptrvardecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  ptrvardecl_numocc
-                           << "\n";
-            if (handle_field_decl && handle_char_decl)
-              llvm::outs() << " ** Number of char field declarations: " << fielddecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  fielddecl_numocc
-                           << "\n";
-            if (handle_field_decl && handle_char_array_decl)
-              llvm::outs() << " ** Number of char[] field declarations: " << arrayfielddecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  arrayfielddecl_numocc
-                           << "\n";
-            if (handle_field_decl && handle_char_ptr_decl)
-              llvm::outs() << " ** Number of char * field declarations: " << ptrfielddecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  ptrfielddecl_numocc
-                           << "\n";
-            if (handle_parm_decl && handle_char_decl)
-              llvm::outs() << " ** Number of char parameter declarations: " << parmdecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  parmdecl_numocc
-                           << "\n";
-            if (handle_parm_decl && handle_char_array_decl)
-              llvm::outs() << " ** Number of char[] parameter declarations: " << arrayparmdecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  arrayparmdecl_numocc
-                           << "\n";
-            if (handle_parm_decl && handle_char_ptr_decl)
-              llvm::outs() << " ** Number of char * parameter declarations: " << ptrparmdecl_map.size()
-                           << "\n"
-                           << "     => occurences : " <<  ptrparmdecl_numocc
-                           << "\n";
           }
         while (0);
       }
@@ -702,7 +496,20 @@ namespace clang
                     end = p;
                   }
                 std::string code(linestart, end - linestart);
-                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string::size_type backslash_pos = 0;
+                while ((backslash_pos = code.find('\\', backslash_pos)) != std::string::npos)
+                  {
+                    code.insert(backslash_pos, 1, '\\');
+                    backslash_pos += 2;
+                  }
+                std::string::size_type dblquote_pos = 0;
+                while ((dblquote_pos = code.find('"', dblquote_pos)) != std::string::npos)
+                  {
+                    code.insert(dblquote_pos, 1, '\\');
+                    dblquote_pos += 2;
+                  }
+                code.insert(0, 1, '"');
+                code.append("\"");
                 std::string filename = src_mgr.getFilename(locbegin).str();
                 unsigned foff = src_mgr.getFileOffset(locbegin);
                 FileID fid = src_mgr.getFileID(locbegin);
@@ -767,7 +574,20 @@ namespace clang
                     end = p;
                   }
                 std::string code(linestart, end - linestart);
-                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string::size_type backslash_pos = 0;
+                while ((backslash_pos = code.find('\\', backslash_pos)) != std::string::npos)
+                  {
+                    code.insert(backslash_pos, 1, '\\');
+                    backslash_pos += 2;
+                  }
+                std::string::size_type dblquote_pos = 0;
+                while ((dblquote_pos = code.find('"', dblquote_pos)) != std::string::npos)
+                  {
+                    code.insert(dblquote_pos, 1, '\\');
+                    dblquote_pos += 2;
+                  }
+                code.insert(0, 1, '"');
+                code.append("\"");
                 std::string filename = src_mgr.getFilename(locbegin).str();
                 unsigned foff = src_mgr.getFileOffset(locbegin);
                 FileID fid = src_mgr.getFileID(locbegin);
@@ -832,7 +652,20 @@ namespace clang
                     end = p;
                   }
                 std::string code(linestart, end - linestart);
-                llvm::outs() << "code: " << code.c_str() << "\n";
+                std::string::size_type backslash_pos = 0;
+                while ((backslash_pos = code.find('\\', backslash_pos)) != std::string::npos)
+                  {
+                    code.insert(backslash_pos, 1, '\\');
+                    backslash_pos += 2;
+                  }
+                std::string::size_type dblquote_pos = 0;
+                while ((dblquote_pos = code.find('"', dblquote_pos)) != std::string::npos)
+                  {
+                    code.insert(dblquote_pos, 1, '\\');
+                    dblquote_pos += 2;
+                  }
+                code.insert(0, 1, '"');
+                code.append("\"");
                 std::string filename = src_mgr.getFilename(locbegin).str();
                 unsigned foff = src_mgr.getFileOffset(locbegin);
                 FileID fid = src_mgr.getFileID(locbegin);
@@ -967,9 +800,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     vardecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = vardecl_map.emplace(entry_key, vardecl_entry);
-                    if (empret.second)
-                      vardecl_num++;
+                    (void)vardecl_map.emplace(entry_key, vardecl_entry);
                   }
               }
           }
@@ -1025,9 +856,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     arrayvardecl_occmap.emplace(entry_key, searchOccurencesArrayVarDecl(src_mgr, varName));
-                    empret_t empret = arrayvardecl_map.emplace(entry_key, arrayvardecl_entry);
-                    if (empret.second)
-                      arrayvardecl_num++;
+                    (void)arrayvardecl_map.emplace(entry_key, arrayvardecl_entry);
                   }
               }
           }
@@ -1083,9 +912,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     ptrvardecl_occmap.emplace(entry_key, searchOccurencesPtrVarDecl(src_mgr, varName));
-                    empret_t empret = ptrvardecl_map.emplace(entry_key, ptrvardecl_entry);
-                    if (empret.second)
-                      ptrvardecl_num++;
+                    (void)ptrvardecl_map.emplace(entry_key, ptrvardecl_entry);
                   }
               }
           }
@@ -1142,9 +969,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     fielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = fielddecl_map.emplace(entry_key, fielddecl_entry);
-                    if (empret.second)
-                      fielddecl_num++;
+                    (void)fielddecl_map.emplace(entry_key, fielddecl_entry);
                   }
               }
           }
@@ -1201,9 +1026,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     arrayfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
-                    if (empret.second)
-                      arrayfielddecl_num++;
+                    (void)arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
                   }
               }
           }
@@ -1260,9 +1083,7 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     ptrfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
-                    if (empret.second)
-                      ptrfielddecl_num++;
+                    (void)ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
                   }
               }
           }
@@ -1315,14 +1136,9 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     parmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = parmdecl_map.emplace(entry_key, parmdecl_entry);
-                    if (empret.second)
-                      parmdecl_num++;
+                    (void)parmdecl_map.emplace(entry_key, parmdecl_entry);
                     if (vardecl_map.find(entry_key) != vardecl_map.end())
-                      {
-                        vardecl_map.erase(entry_key);
-                        vardecl_num--;
-                      }
+                      vardecl_map.erase(entry_key);
                   }
               }
           }
@@ -1375,14 +1191,9 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     arrayparmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = arrayparmdecl_map.emplace(entry_key, arrayparmdecl_entry);
-                    if (empret.second)
-                      arrayparmdecl_num++;
+                    (void)arrayparmdecl_map.emplace(entry_key, arrayparmdecl_entry);
                     if (arrayvardecl_map.find(entry_key) != arrayvardecl_map.end())
-                      {
-                        arrayvardecl_map.erase(entry_key);
-                        arrayvardecl_num--;
-                      }
+                      arrayvardecl_map.erase(entry_key);
                   }
               }
           }
@@ -1435,14 +1246,9 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     ptrparmdecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    empret_t empret = ptrparmdecl_map.emplace(entry_key, ptrparmdecl_entry);
-                    if (empret.second)
-                      ptrparmdecl_num++;
+                    (void)ptrparmdecl_map.emplace(entry_key, ptrparmdecl_entry);
                     if (ptrvardecl_map.find(entry_key) != ptrvardecl_map.end())
-                      {
-                        ptrvardecl_map.erase(entry_key);
-                        ptrvardecl_num--;
-                      }
+                      ptrvardecl_map.erase(entry_key);
                   }
               }
           }

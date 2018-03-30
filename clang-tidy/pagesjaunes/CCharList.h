@@ -138,17 +138,6 @@ namespace clang
         // Results output csv file
         const std::string output_csv_file_pathname;
 
-        // Stats for the files
-        static int vardecl_num;
-        static int arrayvardecl_num;
-        static int ptrvardecl_num;
-        static int fielddecl_num;
-        static int arrayfielddecl_num;
-        static int ptrfielddecl_num;
-        static int parmdecl_num;
-        static int arrayparmdecl_num;
-        static int ptrparmdecl_num;
-
         // Maps for handling stats unicity
         static declmap_t vardecl_map;
         static declocc_t vardecl_occmap;
