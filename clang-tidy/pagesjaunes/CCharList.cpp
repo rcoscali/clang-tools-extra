@@ -772,7 +772,7 @@ namespace clang
                   {
                     qtype = vardecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*vardecl))
                   {
@@ -828,7 +828,7 @@ namespace clang
                   {
                     qtype = arrayvardecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*arrayvardecl))
                   {
@@ -884,7 +884,7 @@ namespace clang
                   {
                     qtype = ptrvardecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*ptrvardecl))
                   {
@@ -941,7 +941,7 @@ namespace clang
                     const ValueDecl *valuedecl = dyn_cast<ValueDecl>(fielddecl);
                     qtype = valuedecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*fielddecl))
                   {
@@ -998,7 +998,7 @@ namespace clang
                     const ValueDecl *valuedecl = dyn_cast<ValueDecl>(arrayfielddecl);
                     qtype = valuedecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*arrayfielddecl))
                   {
@@ -1055,7 +1055,7 @@ namespace clang
                     const ValueDecl *valuedecl = dyn_cast<ValueDecl>(ptrfielddecl);
                     qtype = valuedecl->getType();
                     SplitQualType qt_split = qtype.split();
-                    typeName = QualType::getAsString(qt_split);
+                    typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                   }
                 if (isa<NamedDecl>(*ptrfielddecl))
                   {
@@ -1109,7 +1109,7 @@ namespace clang
 
                 qtype = parmdecl->getOriginalType();
                 SplitQualType qt_split = qtype.split();
-                typeName = QualType::getAsString(qt_split);
+                typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                 if (isa<NamedDecl>(*parmdecl))
                   {
                     const NamedDecl *namedDecl = dyn_cast<NamedDecl>(parmdecl);
@@ -1164,7 +1164,7 @@ namespace clang
 
                 qtype = arrayparmdecl->getOriginalType();
                 SplitQualType qt_split = qtype.split();
-                typeName = QualType::getAsString(qt_split);
+                typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                 if (isa<NamedDecl>(*arrayparmdecl))
                   {
                     const NamedDecl *namedDecl = dyn_cast<NamedDecl>(arrayparmdecl);
@@ -1219,7 +1219,7 @@ namespace clang
 
                 qtype = ptrparmdecl->getOriginalType();
                 SplitQualType qt_split = qtype.split();
-                typeName = QualType::getAsString(qt_split);
+                typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                 if (isa<NamedDecl>(*ptrparmdecl))
                   {
                     const NamedDecl *namedDecl = dyn_cast<NamedDecl>(ptrparmdecl);

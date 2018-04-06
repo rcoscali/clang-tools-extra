@@ -199,11 +199,12 @@ namespace clang
 
       // Find a symbol defined in a function
       string2_map
-      findDeclInFunction(const FunctionDecl *, const std::string&);
+      findDeclInFunction(ClangTidyContext *, const FunctionDecl *, const std::string&);
 
       // Find a member of a struct/class defined in the translation unit
       string2_map
-      findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *transUnit,
+      findCXXRecordMemberInTranslationUnit(ClangTidyContext *,
+                                           const TranslationUnitDecl *,
                                            const std::string& cxxRecordName,
                                            const std::string& memberName);
       

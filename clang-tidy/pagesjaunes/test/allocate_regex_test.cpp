@@ -151,7 +151,7 @@ namespace clang
 #define REQWEIRD_4                                                            \
           "EXEC SQL \n  ALlOCATE: emp_cv ;"
           
-          llvm::StringRef reqweird4(REQWEIRD_3);
+          llvm::StringRef reqweird4(REQWEIRD_4);
           SmallVector<StringRef, 8> matches4;
           bool retbool4 = get_allocate_re().match(reqweird4, &matches4);
           EXPECT_TRUE(retbool4);

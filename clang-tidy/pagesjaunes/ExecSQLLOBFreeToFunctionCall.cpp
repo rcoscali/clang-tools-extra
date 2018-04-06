@@ -924,7 +924,7 @@ namespace clang
       string2_map
       ExecSQLLOBFreeToFunctionCall::findDeclInFunction(const FunctionDecl *func, const std::string& symName)
       {
-        return clang::tidy::pagesjaunes::findDeclInFunction(func, symName);
+        return clang::tidy::pagesjaunes::findDeclInFunction(TidyContext, func, symName);
       }
 
       /**
@@ -946,7 +946,7 @@ namespace clang
                                                                       const std::string& cxxRecordName,
                                                                       const std::string& memberName)
       {
-        return clang::tidy::pagesjaunes::findCXXRecordMemberInTranslationUnit(transUnit, cxxRecordName, memberName);
+        return clang::tidy::pagesjaunes::findCXXRecordMemberInTranslationUnit(TidyContext, transUnit, cxxRecordName, memberName);
       }
 
       /**

@@ -337,7 +337,9 @@ namespace clang
        *       classes/AST instances
        */
       string2_map
-      findDeclInFunction(const FunctionDecl *func, const std::string& symName)
+      findDeclInFunction(ClangTidyContext *TidyContext,
+                         const FunctionDecl *func,
+                         const std::string& symName)
       {
         string2_map ret;
         
@@ -352,7 +354,7 @@ namespace clang
                 const VarDecl *varDecl = dyn_cast<VarDecl>(aDecl);
                 qtype = varDecl->getType();
                 SplitQualType qt_split = qtype.split();
-                typeName = QualType::getAsString(qt_split);
+                typeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
               }
             if (isa<NamedDecl>(*aDecl))
               {
@@ -405,7 +407,8 @@ namespace clang
        *       classes/AST instances
        */
       string2_map
-      findCXXRecordMemberInTranslationUnit(const TranslationUnitDecl *transUnit,
+      findCXXRecordMemberInTranslationUnit(ClangTidyContext *TidyContext,
+                                           const TranslationUnitDecl *transUnit,
                                            const std::string& cxxRecordName,
                                            const std::string& memberName)
       {
@@ -456,7 +459,7 @@ namespace clang
                             const ValueDecl *valueDecl = dyn_cast<ValueDecl>(fieldDecl);
                             QualType qtype = valueDecl->getType();
                             SplitQualType qt_split = qtype.split();
-                            fieldTypeName = QualType::getAsString(qt_split);
+                            fieldTypeName = QualType::getAsString(qt_split, TidyContext->getASTContext()->getPrintingPolicy());
                             ret["recordName"] = recordName;
                             ret["fieldName"] = fieldName;
                             ret["fieldTypeName"] = fieldTypeName;
@@ -743,7 +746,10 @@ namespace clang
        * @return the vector with lines
        */
       std::vector<std::string>
-      bufferSplit(char *buffer, std::vector<std::string>::size_type& nlines, std::vector<std::string>::size_type reserve, bool start_at_0)
+      bufferSplit(char *buffer,
+                  std::vector<std::string>::size_type& nlines,
+                  std::vector<std::string>::size_type reserve,
+                  bool start_at_0)
       {
         nlines = 0;
         std::vector<std::string> ret;

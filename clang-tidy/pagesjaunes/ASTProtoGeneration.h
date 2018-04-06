@@ -1,4 +1,4 @@
-//===--- CCharList.h - clang-tidy --------------------*- C++ -*-===//
+//===--- ASTProtoGeneration.h - clang-tidy --------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_CCHARLIST_H
-#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_CCHARLIST_H
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_ASTPROTOGENERATION_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_ASTPROTOGENERATION_H
 
 #include "../ClangTidy.h"
 #include "llvm/Support/Regex.h"
@@ -17,9 +17,7 @@ using namespace llvm;
 using namespace clang::ast_matchers;
 using namespace clang;
 
-using declmap_t = std::map<std::string, std::map<std::string, std::string>>;
-using occmap_t = std::vector<std::map<std::string, std::string>>;
-using declocc_t = std::map<std::string, std::vector<std::map<std::string, std::string>>>;
+using class_vector_t = std::vector<std::map<std::string, std::string>>;
 
 namespace clang 
 {
@@ -28,13 +26,15 @@ namespace clang
     namespace pagesjaunes
     {
 
-      /// @brief Checks that argument name match parameter name rules.
+      /// @brief Generation of proto files for LLVM AST classes
       ///
+      /// This class will browse LLVM AST classes for getting all members of interest. For each
+      /// member, a corresponding proto member will be produced
       ///
-      class CCharList : public ClangTidyCheck 
+      class ASTProtoGeneration : public ClangTidyCheck 
       {
       public:
-	CCharList(StringRef Name, ClangTidyContext *Context);
+	ASTProtoGeneration(StringRef Name, ClangTidyContext *Context);
 
         // Called when Start of translation unit
         void onStartOfTranslationUnit();
@@ -62,7 +62,7 @@ namespace clang
 	{
 	public:
 	  /// Explicit constructor taking the parent instance as param
-	  explicit FindDeclOccurenceMatcher(CCharList *parent)
+	  explicit FindDeclOccurenceMatcher(ASTProtoGeneration *parent)
 	    : m_parent(parent)
 	  {}
 
@@ -79,7 +79,7 @@ namespace clang
 
 	private:
 	  // Parent CCHarList instance
-	  CCharList *m_parent;
+	  ASTProtoGeneration *m_parent;
 	};
         
       private:
@@ -94,7 +94,7 @@ namespace clang
 			    const SourceLocation&, 
 			    std::string&);
 	
-	enum CCharListErrorKind
+	enum ASTProtoGenerationErrorKind
 	  {
 	    CCHAR_LIST_ERROR_NO_ERROR = 0,
 	    CCHAR_LIST_ERROR_ARRAY_TYPE_NOT_FOUND,
@@ -107,54 +107,24 @@ namespace clang
 		
 	void emitError(DiagnosticsEngine &,
 		       const SourceLocation& err_loc,
-		       enum CCharListErrorKind,
+		       enum ASTProtoGenerationErrorKind,
 		       std::string *msg = nullptr);
 
 	// Context instance
 	ClangTidyContext *TidyContext;
 
-        // Option for report file inclusion
-        const std::string file_inclusion_regex;
+        // Option for class inclusion
+        const class_vector_t ast_class_list;
 
-        // Option for handling var decl
-        const bool handle_var_decl;
-        // Option for handling field decl
-        const bool handle_field_decl;
-        // Option for handling parm decl
-        const bool handle_parm_decl;
-        // Option for handling char 
-        const bool handle_char_decl;
-        // Option for handling char []
-        const bool handle_char_array_decl;
-        // Option for handling char *
-        const bool handle_char_ptr_decl;
-        // Results output csv file
-        const std::string output_csv_file_pathname;
+        // Option for the target proto version (1, 2 or 3)
+        const unsigned int target_proto_version;
+        // Results output proto file
+        const std::string output_proto_file_pathname;
 
-        // Maps for handling stats unicity
-        static declmap_t vardecl_map;
-        static declocc_t vardecl_occmap;
-        static declmap_t arrayvardecl_map;
-        static declocc_t arrayvardecl_occmap;
-        static declmap_t ptrvardecl_map;
-        static declocc_t ptrvardecl_occmap;
-        static declmap_t fielddecl_map;
-        static declocc_t fielddecl_occmap;
-        static declmap_t arrayfielddecl_map;
-        static declocc_t arrayfielddecl_occmap;
-        static declmap_t ptrfielddecl_map;
-        static declocc_t ptrfielddecl_occmap;
-        static declmap_t parmdecl_map;
-        static declocc_t parmdecl_occmap;
-        static declmap_t arrayparmdecl_map;
-        static declocc_t arrayparmdecl_occmap;
-        static declmap_t ptrparmdecl_map;
-        static declocc_t ptrparmdecl_occmap;
-       
       };
 
     } // namespace pagesjaunes
   } // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_CCHARLIST_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PAGESJAUNES_ASTPROTOGENERATION_H
