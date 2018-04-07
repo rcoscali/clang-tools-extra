@@ -246,7 +246,78 @@ namespace clang
               EXPECT_EQ(linesnr, 8);
               if (linesnr == 8)
                 {
-                  EXPECT_STREQ(linesbuf[0].c_str(), "line0");
+                  EXPECT_STREQ(linesbuf[0].c_str(), "this is a test file");
+                  EXPECT_STREQ(linesbuf[1].c_str(), "that is not too big");
+                  EXPECT_STREQ(linesbuf[2].c_str(), "only a few lines");
+                  EXPECT_STREQ(linesbuf[3].c_str(), "of standard text");
+                  EXPECT_STREQ(linesbuf[4].c_str(), "le texte contient aussi");
+                  EXPECT_STREQ(linesbuf[5].c_str(), "quelques caractères accentués");
+                  EXPECT_STREQ(linesbuf[6].c_str(), "qui sont codés sur deux octets.");
+                  // This is not a line returned (linesnr == 8) hence shall be empty
+                  EXPECT_STREQ(linesbuf[7].c_str(), "");
+                  
+                  std::ofstream dst(pathname_dst, std::ios::out | std::ios::trunc | std::ios::binary);
+                  if (dst.is_open())
+                    {
+                      unsigned int nwlines = 0;
+                      for (auto lbit = linesbuf.begin(); lbit != linesbuf.end() && nwlines < linesnr; ++lbit, ++nwlines)
+                        {
+                          if (nwlines > 0 && nwlines < linesnr)
+                            {
+                              std::string line = *lbit;
+                              std::cout <<
+                                std::setfill('0') << std::setw(5) <<
+                                nwlines <<
+                                std::setfill(' ') << std::setw(0) <<
+                                " " << line << "\n";
+                              dst.write(line.c_str(), line.length());
+                              dst.write("\n", 1);
+                            }
+                        }
+                      std::cout << "Total lines written/total lines: " << nwlines << "/" << linesnr << "\n";
+                    }
+                  dst.close();
+
+                  std::size_t filesize_src;
+                  const char *buffer_src = clang::tidy::pagesjaunes::readTextFile(pathname.c_str(), filesize_src);
+                  std::string buf_src(buffer_src);
+                  delete buffer_src;
+
+                  std::size_t filesize_copy;
+                  const char *buffer_copy = clang::tidy::pagesjaunes::readTextFile(pathname_dst.c_str(), filesize_copy);
+                  std::string buf_copy(buffer_copy);
+                  delete buffer_copy;
+                  
+                  EXPECT_TRUE(sha256cmp(buf_src, buf_copy) == 0);
+                }
+            }
+        }
+
+        TEST_F(BufferSplitTest, ReadWriteSplittedBufferStartAt1)
+        {
+          if (std::getenv(LLVM_SRC_ROOT_DIR_ENVVAR_NAME.c_str()) == nullptr)
+            {
+              EXPECT_TRUE(false);
+            }
+          else
+            {
+              std::string pathname(m_clang_root_directory->c_str());
+              pathname.append("/");
+              pathname.append(CLANG_TIDY_TEST_FILE_RELATIVE_PATH);
+              pathname.append(CLANG_TIDY_TEST_FILE_NAME);
+              std::string pathname_dst("/tmp/");
+              pathname_dst.append(CLANG_TIDY_TEST_FILE_NAME);
+              pathname_dst.append(".copy");
+              
+              std::size_t filesize;
+              const char *buffer = clang::tidy::pagesjaunes::readTextFile(pathname.c_str(), filesize);
+              std::vector<std::string>::size_type linesnr;
+              // Evaluate number of lines with file length divied by 4
+              std::vector<std::string> linesbuf = bufferSplit(const_cast<char *>(buffer), linesnr, filesize/4);
+              EXPECT_EQ(linesnr, 8);
+              if (linesnr == 8)
+                {
+                  EXPECT_STREQ(linesbuf[0].c_str(), "");
                   EXPECT_STREQ(linesbuf[1].c_str(), "this is a test file");
                   EXPECT_STREQ(linesbuf[2].c_str(), "that is not too big");
                   EXPECT_STREQ(linesbuf[3].c_str(), "only a few lines");
