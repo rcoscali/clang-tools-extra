@@ -28623,4 +28623,3 @@ const char *bigbuf = "/*-------------------------------Identification-----------
   "    /* Sortie de la fonction */\n" \
   "    return (iCodRet);\n" \
   "}\n";
-
