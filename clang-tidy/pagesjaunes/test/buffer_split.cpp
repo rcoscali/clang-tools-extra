@@ -189,7 +189,8 @@ namespace clang
             {
               EXPECT_STREQ(linesbuf[0].c_str(), "/*-------------------------------Identification-------------------------------*/");
               EXPECT_STREQ(linesbuf[28615].c_str(), "        doc2->value.a_classer.iNbPart = GIViNbTupleIapart;");
-              EXPECT_STREQ(linesbuf[28625].c_str(), "}");
+              EXPECT_STREQ(linesbuf[28624].c_str(), "}");
+              EXPECT_STREQ(linesbuf[28625].c_str(), NULL);
             }
         }
 
