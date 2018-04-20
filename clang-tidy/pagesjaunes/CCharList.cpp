@@ -122,7 +122,7 @@ namespace clang
        * readAllowedMembersFile
        */
       void
-      CCharToCXXString::readAllowedMembersFile()
+      CCharList::readAllowedMembersFile()
       {
         llvm::outs() << "Trying to read file: " << allowed_members_file << "\n";
         std::ifstream src(allowed_members_file.c_str(), std::ios::binary);
@@ -1023,7 +1023,7 @@ namespace clang
 
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
-                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
@@ -1103,7 +1103,7 @@ namespace clang
                     
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
-                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
@@ -1183,7 +1183,7 @@ namespace clang
                     
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
-                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
