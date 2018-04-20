@@ -7,6 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <iostream>
+#include <fstream>
+
 #include "CCharToCXXString.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
@@ -56,8 +59,62 @@ namespace clang
 	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
 	  handle_strcpy(Options.get("Handle-strcpy", 1U)),
 	  handle_strcat(Options.get("Handle-strcat", 1U)),
-	  handle_strlen(Options.get("Handle-strlen", 1U))
+	  handle_strlen(Options.get("Handle-strlen", 1U)),
+          allowed_members_file(Options.get("Allowed-members-file", "members.lst"))
       {
+        llvm::outs() << "CCharToCXXString::CCharToCXXString(StringRef Name, ClangTidyContext *Context):\n";
+        llvm::outs() << "    handle_strcmp = " << (handle_strcmp?"True":"False") << "\n";
+        llvm::outs() << "    handle_strcpy = " << (handle_strcpy?"True":"False") << "\n";
+        llvm::outs() << "    handle_strcat = " << (handle_strcat?"True":"False") << "\n";
+        llvm::outs() << "    handle_strlen = " << (handle_strlen?"True":"False") << "\n";
+        llvm::outs() << "    allowed_members_file = '" << allowed_members_file << "'\n";
+
+        // Read the allowed members file
+        // This file contains one line for each member with the following syntax:
+        // <struct_name>.<member_name>
+        try
+          {
+            readAllowedMembersFile();
+            if (m_allowedMembers.size() == 0)
+              llvm::errs() << "Warning ! no members allowed for processing: this tool will do nothing !\n";
+          }
+        catch (std::exception& e)
+          {
+            llvm::errs() << "Couldn't read the allowed members file: " << allowed_members_file << " \n";
+            llvm::errs() << "std::exception: " << e.what() << "\n";
+          }
+      }
+
+      /**
+       * readAllowedMembersFile
+       */
+      void
+      CCharToCXXString::readAllowedMembersFile()
+      {
+        llvm::outs() << "Trying to read file: " << allowed_members_file << "\n";
+        std::ifstream src(allowed_members_file.c_str(), std::ios::binary);
+        if (src.is_open())
+          {
+            src.exceptions(std::ifstream::badbit);
+            char buf[512];
+            while (!src.eof())
+              {
+                src.getline(buf, 512);
+                std::string allowed_member_str(buf);
+                if (buf != std::string(""))
+                  {
+                    std::string::size_type dotpos = allowed_member_str.find('.');
+                    std::pair<std::string , std::string> member;
+                    if (dotpos != std::string::npos)
+                      member = std::make_pair(allowed_member_str.substr(0, dotpos), allowed_member_str.substr(dotpos + 1));
+                    else
+                      member = std::make_pair(allowed_member_str, std::string(""));
+                    llvm::outs() << "Adding allowed " << (dotpos == std::string::npos ? "structure" : "member") << ": " << member.first << ", " << member.second << "\n";
+                    m_allowedMembers.push_back(member);
+                  }
+              }
+            src.close();
+          }
       }
 
       /**
@@ -81,7 +138,15 @@ namespace clang
 	Options.store(Opts, "Handle-strcat", handle_strcat);
 	Options.store(Opts, "Handle-strcmp", handle_strcmp);
 	Options.store(Opts, "Handle-strlen", handle_strlen);
-      }
+	Options.store(Opts, "Allowed-members-file", allowed_members_file);
+
+        llvm::outs() << "CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";        
+        llvm::outs() << "Handle-strcpy = " << handle_strcpy << "\n";        
+        llvm::outs() << "Handle-strcat = " << handle_strcat << "\n";        
+        llvm::outs() << "Handle-strcmp = " << handle_strcmp << "\n";        
+        llvm::outs() << "Handle-strlen = " << handle_strlen << "\n";        
+        llvm::outs() << "Allowed-members-file = " << allowed_members_file << "\n";        
+      }      
 
       /**
        * registerMatchers
@@ -198,86 +263,110 @@ namespace clang
         SourceRange call_range(call_start, call_end);
         SourceRange def_range(def_start, def_end);
 
-	// Name of the function
-	std::string function_name;
-	
-        // Target rewritten code for call
-	std::string replt_4call;
-	switch (function_kind)
-	  {
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP:
-	    // Write new code for strcmp: member_tokens + ".compare(member2)"
-	    replt_4call = formatv("{0}.compare({1})", member_tokens, member2_tokens).str();
-	    function_name.assign("strcmp");
-	    break;
+        // Check if struct/member is allowed for transformation
+        bool allowed = false;
+        llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+        for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
+          {
+            std::string allowed_struct = it->first;
+            std::string allowed_member = it->second;
+            std::string allowed_struct_struct("struct ");
+            allowed_struct_struct.append(allowed_struct);
+            
+            llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
+            if (allowed_member.empty())
+              allowed = (allowed_struct == object_name || allowed_struct_struct == object_name);
+            else
+              allowed = (allowed_struct == object_name || allowed_struct_struct == object_name) && member_name == allowed_member;
+            if (allowed)
+              break;
+          }
 
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP:
-	    // Write new code for strcmp: member_tokens + ".compare(member2)"
-	    replt_4call = formatv("{0}.compare(0, std::string::npos, {1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
-	    function_name.assign("strncmp");
-	    break;
-
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY:
-	    // Write new code for strcpy: member_tokens + ".assign(member2)"
-	    replt_4call = formatv("{0}.assign({1})", member_tokens, member2_tokens).str();
-	    function_name.assign("strcpy");
-	    break;
-
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY:
-	    // Write new code for strcpy: member_tokens + ".assign(member2)"
-	    replt_4call = formatv("{0}.assign({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
-	    function_name.assign("strncpy");
-	    break;
-
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT:
-	    // Write new code for strcpy: member_tokens + ".append(member2)"
-	    replt_4call = formatv("{0}.append({1})", member_tokens, member2_tokens).str();
-	    function_name.assign("strcat");
-	    break;
-
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT:
-	    // Write new code for strcpy: member_tokens + ".append(member2)"
-	    replt_4call = formatv("{0}.append({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
-	    function_name.assign("strncat");
-	    break;
-
-	  case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN:
-	    // Write new code for strlen: member_tokens + ".length()"
-            replt_4call = formatv("{0}.length()", member_tokens).str();
-	    function_name.assign("strlen");
-	    break;
-	  }
-
-        // Write new code for definition: std::string + member tokens
-	std::string replt_4def = formatv("std::string {0}", field_name).str();
-
-	/* 
-	 * !!{ ============================================================ }
-	 * !!{ I put the diagnostic builder in its own block because actual }
-	 * !!{ report is launched at destruction. As the destructor is not  }
-	 * !!{ available (= delete), this is the only way to achieve this.  }
-	 * !!{ ============================================================ }
-	 */
-
-	// First report
-        {
-          // Create diag msg for the call expr rewrite
-          DiagnosticBuilder mydiag = diag(call_start,
-                                          "This call to '%0' shall be replaced with std::string '%1' equivalent")
-            << function_name << replt_4call;
-          // Emit replacement for call expr
-          mydiag << FixItHint::CreateReplacement(call_range, replt_4call);
-        }
-
-	// Second report
-        {
-          // Create diag msg for the call expr rewrite
-          DiagnosticBuilder mydiag = diag(def_start,
-                                          "The member '%0' of structure '%1' shall be replaced with 'std::string %2' equivalent")
-            << member_name << object_name << field_name;
+        llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
         
-          mydiag << FixItHint::CreateReplacement(def_range, replt_4def);
-        }
+        if (allowed)
+          {
+            // Name of the function
+            std::string function_name;
+	
+            // Target rewritten code for call
+            std::string replt_4call;
+            switch (function_kind)
+              {
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP:
+                // Write new code for strcmp: member_tokens + ".compare(member2)"
+                replt_4call = formatv("{0}.compare({1})", member_tokens, member2_tokens).str();
+                function_name.assign("strcmp");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP:
+                // Write new code for strcmp: member_tokens + ".compare(member2)"
+                replt_4call = formatv("{0}.compare(0, std::string::npos, {1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                function_name.assign("strncmp");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY:
+                // Write new code for strcpy: member_tokens + ".assign(member2)"
+                replt_4call = formatv("{0}.assign({1})", member_tokens, member2_tokens).str();
+                function_name.assign("strcpy");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY:
+                // Write new code for strcpy: member_tokens + ".assign(member2)"
+                replt_4call = formatv("{0}.assign({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                function_name.assign("strncpy");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT:
+                // Write new code for strcpy: member_tokens + ".append(member2)"
+                replt_4call = formatv("{0}.append({1})", member_tokens, member2_tokens).str();
+                function_name.assign("strcat");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT:
+                // Write new code for strcpy: member_tokens + ".append(member2)"
+                replt_4call = formatv("{0}.append({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                function_name.assign("strncat");
+                break;
+
+              case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN:
+                // Write new code for strlen: member_tokens + ".length()"
+                replt_4call = formatv("{0}.length()", member_tokens).str();
+                function_name.assign("strlen");
+                break;
+              }
+
+            // Write new code for definition: std::string + member tokens
+            std::string replt_4def = formatv("std::string {0}", field_name).str();
+
+            /* 
+             * !!{ ============================================================ }
+             * !!{ I put the diagnostic builder in its own block because actual }
+             * !!{ report is launched at destruction. As the destructor is not  }
+             * !!{ available (= delete), this is the only way to achieve this.  }
+             * !!{ ============================================================ }
+             */
+
+            // First report
+            {
+              // Create diag msg for the call expr rewrite
+              DiagnosticBuilder mydiag = diag(call_start,
+                                              "This call to '%0' shall be replaced with std::string '%1' equivalent")
+                << function_name << replt_4call;
+              // Emit replacement for call expr
+              mydiag << FixItHint::CreateReplacement(call_range, replt_4call);
+            }
+
+            // Second report
+            {
+              // Create diag msg for the call expr rewrite
+              DiagnosticBuilder mydiag = diag(def_start,
+                                              "The member '%0' of structure '%1' shall be replaced with 'std::string %2' equivalent")
+                << member_name << object_name << field_name;
+        
+              mydiag << FixItHint::CreateReplacement(def_range, replt_4def);
+            }
+          }
       }
 
       /**

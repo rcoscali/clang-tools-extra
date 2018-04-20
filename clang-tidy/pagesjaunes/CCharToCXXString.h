@@ -16,6 +16,7 @@
 using namespace llvm;
 using namespace clang::ast_matchers;
 using namespace clang;
+using allowed_members_t = std::vector<std::pair<std::string,std::string>>;
 
 namespace clang 
 {
@@ -47,6 +48,8 @@ namespace clang
 	void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
       private:
+
+        void readAllowedMembersFile();
 
 	void checkStrcmp(SourceManager &,
 			 DiagnosticsEngine &,
@@ -105,11 +108,17 @@ namespace clang
 	// Context instance
 	ClangTidyContext *TidyContext;
 
+        // Vector of allowed members
+        allowed_members_t m_allowedMembers;
+
 	// Check options
 	const unsigned handle_strcmp;
 	const unsigned handle_strcpy;
 	const unsigned handle_strcat;
 	const unsigned handle_strlen;
+
+        // Check option for restricting the tool scope to some struct members only
+        const std::string allowed_members_file;
       };
 
     } // namespace pagesjaunes

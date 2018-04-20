@@ -102,6 +102,7 @@ namespace clang
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcmp"] = "1";
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strcat"] = "1";
           Opts["pagesjaunes-C-char-to-CXX-string.Handle-strlen"] = "1";
+          Opts["pagesjaunes-C-char-to-CXX-string.Allowed-members-file"] = "members.lst";
           
           /*
            * Allocate requests
