@@ -10,7 +10,13 @@
 #include "../ClangTidy.h"
 #include "../ClangTidyModule.h"
 #include "../ClangTidyModuleRegistry.h"
+#include "../google/UnnamedNamespaceInHeaderCheck.h"
 #include "DefaultArgumentsCheck.h"
+#include "MultipleInheritanceCheck.h"
+#include "OverloadedOperatorCheck.h"
+#include "StaticallyConstructedObjectsCheck.h"
+#include "TrailingReturnCheck.h"
+#include "VirtualInheritanceCheck.h"
 
 using namespace clang::ast_matchers;
 
@@ -24,6 +30,18 @@ public:
   void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
     CheckFactories.registerCheck<DefaultArgumentsCheck>(
         "fuchsia-default-arguments");
+    CheckFactories.registerCheck<google::build::UnnamedNamespaceInHeaderCheck>(
+        "fuchsia-header-anon-namespaces");
+    CheckFactories.registerCheck<MultipleInheritanceCheck>(
+        "fuchsia-multiple-inheritance");
+    CheckFactories.registerCheck<OverloadedOperatorCheck>(
+        "fuchsia-overloaded-operator");
+    CheckFactories.registerCheck<StaticallyConstructedObjectsCheck>(
+        "fuchsia-statically-constructed-objects");
+    CheckFactories.registerCheck<TrailingReturnCheck>(
+        "fuchsia-trailing-return");
+    CheckFactories.registerCheck<VirtualInheritanceCheck>(
+        "fuchsia-virtual-inheritance");
   }
 };
 // Register the FuchsiaTidyModule using this statically initialized variable.

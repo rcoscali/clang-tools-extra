@@ -89,8 +89,9 @@ namespace clang {
       
       class ErrorReporter {
       public:
-        ErrorReporter(ClangTidyContext &Context, bool ApplyFixes)
-          : Files(FileSystemOptions()), DiagOpts(new DiagnosticOptions()),
+        ErrorReporter(ClangTidyContext &Context, bool ApplyFixes,
+                      llvm::IntrusiveRefCntPtr<vfs::FileSystem> BaseFS)
+          : Files(FileSystemOptions(), BaseFS), DiagOpts(new DiagnosticOptions()),
             DiagPrinter(new TextDiagnosticPrinter(llvm::outs(), &*DiagOpts)),
             Diags(IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs), &*DiagOpts,
                   DiagPrinter),
@@ -476,9 +477,12 @@ namespace clang {
 
     void runClangTidy(clang::tidy::ClangTidyContext &Context,
                       const CompilationDatabase &Compilations,
-                      ArrayRef<std::string> InputFiles, ProfileData *Profile) {
-      ClangTool Tool(Compilations, InputFiles);
-
+                      ArrayRef<std::string> InputFiles,
+                      llvm::IntrusiveRefCntPtr<vfs::FileSystem> BaseFS,
+                      ProfileData *Profile) {
+      ClangTool Tool(Compilations, InputFiles,
+                     std::make_shared<PCHContainerOperations>(), BaseFS);
+      
       Context.setToolPtr(&Tool);
 
       // Add extra arguments passed by the clang-tidy command-line.
@@ -551,8 +555,9 @@ namespace clang {
     }
 
     void handleErrors(ClangTidyContext &Context, bool Fix,
-                      unsigned &WarningsAsErrorsCount) {
-      ErrorReporter Reporter(Context, Fix);
+                      unsigned &WarningsAsErrorsCount,
+                      llvm::IntrusiveRefCntPtr<vfs::FileSystem> BaseFS) {
+      ErrorReporter Reporter(Context, Fix, BaseFS);
       vfs::FileSystem &FileSystem =
         *Reporter.getSourceManager().getFileManager().getVirtualFileSystem();
       auto InitialWorkingDir = FileSystem.getCurrentWorkingDirectory();

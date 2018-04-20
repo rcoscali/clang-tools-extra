@@ -61,12 +61,15 @@ public:
   /// Uses the default fallback command, adding any extra flags.
   tooling::CompileCommand getFallbackCommand(PathRef File) const override;
 
+  /// Set the compile commands directory to \p P.
+  void setCompileCommandsDir(Path P);
+
   /// Sets the extra flags that should be added to a file.
   void setExtraFlagsForFile(PathRef File, std::vector<std::string> ExtraFlags);
 
 private:
-  tooling::CompilationDatabase *getCompilationDatabase(PathRef File) const;
-  tooling::CompilationDatabase *tryLoadDatabaseFromPath(PathRef File) const;
+  tooling::CompilationDatabase *getCDBForFile(PathRef File) const;
+  tooling::CompilationDatabase *getCDBInDirLocked(PathRef File) const;
   void addExtraFlags(PathRef File, tooling::CompileCommand &C) const;
 
   mutable std::mutex Mutex;

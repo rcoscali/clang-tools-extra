@@ -13,6 +13,7 @@
 
 #ifndef LLVM_CLANG_TOOLS_EXTRA_UNITTESTS_CLANGD_MATCHERS_H
 #define LLVM_CLANG_TOOLS_EXTRA_UNITTESTS_CLANGD_MATCHERS_H
+#include "Protocol.h"
 #include "gmock/gmock.h"
 
 namespace clang {
@@ -106,6 +107,28 @@ template <typename... Args>
 PolySubsequenceMatcher<Args...> HasSubsequence(Args &&... M) {
   return PolySubsequenceMatcher<Args...>(std::forward<Args>(M)...);
 }
+
+// EXPECT_ERROR seems like a pretty generic name, make sure it's not defined
+// already.
+#ifdef EXPECT_ERROR
+#error "Refusing to redefine EXPECT_ERROR"
+#endif
+
+// Consumes llvm::Expected<T>, checks it contains an error and marks it as
+// handled.
+#define EXPECT_ERROR(expectedValue)                                            \
+  do {                                                                         \
+    auto &&ComputedValue = (expectedValue);                                    \
+    if (ComputedValue) {                                                       \
+      ADD_FAILURE() << "expected an error from " << #expectedValue             \
+                    << " but got "                                             \
+                    << ::testing::PrintToString(*ComputedValue);               \
+      break;                                                                   \
+    }                                                                          \
+    handleAllErrors(ComputedValue.takeError(),                                 \
+                    [](const llvm::ErrorInfoBase &) {});                       \
+                                                                               \
+  } while (false)
 
 } // namespace clangd
 } // namespace clang
