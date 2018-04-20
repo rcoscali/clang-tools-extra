@@ -83,6 +83,7 @@ namespace clang
           file_inclusion_regex(Options.get("File-inclusion-regex", ".*")),
           handle_var_decl(Options.get("Handle-variable-declarations", 1U)),
           handle_field_decl(Options.get("Handle-field-declarations", 0U)),
+          allowed_members_file(Options.get("Allowed-members-file", "members.lst")),
           handle_parm_decl(Options.get("Handle-parameter-declarations", 0U)),
           handle_char_decl(Options.get("Handle-char-declarations", 0U)),
           handle_char_array_decl(Options.get("Handle-char-array-declarations", 1U)),
@@ -90,14 +91,63 @@ namespace clang
           output_csv_file_pathname(Options.get("Result-CSV-file-pathname", "results.csv"))
       {
         llvm::outs() << "CCharList::CCharList(StringRef Name, ClangTidyContext *Context)\n";
-        llvm::outs() << "File-inclusion-regex = '" << file_inclusion_regex << "'\n";
-        llvm::outs() << "Handle-variable-declarations = " << handle_var_decl << "\n";
-        llvm::outs() << "Handle-field-declarations = " << handle_field_decl << "\n";
-        llvm::outs() << "Handle-parameter-declarations = " << handle_parm_decl << "\n";
-        llvm::outs() << "Handle-char-declarations = " << handle_char_decl << "\n";
-        llvm::outs() << "Handle-char-array-declarations = " << handle_char_array_decl << "\n";
-        llvm::outs() << "Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
-        llvm::outs() << "Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+        llvm::outs() << "    File-inclusion-regex = '" << file_inclusion_regex << "'\n";
+        llvm::outs() << "    Handle-variable-declarations = " << handle_var_decl << "\n";
+        llvm::outs() << "    Handle-field-declarations = " << handle_field_decl << "\n";
+        llvm::outs() << "    Handle-parameter-declarations = " << handle_parm_decl << "\n";
+        llvm::outs() << "    Handle-char-declarations = " << handle_char_decl << "\n";
+        llvm::outs() << "    Handle-char-array-declarations = " << handle_char_array_decl << "\n";
+        llvm::outs() << "    Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
+        llvm::outs() << "    Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+        llvm::outs() << "    Allowed-members-file = '" << allowed_members_file << "'\n";
+        // Read the allowed members file
+        // This file contains one line for each member with the following syntax:
+        // <struct_name>.<member_name>
+
+        try
+          {
+            readAllowedMembersFile();
+            if (m_allowedMembers.size() == 0)
+              llvm::errs() << "Warning ! no members allowed for processing: this tool will do nothing !\n";
+          }
+        catch (std::exception& e)
+          {
+            llvm::errs() << "Couldn't read the allowed members file: " << allowed_members_file << " \n";
+            llvm::errs() << "std::exception: " << e.what() << "\n";
+          }
+      }
+
+
+      /**
+       * readAllowedMembersFile
+       */
+      void
+      CCharToCXXString::readAllowedMembersFile()
+      {
+        llvm::outs() << "Trying to read file: " << allowed_members_file << "\n";
+        std::ifstream src(allowed_members_file.c_str(), std::ios::binary);
+        if (src.is_open())
+          {
+            src.exceptions(std::ifstream::badbit);
+            char buf[512];
+            while (!src.eof())
+              {
+                src.getline(buf, 512);
+                std::string allowed_member_str(buf);
+                if (buf != std::string(""))
+                  {
+                    std::string::size_type dotpos = allowed_member_str.find('.');
+                    std::pair<std::string , std::string> member;
+                    if (dotpos != std::string::npos)
+                      member = std::make_pair(allowed_member_str.substr(0, dotpos), allowed_member_str.substr(dotpos + 1));
+                    else
+                      member = std::make_pair(allowed_member_str, std::string(""));
+                    llvm::outs() << "Adding allowed " << (dotpos == std::string::npos ? "structure" : "member") << ": " << member.first << ", " << member.second << "\n";
+                    m_allowedMembers.push_back(member);
+                  }
+              }
+            src.close();
+          }
       }
 
       /**
@@ -267,14 +317,15 @@ namespace clang
         Options.store(Opts, "Result-CSV-file-pathname", output_csv_file_pathname);
 
         llvm::outs() << "CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)\n";
-        llvm::outs() << "File-inclusion-regex = '" << file_inclusion_regex << "'\n";        
-        llvm::outs() << "Handle-variable-declarations = " << handle_var_decl << "\n";
-        llvm::outs() << "Handle-field-declarations = " << handle_field_decl << "\n";
-        llvm::outs() << "Handle-parameter-declarations = " << handle_parm_decl << "\n";
-        llvm::outs() << "Handle-char-declarations = " << handle_char_decl << "\n";
-        llvm::outs() << "Handle-char-array-declarations = " << handle_char_array_decl << "\n";
-        llvm::outs() << "Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
-        llvm::outs() << "Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+        llvm::outs() << "    File-inclusion-regex = '" << file_inclusion_regex << "'\n";        
+        llvm::outs() << "    Handle-variable-declarations = " << handle_var_decl << "\n";
+        llvm::outs() << "    Handle-field-declarations = " << handle_field_decl << "\n";
+        llvm::outs() << "    Allowed-members-file = " << allowed_members_file << "\n";        
+        llvm::outs() << "    Handle-parameter-declarations = " << handle_parm_decl << "\n";
+        llvm::outs() << "    Handle-char-declarations = " << handle_char_decl << "\n";
+        llvm::outs() << "    Handle-char-array-declarations = " << handle_char_array_decl << "\n";
+        llvm::outs() << "    Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
+        llvm::outs() << "    Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
       }
 
       /**
@@ -969,7 +1020,30 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     fielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    (void)fielddecl_map.emplace(entry_key, fielddecl_entry);
+
+                    // Check if struct/member is allowed for transformation
+                    bool allowed = false;
+                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
+                      {
+                        std::string allowed_struct = it->first;
+                        std::string allowed_member = it->second;
+                        std::string allowed_struct_struct("struct ");
+                        allowed_struct_struct.append(allowed_struct);
+                        
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
+                        if (allowed_member.empty())
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+                        else
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
+                        if (allowed)
+                          break;
+                      }
+
+                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
+                    
+                    if (allowed)
+                      (void)fielddecl_map.emplace(entry_key, fielddecl_entry);
                   }
               }
           }
@@ -1026,7 +1100,30 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     arrayfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    (void)arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
+                    
+                    // Check if struct/member is allowed for transformation
+                    bool allowed = false;
+                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
+                      {
+                        std::string allowed_struct = it->first;
+                        std::string allowed_member = it->second;
+                        std::string allowed_struct_struct("struct ");
+                        allowed_struct_struct.append(allowed_struct);
+                        
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
+                        if (allowed_member.empty())
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+                        else
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
+                        if (allowed)
+                          break;
+                      }
+
+                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
+                    
+                    if (allowed)
+                      (void)arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
                   }
               }
           }
@@ -1083,7 +1180,30 @@ namespace clang
                     entry_key.append(linenumstr);
                     //do_out = true;
                     ptrfielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
-                    (void)ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
+                    
+                    // Check if struct/member is allowed for transformation
+                    bool allowed = false;
+                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+                    for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
+                      {
+                        std::string allowed_struct = it->first;
+                        std::string allowed_member = it->second;
+                        std::string allowed_struct_struct("struct ");
+                        allowed_struct_struct.append(allowed_struct);
+                        
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
+                        if (allowed_member.empty())
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+                        else
+                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
+                        if (allowed)
+                          break;
+                      }
+
+                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
+                    
+                    if (allowed)
+                      (void)ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
                   }
               }
           }

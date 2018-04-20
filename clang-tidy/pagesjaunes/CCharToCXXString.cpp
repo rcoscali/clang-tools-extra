@@ -141,11 +141,11 @@ namespace clang
 	Options.store(Opts, "Allowed-members-file", allowed_members_file);
 
         llvm::outs() << "CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";        
-        llvm::outs() << "Handle-strcpy = " << handle_strcpy << "\n";        
-        llvm::outs() << "Handle-strcat = " << handle_strcat << "\n";        
-        llvm::outs() << "Handle-strcmp = " << handle_strcmp << "\n";        
-        llvm::outs() << "Handle-strlen = " << handle_strlen << "\n";        
-        llvm::outs() << "Allowed-members-file = " << allowed_members_file << "\n";        
+        llvm::outs() << "    Handle-strcpy = " << handle_strcpy << "\n";        
+        llvm::outs() << "    Handle-strcat = " << handle_strcat << "\n";        
+        llvm::outs() << "    Handle-strcmp = " << handle_strcmp << "\n";        
+        llvm::outs() << "    Handle-strlen = " << handle_strlen << "\n";        
+        llvm::outs() << "    Allowed-members-file = " << allowed_members_file << "\n";        
       }      
 
       /**

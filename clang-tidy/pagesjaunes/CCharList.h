@@ -20,6 +20,7 @@ using namespace clang;
 using declmap_t = std::map<std::string, std::map<std::string, std::string>>;
 using occmap_t = std::vector<std::map<std::string, std::string>>;
 using declocc_t = std::map<std::string, std::vector<std::map<std::string, std::string>>>;
+using allowed_members_t = std::vector<std::pair<std::string,std::string>>;
 
 namespace clang 
 {
@@ -84,6 +85,8 @@ namespace clang
         
       private:
 
+        void readAllowedMembersFile();
+
         occmap_t searchOccurencesVarDecl(SourceManager &, std::string&);
 
         occmap_t searchOccurencesArrayVarDecl(SourceManager &, std::string&);
@@ -113,6 +116,9 @@ namespace clang
 	// Context instance
 	ClangTidyContext *TidyContext;
 
+        // Vector of allowed members
+        allowed_members_t m_allowedMembers;
+        
         // Option for report file inclusion
         const std::string file_inclusion_regex;
 
@@ -120,6 +126,8 @@ namespace clang
         const bool handle_var_decl;
         // Option for handling field decl
         const bool handle_field_decl;
+        // Check option for restricting the tool scope to some struct members only
+        const std::string allowed_members_file;
         // Option for handling parm decl
         const bool handle_parm_decl;
         // Option for handling char 
