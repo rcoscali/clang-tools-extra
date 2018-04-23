@@ -91,6 +91,7 @@ add_executable(pagesjaunes_test
   test/fetch_tmpl_repeat_members_test.cpp
   test/fetch_tmpl_repeat_members2_test.cpp
   test/fetch_fileline_test.cpp)
+target_include_directories(pagesjaunes_test SYSTEM BEFORE PRIVATE ${LLVM_GOOGLETEST_DIR}/include)
 target_link_libraries(pagesjaunes_test
   "clangTidy;clangTidyUtils;clangAST;clangASTMatchers;clangBasic;clangFormat;clangFrontend;clangLex;clangRewrite;clangSema;clangStaticAnalyzerCore;clangStaticAnalyzerFrontend;clangTooling;clangToolingCore;clangToolingASTDiff;clangToolingRefactor;LLVMSupport;gtestall;pthread")
 set_target_properties(pagesjaunes_test PROPERTIES
