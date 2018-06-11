@@ -795,6 +795,8 @@ namespace clang
         SourceLocation decl_loc;
         std::string member_name;
         std::string object_name;
+        std::string varName;
+        std::string typeName;
         QualType qtype;
         //bool do_out = false;
         std::string declkind;
@@ -1018,6 +1020,9 @@ namespace clang
                 else
                   varName = "<unknown>";
 
+                object_name = typeName;
+                member_name = varName;                
+
                 declkind = "FieldDecl";
                 fielddecl_entry.emplace("kind", declkind);
                 fielddecl_entry.emplace("typeName", typeName);
@@ -1137,6 +1142,9 @@ namespace clang
                 else
                   varName = "<unknown>";
 
+                object_name = typeName;
+                member_name = varName;
+                
                 declkind = "ArrayFieldDecl";
                 arrayfielddecl_entry.emplace("kind", declkind);
                 arrayfielddecl_entry.emplace("typeName", typeName);
@@ -1243,6 +1251,9 @@ namespace clang
                   }
                 else
                   varName = "<unknown>";
+
+                object_name = typeName;
+                member_name = varName;
 
                 declkind = "PtrFieldDecl";
                 ptrfielddecl_entry.emplace("kind", declkind);
