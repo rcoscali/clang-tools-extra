@@ -26,6 +26,10 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 
+#define LOG_OPTIONS 1
+#define LOG_MEMBERS_FILE 1
+#define LOG_DIAG_N_FIX 1
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -90,6 +94,7 @@ namespace clang
           handle_char_ptr_decl(Options.get("Handle-char-pointer-declarations", 1U)),
           output_csv_file_pathname(Options.get("Result-CSV-file-pathname", "results.csv"))
       {
+#if LOG_OPTIONS
         llvm::outs() << "CCharList::CCharList(StringRef Name, ClangTidyContext *Context)\n";
         llvm::outs() << "    File-inclusion-regex = '" << file_inclusion_regex << "'\n";
         llvm::outs() << "    Handle-variable-declarations = " << handle_var_decl << "\n";
@@ -100,6 +105,8 @@ namespace clang
         llvm::outs() << "    Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
         llvm::outs() << "    Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
         llvm::outs() << "    Allowed-members-file = '" << allowed_members_file << "'\n";
+#endif
+
         // Read the allowed members file
         // This file contains one line for each member with the following syntax:
         // <struct_name>.<member_name>
@@ -124,7 +131,10 @@ namespace clang
       void
       CCharList::readAllowedMembersFile()
       {
+#if LOG_MEMBERS_FILE
         llvm::outs() << "Trying to read file: " << allowed_members_file << "\n";
+#endif
+
         std::ifstream src(allowed_members_file.c_str(), std::ios::binary);
         if (src.is_open())
           {
@@ -134,7 +144,7 @@ namespace clang
               {
                 src.getline(buf, 512);
                 std::string allowed_member_str(buf);
-                if (buf != std::string(""))
+                if (buf != std::string("") && (src.rdstate() & std::ifstream::failbit ) == 0)
                   {
                     std::string::size_type dotpos = allowed_member_str.find('.');
                     std::pair<std::string , std::string> member;
@@ -142,7 +152,9 @@ namespace clang
                       member = std::make_pair(allowed_member_str.substr(0, dotpos), allowed_member_str.substr(dotpos + 1));
                     else
                       member = std::make_pair(allowed_member_str, std::string(""));
+#if LOG_MEMBERS_FILE
                     llvm::outs() << "Adding allowed " << (dotpos == std::string::npos ? "structure" : "member") << ": " << member.first << ", " << member.second << "\n";
+#endif
                     m_allowedMembers.push_back(member);
                   }
               }
@@ -307,6 +319,9 @@ namespace clang
       void
       CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
+#if LOG_OPTIONS
+        llvm::outs() << "CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)\n";
+#endif
         Options.store(Opts, "File-inclusion-regex", file_inclusion_regex);
         Options.store(Opts, "Handle-variable-declarations", handle_var_decl);
         Options.store(Opts, "Handle-field-declarations", handle_field_decl);
@@ -316,7 +331,7 @@ namespace clang
         Options.store(Opts, "Handle-char-pointer-declarations", handle_char_ptr_decl);
         Options.store(Opts, "Result-CSV-file-pathname", output_csv_file_pathname);
 
-        llvm::outs() << "CCharList::storeOptions(ClangTidyOptions::OptionMap &Opts)\n";
+#if LOG_OPTIONS
         llvm::outs() << "    File-inclusion-regex = '" << file_inclusion_regex << "'\n";        
         llvm::outs() << "    Handle-variable-declarations = " << handle_var_decl << "\n";
         llvm::outs() << "    Handle-field-declarations = " << handle_field_decl << "\n";
@@ -326,6 +341,7 @@ namespace clang
         llvm::outs() << "    Handle-char-array-declarations = " << handle_char_array_decl << "\n";
         llvm::outs() << "    Handle-char-pointer-declarations = " << handle_char_ptr_decl << "\n";
         llvm::outs() << "    Result-CSV-file-pathname = " << output_csv_file_pathname << "\n";
+#endif
       }
 
       /**
@@ -777,8 +793,8 @@ namespace clang
 
         SourceRange decl_loc_range;
         SourceLocation decl_loc;
-        std::string typeName;
-        std::string varName;
+        std::string member_name;
+        std::string object_name;
         QualType qtype;
         //bool do_out = false;
         std::string declkind;
@@ -1011,6 +1027,19 @@ namespace clang
                 fielddecl_entry.emplace("column", colnumstr);
                 if (!varName.empty())
                   {
+#if LOG_DIAG_N_FIX
+                    // Get the source manager
+                    const SourceManager& src_mgr = TidyContext->getASTContext()->getSourceManager();
+                    std::string the_filename;
+                    unsigned the_linenum;
+                    
+                    {
+                      the_filename = src_mgr.getFilename(decl_loc).str();
+                      unsigned foff = src_mgr.getFileOffset(decl_loc);
+                      FileID fid = src_mgr.getFileID(decl_loc);
+                      the_linenum = src_mgr.getLineNumber(fid, foff);
+                    }
+#endif
                     entry_key.assign(varName);
                     entry_key.append("|");
                     entry_key.append(typeName);
@@ -1023,24 +1052,50 @@ namespace clang
 
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
+#if LOG_DIAG_FIX
                     llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
+#endif
+
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
                         std::string allowed_member = it->second;
                         std::string allowed_struct_struct("struct ");
                         allowed_struct_struct.append(allowed_struct);
+                        std::string allowed_struct_ptr(allowed_struct);
+                        allowed_struct_ptr.append(" *");
+                        std::string allowed_struct_struct_ptr(allowed_struct_struct);
+                        allowed_struct_struct_ptr.append(" *");
                         
-                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
-                        if (allowed_member.empty())
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+#if LOG_DIAG_N_FIX
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_struct_struct << ", " << allowed_member << "\n";
+                        llvm::outs() << "Testing versus: " << allowed_struct_ptr << ", " << allowed_struct_struct_ptr << ", " << allowed_member << "\n";
+#endif
+                        if (allowed_struct.compare("*") == 0 && allowed_member.empty())
+                          {
+                            allowed = true;
+                            break;
+                          }
                         else
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
+                          {
+                            if (allowed_member.empty() || allowed_member.compare("*") == 0)
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name);
+                            else
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name) &&
+                                member_name == allowed_member;
                         if (allowed)
                           break;
                       }
 
-                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
+#if LOG_DIAG_N_FIX
+                        llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
+#endif
                     
                     if (allowed)
                       (void)fielddecl_map.emplace(entry_key, fielddecl_entry);
@@ -1103,24 +1158,51 @@ namespace clang
                     
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
+#if LOG_DIAG_N_FIX
                     llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
+#endif
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
                         std::string allowed_member = it->second;
                         std::string allowed_struct_struct("struct ");
                         allowed_struct_struct.append(allowed_struct);
+                        std::string allowed_struct_ptr(allowed_struct);
+                        allowed_struct_ptr.append(" *");
+                        std::string allowed_struct_struct_ptr(allowed_struct_struct);
+                        allowed_struct_struct_ptr.append(" *");
                         
-                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
-                        if (allowed_member.empty())
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+#if LOG_DIAG_N_FIX
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_struct_struct << ", " << allowed_member << "\n";
+                        llvm::outs() << "Testing versus: " << allowed_struct_ptr << ", " << allowed_struct_struct_ptr << ", " << allowed_member << "\n";
+#endif
+                        if (allowed_struct.compare("*") == 0 && allowed_member.empty())
+                          {
+                            allowed = true;
+                            break;
+                          }
                         else
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
-                        if (allowed)
-                          break;
+                          {
+                            if (allowed_member.empty() || allowed_member.compare("*") == 0)
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name);
+                            else
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name) &&
+                                member_name == allowed_member;
+                            
+                            if (allowed)
+                              break;
+                          }
                       }
 
-                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
+#if LOG_DIAG_N_FIX
+                    llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
+#endif
                     
                     if (allowed)
                       (void)arrayfielddecl_map.emplace(entry_key, arrayfielddecl_entry);
@@ -1183,25 +1265,54 @@ namespace clang
                     
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
-                    llvm::outs() << "Start testing if allowed: " << typeName << ", " << varName << "\n";
+
+#if LOG_DIAG_N_FIX
+                    llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+#endif
+        
                     for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
                       {
                         std::string allowed_struct = it->first;
                         std::string allowed_member = it->second;
                         std::string allowed_struct_struct("struct ");
                         allowed_struct_struct.append(allowed_struct);
+                        std::string allowed_struct_ptr(allowed_struct);
+                        allowed_struct_ptr.append(" *");
+                        std::string allowed_struct_struct_ptr(allowed_struct_struct);
+                        allowed_struct_struct_ptr.append(" *");
                         
-                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
-                        if (allowed_member.empty())
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName);
+#if LOG_DIAG_N_FIX
+                        llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_struct_struct << ", " << allowed_member << "\n";
+                        llvm::outs() << "Testing versus: " << allowed_struct_ptr << ", " << allowed_struct_struct_ptr << ", " << allowed_member << "\n";
+#endif
+                        if (allowed_struct.compare("*") == 0 && allowed_member.empty())
+                          {
+                            allowed = true;
+                            break;
+                          }
                         else
-                          allowed = (allowed_struct == typeName || allowed_struct_struct == typeName) && varName == allowed_member;
-                        if (allowed)
-                          break;
+                          {
+                            if (allowed_member.empty() || allowed_member.compare("*") == 0)
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name);
+                            else
+                              allowed = (allowed_struct == object_name ||
+                                         allowed_struct_ptr == object_name ||
+                                         allowed_struct_struct == object_name ||
+                                         allowed_struct_struct_ptr == object_name) &&
+                                member_name == allowed_member;
+                            
+                            if (allowed)
+                              break;
+                          }
                       }
-
-                    llvm::outs() << "Struct/Member: " << typeName << ", " << varName << " is " << (allowed?"" : "not ") << "Allowed\n";
                     
+#if LOG_DIAG_N_FIX
+                    llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
+#endif
+        
                     if (allowed)
                       (void)ptrfielddecl_map.emplace(entry_key, ptrfielddecl_entry);
                   }

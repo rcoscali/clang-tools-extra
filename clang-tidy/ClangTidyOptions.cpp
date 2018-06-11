@@ -20,6 +20,7 @@
 #include <utility>
 
 #define DEBUG_TYPE "clang-tidy-options"
+#define LOG_CONFIG_FILE 0
 
 using clang::tidy::ClangTidyOptions;
 using clang::tidy::FileFilter;
@@ -275,6 +276,9 @@ FileOptionsProvider::tryReadConfigFile(StringRef Directory) {
     SmallString<128> ConfigFile(Directory);
     llvm::sys::path::append(ConfigFile, ConfigHandler.first);
     DEBUG(llvm::dbgs() << "Trying " << ConfigFile << "...\n");
+#if LOG_CONFIG_FILE
+    Lllvm::outs() << "Trying " << ConfigFile << "...\n";
+#endif
 
     bool IsFile = false;
     // Ignore errors from is_regular_file: we only need to know if we can read
@@ -303,6 +307,9 @@ FileOptionsProvider::tryReadConfigFile(StringRef Directory) {
                      << ParsedOptions.getError().message() << "\n";
       continue;
     }
+#if LOG_CONFIG_FILES
+    llvm::outs() << "Found & parse " << ConfigFile << "...\n";
+#endif
     return OptionsSource(*ParsedOptions, ConfigFile.c_str());
   }
   return llvm::None;

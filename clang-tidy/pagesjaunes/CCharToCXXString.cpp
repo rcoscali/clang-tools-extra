@@ -23,6 +23,11 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 
+#define LOG_DIAG_N_FIX 0
+#define LOG_READ_ALLOWED 0
+#define LOG_LINE 0
+#define LOG_OPTIONS 0
+
 using namespace clang;
 using namespace clang::ast_matchers;
 using namespace llvm;
@@ -56,19 +61,22 @@ namespace clang
                                          ClangTidyContext *Context)
         : ClangTidyCheck(Name, Context),
           TidyContext(Context),
-	  handle_strcmp(Options.get("Handle-strcmp", 1U)),
-	  handle_strcpy(Options.get("Handle-strcpy", 1U)),
-	  handle_strcat(Options.get("Handle-strcat", 1U)),
-	  handle_strlen(Options.get("Handle-strlen", 1U)),
-          allowed_members_file(Options.get("Allowed-members-file", "members.lst"))
+	  handle_strcmp(Options.getLocalOrGlobal("Handle-strcmp", 1U)),
+	  handle_strcpy(Options.getLocalOrGlobal("Handle-strcpy", 1U)),
+	  handle_strcat(Options.getLocalOrGlobal("Handle-strcat", 1U)),
+	  handle_strlen(Options.getLocalOrGlobal("Handle-strlen", 1U)),
+          allowed_members_file(Options.getLocalOrGlobal("Allowed-members-file", "members.lst"))
       {
+#if LOG_OPTIONS        
         llvm::outs() << "CCharToCXXString::CCharToCXXString(StringRef Name, ClangTidyContext *Context):\n";
         llvm::outs() << "    handle_strcmp = " << (handle_strcmp?"True":"False") << "\n";
         llvm::outs() << "    handle_strcpy = " << (handle_strcpy?"True":"False") << "\n";
         llvm::outs() << "    handle_strcat = " << (handle_strcat?"True":"False") << "\n";
         llvm::outs() << "    handle_strlen = " << (handle_strlen?"True":"False") << "\n";
         llvm::outs() << "    allowed_members_file = '" << allowed_members_file << "'\n";
+#endif
 
+        m_fixedMembers.clear();
         // Read the allowed members file
         // This file contains one line for each member with the following syntax:
         // <struct_name>.<member_name>
@@ -91,7 +99,10 @@ namespace clang
       void
       CCharToCXXString::readAllowedMembersFile()
       {
+#if LOG_READ_ALLOWED
         llvm::outs() << "Trying to read file: " << allowed_members_file << "\n";
+#endif
+        
         std::ifstream src(allowed_members_file.c_str(), std::ios::binary);
         if (src.is_open())
           {
@@ -101,7 +112,7 @@ namespace clang
               {
                 src.getline(buf, 512);
                 std::string allowed_member_str(buf);
-                if (buf != std::string(""))
+                if (buf != std::string("") && (src.rdstate() & std::ifstream::failbit ) == 0)
                   {
                     std::string::size_type dotpos = allowed_member_str.find('.');
                     std::pair<std::string , std::string> member;
@@ -109,7 +120,10 @@ namespace clang
                       member = std::make_pair(allowed_member_str.substr(0, dotpos), allowed_member_str.substr(dotpos + 1));
                     else
                       member = std::make_pair(allowed_member_str, std::string(""));
+
+#if LOG_READ_ALLOWED
                     llvm::outs() << "Adding allowed " << (dotpos == std::string::npos ? "structure" : "member") << ": " << member.first << ", " << member.second << "\n";
+#endif
                     m_allowedMembers.push_back(member);
                   }
               }
@@ -134,20 +148,26 @@ namespace clang
       void
       CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts)
       {
+#if LOG_OPTIONS
+        std::cout << "CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";
+#endif
+        
+	Options.store(Opts, "Handle-strcmp", handle_strcmp);
 	Options.store(Opts, "Handle-strcpy", handle_strcpy);
 	Options.store(Opts, "Handle-strcat", handle_strcat);
-	Options.store(Opts, "Handle-strcmp", handle_strcmp);
 	Options.store(Opts, "Handle-strlen", handle_strlen);
 	Options.store(Opts, "Allowed-members-file", allowed_members_file);
 
-        llvm::outs() << "CCharToCXXString::storeOptions(ClangTidyOptions::OptionMap &Opts):\n";        
-        llvm::outs() << "    Handle-strcpy = " << handle_strcpy << "\n";        
-        llvm::outs() << "    Handle-strcat = " << handle_strcat << "\n";        
-        llvm::outs() << "    Handle-strcmp = " << handle_strcmp << "\n";        
-        llvm::outs() << "    Handle-strlen = " << handle_strlen << "\n";        
-        llvm::outs() << "    Allowed-members-file = " << allowed_members_file << "\n";        
-      }      
+#if LOG_OPTIONS
+        std::cout << "    Handle-strcpy = " << (handle_strcpy?"True":"False") << "\n";
+        std::cout << "    Handle-strcat = " << (handle_strcat?"True":"False") << "\n";
+        std::cout << "    Handle-strcmp = " << (handle_strcmp?"True":"False") << "\n";
+        std::cout << "    Handle-strlen = " << (handle_strlen?"True":"False") << "\n";
+        std::cout << "    Allowed-members-file = " << allowed_members_file << "\n";
+#endif
+      }
 
+      
       /**
        * registerMatchers
        *
@@ -167,53 +187,123 @@ namespace clang
       void 
       CCharToCXXString::registerMatchers(MatchFinder *Finder) 
       {
-        // Bind a strcmp call with a constant char array
+        //
+        // strcmp
+        //
+        // Bind a strcmp call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcmp"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strcmp_call")
                            , this);
-        // Bind a strncmp call with a constant char array
+        // Bind a strcmp call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcmp"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strcmp_call")
+                           , this);
+        //
+        // strncmp
+        //
+        // Bind a strncmp call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncmp"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strncmp_call")
                            , this);
-        // Bind a strcpy call with a constant char array
+        // Bind a strncmp call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncmp"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strncmp_call")
+                           , this);
+        //
+        // strcpy
+        //
+        // Bind a strcpy call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcpy"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strcpy_call")
                            , this);
-        // Bind a strncpy call with a constant char array
+        // Bind a strcpy call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcpy"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strcpy_call")
+                           , this);
+        //
+        // strncpy
+        //
+        // Bind a strncpy call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncpy"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strncpy_call")
                            , this);
-        // Bind a strcat call with a constant char array
+        // Bind a strncpy call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncpy"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strncpy_call")
+                           , this);
+        //
+        // strcat
+        //
+        // Bind a strcat call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcat"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strcat_call")
                            , this);
-        // Bind a strncat call with a constant char array
+        // Bind a strcat call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strcat"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strcat_call")
+                           , this);
+        //
+        // strncat
+        //
+        // Bind a strncat call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncat"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
                                     ).bind("strncat_call")
                            , this);
-        // Bind a strlen call with a constant char array
+        // Bind a strncat call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strncat"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
+                                    ).bind("strncat_call")
+                           , this);
+        //
+        // strlen
+        //
+        // Bind a strlen call with a constant char array and .
         Finder->addMatcher(callExpr(callee(functionDecl(hasName("strlen"))),
                                     hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
                                                                                                       isAnyCharacter())).bind("arraytype")),
                                                              hasObjectExpression(hasType(cxxRecordDecl().bind("obj_decl")))).bind("member_expr"))
+                                    ).bind("strlen_call")
+                           , this);
+        // Bind a strlen call with a constant char array and ->
+        Finder->addMatcher(callExpr(callee(functionDecl(hasName("strlen"))),
+                                    hasDescendant(memberExpr(hasType(constantArrayType(hasElementType(builtinType(),
+                                                                                                      isAnyCharacter())).bind("arraytype")),
+                                                             hasObjectExpression(hasType(pointsTo(cxxRecordDecl().bind("obj_decl"))))).bind("member_expr"))
                                     ).bind("strlen_call")
                            , this);
       }
@@ -243,18 +333,20 @@ namespace clang
        * @param member3_tokens  The third member tokens (contain size for strncpy and strncmp)
        * @param def_start       The member definition start
        * @param def_end         The member definition end
-       * @param member_name     The member name we will change the stype (using std::string)
+       * @param member_name     The member name we will change the type (using std::string) 
+       *                        as we got it in the str<something> call
        * @param object_name     The object name holding the member we will change type
-       * @param field_name      The structure (object) field name
+       * @param field_name      The structure (object) field name as we got it in the cxx 
+       *                        object definition
        * @param field_tokens    The structure (object) field tokens
        */
       void
       CCharToCXXString::emitDiagAndFix(DiagnosticsEngine &diag_engine,
                                        const SourceLocation& call_start, const SourceLocation& call_end,
                                        enum CCharToCXXStringCallKind function_kind,
-                                       std::string& member_tokens,
-                                       std::string& member2_tokens,
-                                       std::string& member3_tokens,
+                                       std::string& arg1_tokens,
+                                       std::string& arg2_tokens,
+                                       std::string& arg3_tokens,
                                        const SourceLocation& def_start, const SourceLocation& def_end,
                                        std::string& member_name, std::string& object_name,
                                        std::string& field_name, std::string& field_tokens)
@@ -262,27 +354,69 @@ namespace clang
         // Source range for statement & definition to rewrite
         SourceRange call_range(call_start, call_end);
         SourceRange def_range(def_start, def_end);
+#if LOG_DIAG_N_FIX
+        // Get the source manager
+        const SourceManager& src_mgr = TidyContext->getASTContext()->getSourceManager();
+        std::string the_filename;
+        unsigned the_linenum;
 
+        {
+          the_filename = src_mgr.getFilename(call_start).str();
+          unsigned foff = src_mgr.getFileOffset(call_start);
+          FileID fid = src_mgr.getFileID(call_start);
+          the_linenum = src_mgr.getLineNumber(fid, foff);
+        }
+#endif
+            
         // Check if struct/member is allowed for transformation
         bool allowed = false;
+
+#if LOG_DIAG_N_FIX
         llvm::outs() << "Start testing if allowed: " << object_name << ", " << member_name << "\n";
+#endif
+        
         for (auto it = m_allowedMembers.begin(); it != m_allowedMembers.end(); it++)
           {
             std::string allowed_struct = it->first;
             std::string allowed_member = it->second;
             std::string allowed_struct_struct("struct ");
             allowed_struct_struct.append(allowed_struct);
+            std::string allowed_struct_ptr(allowed_struct);
+            allowed_struct_ptr.append(" *");
+            std::string allowed_struct_struct_ptr(allowed_struct_struct);
+            allowed_struct_struct_ptr.append(" *");
             
-            llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_member << "\n";
-            if (allowed_member.empty())
-              allowed = (allowed_struct == object_name || allowed_struct_struct == object_name);
+#if LOG_DIAG_N_FIX
+            llvm::outs() << "Testing versus: " << allowed_struct << ", " << allowed_struct_struct << ", " << allowed_member << "\n";
+            llvm::outs() << "Testing versus: " << allowed_struct_ptr << ", " << allowed_struct_struct_ptr << ", " << allowed_member << "\n";
+#endif
+            if (allowed_struct.compare("*") == 0 && allowed_member.empty())
+              {
+                allowed = true;
+                break;
+              }
             else
-              allowed = (allowed_struct == object_name || allowed_struct_struct == object_name) && member_name == allowed_member;
-            if (allowed)
-              break;
+              {
+                if (allowed_member.empty() || allowed_member.compare("*") == 0)
+                  allowed = (allowed_struct == object_name ||
+                             allowed_struct_ptr == object_name ||
+                             allowed_struct_struct == object_name ||
+                             allowed_struct_struct_ptr == object_name);
+                else
+                  allowed = (allowed_struct == object_name ||
+                             allowed_struct_ptr == object_name ||
+                             allowed_struct_struct == object_name ||
+                             allowed_struct_struct_ptr == object_name) &&
+                    member_name == allowed_member;
+                
+                if (allowed)
+                  break;
+              }
           }
 
+#if LOG_DIAG_N_FIX
         llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
+#endif
         
         if (allowed)
           {
@@ -294,44 +428,65 @@ namespace clang
             switch (function_kind)
               {
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCMP:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strcmp call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcmp: member_tokens + ".compare(member2)"
-                replt_4call = formatv("{0}.compare({1})", member_tokens, member2_tokens).str();
+                replt_4call = formatv("{0}.compare({1})", arg1_tokens, arg2_tokens).str();
                 function_name.assign("strcmp");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCMP:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strncmp call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcmp: member_tokens + ".compare(member2)"
-                replt_4call = formatv("{0}.compare(0, std::string::npos, {1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                replt_4call = formatv("{0}.compare(0, std::string::npos, {1}.c_str(), {2})", arg1_tokens, arg2_tokens, arg3_tokens).str();
                 function_name.assign("strncmp");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCPY:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strcpy call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcpy: member_tokens + ".assign(member2)"
-                replt_4call = formatv("{0}.assign({1})", member_tokens, member2_tokens).str();
+                replt_4call = formatv("{0}.assign({1})", arg1_tokens, arg2_tokens).str();
                 function_name.assign("strcpy");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCPY:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strncpy call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcpy: member_tokens + ".assign(member2)"
-                replt_4call = formatv("{0}.assign({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                replt_4call = formatv("{0}.assign({1}, {2})", arg1_tokens, arg2_tokens, arg3_tokens).str();
                 function_name.assign("strncpy");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRCAT:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strcat call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcpy: member_tokens + ".append(member2)"
-                replt_4call = formatv("{0}.append({1})", member_tokens, member2_tokens).str();
+                replt_4call = formatv("{0}.append({1})", arg1_tokens, arg2_tokens).str();
                 function_name.assign("strcat");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRNCAT:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strncat call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
                 // Write new code for strcpy: member_tokens + ".append(member2)"
-                replt_4call = formatv("{0}.append({1}, {2})", member_tokens, member2_tokens, member3_tokens).str();
+                replt_4call = formatv("{0}.append({1}, {2})", arg1_tokens, arg2_tokens, arg3_tokens).str();
                 function_name.assign("strncat");
                 break;
 
               case CCharToCXXString::CCHAR_2_CXXSTRING_CALL_STRLEN:
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Warn for strlen call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif                
                 // Write new code for strlen: member_tokens + ".length()"
-                replt_4call = formatv("{0}.length()", member_tokens).str();
+                replt_4call = formatv("{0}.length()", arg1_tokens).str();
                 function_name.assign("strlen");
                 break;
               }
@@ -355,17 +510,36 @@ namespace clang
                 << function_name << replt_4call;
               // Emit replacement for call expr
               mydiag << FixItHint::CreateReplacement(call_range, replt_4call);
+
+#if LOG_DIAG_N_FIX
+              llvm::outs() << "Diag & Fix sent for " << function_name << " call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
             }
 
             // Second report
-            {
-              // Create diag msg for the call expr rewrite
-              DiagnosticBuilder mydiag = diag(def_start,
-                                              "The member '%0' of structure '%1' shall be replaced with 'std::string %2' equivalent")
-                << member_name << object_name << field_name;
-        
-              mydiag << FixItHint::CreateReplacement(def_range, replt_4def);
-            }
+            bool already_fixed = false;
+            for (auto it = m_fixedMembers.begin(); it != m_fixedMembers.end(); it++)
+              {
+                if (it->first == def_range && it->second == replt_4def) {
+                  already_fixed = true;
+                  break;
+                }
+              }
+            
+            if (! already_fixed)
+              {
+                // Create diag msg for the call expr rewrite
+                DiagnosticBuilder mydiag = diag(def_start,
+                                                "The member '%0' of structure '%1' shall be replaced with 'std::string %2' equivalent")
+                  << member_name << object_name << field_name;
+                
+                mydiag << FixItHint::CreateReplacement(def_range, replt_4def);
+                m_fixedMembers.push_back(make_pair(def_range, replt_4def));
+
+#if LOG_DIAG_N_FIX
+                llvm::outs() << "Diag & Fix sent for struct member used in " << function_name << " call in file " << the_filename << " at line " << the_linenum << "\n";
+#endif
+              }
           }
       }
 
@@ -1151,13 +1325,23 @@ namespace clang
       CCharToCXXString::check(const MatchFinder::MatchResult &result) 
       {
         // Get root bounded variables
-        CallExpr *strcmp_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcmp_call");
+        CallExpr *strcmp_call  = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcmp_call");
         CallExpr *strncmp_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncmp_call");
-        CallExpr *strcpy_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcpy_call");
+        CallExpr *strcpy_call  = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcpy_call");
         CallExpr *strncpy_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncpy_call");
-        CallExpr *strcat_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcpat_call");
+        CallExpr *strcat_call  = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strcat_call");
         CallExpr *strncat_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strncat_call");
-        CallExpr *strlen_call = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strlen_call");
+        CallExpr *strlen_call  = (CallExpr *) result.Nodes.getNodeAs<CallExpr>("strlen_call");
+
+#if LOG_LINE
+        std::cout << "strcmp_call = "  << std::hex << strcmp_call  << "\n";
+        std::cout << "strncmp_call = " << std::hex << strncmp_call << "\n";
+        std::cout << "strcpy_call = "  << std::hex << strcpy_call  << "\n";
+        std::cout << "strncpy_call = " << std::hex << strncpy_call << "\n";
+        std::cout << "strcat_call = "  << std::hex << strcat_call  << "\n";
+        std::cout << "strncat_call = " << std::hex << strncat_call << "\n";
+        std::cout << "strlen_call = "  << std::hex << strlen_call  << "\n";
+#endif
 
         // Get the source manager
         SourceManager &src_mgr = result.Context->getSourceManager();
@@ -1167,56 +1351,147 @@ namespace clang
         /*
          * Handle strcmp calls
          */
-        if (handle_strcmp && strcmp_call)
-	  checkStrcmp(src_mgr,
-		      diag_engine,
-		      strcmp_call,
-		      result);
+        if (strcmp_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strcmp_call->getLocStart();
 
-        else if (handle_strcmp && strncmp_call)
-	  checkStrcmp(src_mgr,
-		      diag_engine,
-		      strncmp_call,
-		      result);
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strcmp call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcmp(src_mgr,
+                      diag_engine,
+                      strcmp_call,
+                      result);
+        }
+        
+        if (strncmp_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strncmp_call->getLocStart();
+
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strncmp call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcmp(src_mgr,
+                      diag_engine,
+                      strncmp_call,
+                      result);
+        }
 
         /*
          * Handle strcpy calls
          */
-        else if (handle_strcpy && strcpy_call)
-	  checkStrcpy(src_mgr,
-		      diag_engine,
-		      strcpy_call,
-		      result);
+        if (strcpy_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strcpy_call->getLocStart();
 
-        else if (handle_strcpy && strncpy_call)
-	  checkStrcpy(src_mgr,
-		      diag_engine,
-		      strncpy_call,
-		      result);
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strcpy call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcpy(src_mgr,
+                      diag_engine,
+                      strcpy_call,
+                      result);
+        }
+        
+        if (strncpy_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strncpy_call->getLocStart();
+
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strncpy call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcpy(src_mgr,
+                      diag_engine,
+                      strncpy_call,
+                      result);
+        }
 
         /*
          * Handle strcat calls
          */
-        else if (handle_strcat && strcat_call)
-	  checkStrcat(src_mgr,
-		      diag_engine,
-		      strcat_call,
-		      result);
+        if (strcat_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strcat_call->getLocStart();
 
-        else if (handle_strcat && strncat_call)
-	  checkStrcat(src_mgr,
-		      diag_engine,
-		      strncat_call,
-		      result);
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strcat call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcat(src_mgr,
+                      diag_engine,
+                      strcat_call,
+                      result);
+        }
+        
+        if (strncat_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strncat_call->getLocStart();
+
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strncat call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
+          checkStrcat(src_mgr,
+                      diag_engine,
+                      strncat_call,
+                      result);
+        }
 
         /*
          * Handle strlen calls
          */
-        else if (handle_strlen && strlen_call)
+        if (strlen_call) {
+#if LOG_LINE
+            {
+              // Get start/end locations for the statement
+              SourceLocation a_call_start = strlen_call->getLocStart();
+
+              std::string filename = src_mgr.getFilename(a_call_start).str();
+              unsigned foff = src_mgr.getFileOffset(a_call_start);
+              FileID fid = src_mgr.getFileID(a_call_start);
+              unsigned linenum = src_mgr.getLineNumber(fid, foff);
+              llvm::outs() << "Processing strlen call in file " << filename << " at line " << linenum << "\n";
+            }
+#endif
 	  checkStrlen(src_mgr,
 		      diag_engine,
 		      strlen_call,
 		      result);
+        }
       }
     } // namespace pagesjaunes
   } // namespace tidy

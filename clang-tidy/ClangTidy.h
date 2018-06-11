@@ -173,9 +173,9 @@ public:
   /// whether it has the default value or it has been overridden.
   virtual void storeOptions(ClangTidyOptions::OptionMap &Options) {}
 
+  StringRef getID() const override { return CheckName; }
 private:
   void run(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  StringRef getID() const override { return CheckName; }
   std::string CheckName;
   ClangTidyContext *Context;
 

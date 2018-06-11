@@ -83,6 +83,7 @@ namespace clang
           Opts["pagesjaunes-C-char-list.Handle-char-array-declarations"] = "1";
           Opts["pagesjaunes-C-char-list.Handle-char-pointer-declarations"] = "1";
           Opts["pagesjaunes-C-char-list.Result-CSV-file-pathname"] = "results.csv";
+          Opts["pagesjaunes-C-char-list.Allowed-members-file"] = "members.lst";
 
           /*
            * Options are available in order to select processed headers

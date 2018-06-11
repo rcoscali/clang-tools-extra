@@ -44,6 +44,8 @@
 #include <algorithm>
 #include <utility>
 
+#define LOG_OPTIONS 0
+
 using namespace clang::ast_matchers;
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -408,11 +410,19 @@ namespace clang {
     }
 
     ClangTidyOptions::OptionMap ClangTidyASTConsumerFactory::getCheckOptions() {
+#if LOG_OPTIONS
+      llvm::outs() << "ClangTidyOptions::OptionMap ClangTidyASTConsumerFactory::getCheckOptions(): Entry\n";
+#endif
       ClangTidyOptions::OptionMap Options;
       std::vector<std::unique_ptr<ClangTidyCheck>> Checks;
       CheckFactories->createChecks(&Context, Checks);
       for (const auto &Check : Checks)
-        Check->storeOptions(Options);
+        {
+#if LOG_OPTIONS
+          llvm::outs() << "Calling storeOptions for check " << Check->getID() << "\n";
+#endif
+          Check->storeOptions(Options);
+        }
       return Options;
     }
 
@@ -451,11 +461,17 @@ namespace clang {
 
     void OptionsView::store(ClangTidyOptions::OptionMap &Options,
                             StringRef LocalName, StringRef Value) const {
+#if LOG_OPTIONS
+      llvm::outs() << "void OptionsView::store(ClangTidyOptions::OptionMap &Options, StringRef LocalName, StringRef Value): Entry\n";
+#endif
       Options[NamePrefix + LocalName.str()] = Value;
     }
 
     void OptionsView::store(ClangTidyOptions::OptionMap &Options,
                             StringRef LocalName, int64_t Value) const {
+#if LOG_OPTIONS
+      llvm::outs() << "void OptionsView::store(ClangTidyOptions::OptionMap &Options, StringRef LocalName, int64_t Value): Entry\n";
+#endif
       store(Options, LocalName, llvm::itostr(Value));
     }
 
@@ -539,7 +555,6 @@ namespace clang {
           Action(ClangTidyASTConsumerFactory *Factory) : Factory(Factory) {}
           std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
                                                          StringRef File) override {
-            llvm::outs() << "std::unique_ptr<ASTConsumer> Action::CreateASTConsumer(CompilerInstance &Compiler, StringRef File): File = '" << File.str() << "'\n";
             return Factory->CreateASTConsumer(Compiler, File);
           }
 

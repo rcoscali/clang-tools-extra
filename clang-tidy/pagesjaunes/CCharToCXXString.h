@@ -42,8 +42,10 @@ namespace clang
 
 	// Store check options
 	void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+        
 	// Register the AST matchers used for finding nodes
 	void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+        
 	// Callback calkled with each found node
 	void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
@@ -110,6 +112,8 @@ namespace clang
 
         // Vector of allowed members
         allowed_members_t m_allowedMembers;
+
+        std::vector<std::pair<SourceRange, std::string>> m_fixedMembers;
 
 	// Check options
 	const unsigned handle_strcmp;
