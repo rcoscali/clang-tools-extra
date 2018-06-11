@@ -787,7 +787,7 @@ namespace clang
         const ParmVarDecl *ptrparmdecl = (const ParmVarDecl *) result.Nodes.getNodeAs<ParmVarDecl>("charPtrParmVarDecl");
 
         // Get the source manager
-        SourceManager &src_mgr = result.Context->getSourceManager();
+        SourceManager &src_mgr = const_cast<SourceManager &>(result.Context->getSourceManager());
         // And diagnostics engine
         //DiagnosticsEngine &diag_engine = result.Context->getDiagnostics();
 
@@ -1032,19 +1032,6 @@ namespace clang
                 fielddecl_entry.emplace("column", colnumstr);
                 if (!varName.empty())
                   {
-#if LOG_DIAG_N_FIX
-                    // Get the source manager
-                    const SourceManager& src_mgr = TidyContext->getASTContext()->getSourceManager();
-                    std::string the_filename;
-                    unsigned the_linenum;
-                    
-                    {
-                      the_filename = src_mgr.getFilename(decl_loc).str();
-                      unsigned foff = src_mgr.getFileOffset(decl_loc);
-                      FileID fid = src_mgr.getFileID(decl_loc);
-                      the_linenum = src_mgr.getLineNumber(fid, foff);
-                    }
-#endif
                     entry_key.assign(varName);
                     entry_key.append("|");
                     entry_key.append(typeName);
@@ -1053,7 +1040,7 @@ namespace clang
                     entry_key.append("|");
                     entry_key.append(linenumstr);
                     //do_out = true;
-                    fielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(src_mgr, varName));
+                    fielddecl_occmap.emplace(entry_key, searchOccurencesVarDecl(const_cast<SourceManager &>(src_mgr), varName));
 
                     // Check if struct/member is allowed for transformation
                     bool allowed = false;
@@ -1094,12 +1081,13 @@ namespace clang
                                          allowed_struct_struct == object_name ||
                                          allowed_struct_struct_ptr == object_name) &&
                                 member_name == allowed_member;
-                        if (allowed)
-                          break;
+                            if (allowed)
+                              break;
+                          }
                       }
-
+                    
 #if LOG_DIAG_N_FIX
-                        llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
+                    llvm::outs() << "Struct/Member: " << object_name << ", " << member_name << " is " << (allowed?"" : "not ") << "Allowed\n";
 #endif
                     
                     if (allowed)
@@ -1494,10 +1482,11 @@ namespace clang
                   }
               }
           }
-
-        //        if (0 && do_out)
-        //outs() << "==" << declkind << "," << varName << "," << typeName << "," << filename << "," << linenum << "," << colnum << "\n";
-      }
-    } // namespace pagesjaunes
-  } // namespace tidy
-} // namespace clang
+            
+            //        if (0 && do_out)
+            //outs() << "==" << declkind << "," << varName << "," << typeName << "," << filename << "," << linenum << "," << colnum << "\n";
+          }
+      } // namespace pagesjaunes
+    } // namespace tidy
+  } // namespace clang
+  
