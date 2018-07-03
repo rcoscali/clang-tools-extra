@@ -303,7 +303,8 @@ static void printProfileData(const ProfileData &Profile,
   OS.flush();
 }
 
-static std::unique_ptr<ClangTidyOptionsProvider> createOptionsProvider() {
+static std::unique_ptr<ClangTidyOptionsProvider> createOptionsProvider(
+   llvm::IntrusiveRefCntPtr<vfs::FileSystem> FS) {
   ClangTidyGlobalOptions GlobalOptions;
   if (std::error_code Err = parseLineFilter(LineFilter, GlobalOptions)) {
     llvm::errs() << "Invalid LineFilter: " << Err.message() << "\n\nUsage:\n";
@@ -354,7 +355,7 @@ static std::unique_ptr<ClangTidyOptionsProvider> createOptionsProvider() {
     }
   }
   return llvm::make_unique<FileOptionsProvider>(GlobalOptions, DefaultOptions,
-                                                OverrideOptions);
+                                                OverrideOptions, std::move(FS));
 }
 
 llvm::IntrusiveRefCntPtr<vfs::FileSystem>
@@ -384,8 +385,13 @@ getVfsOverlayFromFile(const std::string &OverlayFile) {
 static int clangTidyMain(int argc, const char **argv) {
   CommonOptionsParser OptionsParser(argc, argv, ClangTidyCategory,
                                     cl::ZeroOrMore);
+  llvm::IntrusiveRefCntPtr<vfs::FileSystem> BaseFS(
+      VfsOverlay.empty() ? vfs::getRealFileSystem()
+                         : getVfsOverlayFromFile(VfsOverlay));
+  if (!BaseFS)
+    return 1;
 
-  auto OwningOptionsProvider = createOptionsProvider();
+  auto OwningOptionsProvider = createOptionsProvider(BaseFS);
   auto *OptionsProvider = OwningOptionsProvider.get();
   if (!OptionsProvider)
     return 1;
@@ -455,12 +461,6 @@ static int clangTidyMain(int argc, const char **argv) {
     llvm::cl::PrintHelpMessage(/*Hidden=*/false, /*Categorized=*/true);
     return 1;
   }
-  llvm::IntrusiveRefCntPtr<vfs::FileSystem> BaseFS(
-      VfsOverlay.empty() ? vfs::getRealFileSystem()
-                         : getVfsOverlayFromFile(VfsOverlay));
-  if (!BaseFS)
-    return 1;
-
   ProfileData Profile;
 
   llvm::InitializeAllTargetInfos();
